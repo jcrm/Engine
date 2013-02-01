@@ -229,8 +229,8 @@ bool D3DClass::Initialize(int screenWidth, int screenHeight, bool vsync, HWND hw
 	UINT numDriverTypes = ARRAYSIZE( driverTypes );
 	for( UINT driverTypeIndex = 0; driverTypeIndex < numDriverTypes; driverTypeIndex++ )
     {
-        D3D_DRIVER_TYPE  g_driverType = driverTypes[driverTypeIndex];
-        result = D3D11CreateDeviceAndSwapChain(NULL, g_driverType, NULL, 0, &featureLevel, 1, 
+        D3D_DRIVER_TYPE  m_driverType = driverTypes[driverTypeIndex];
+        result = D3D11CreateDeviceAndSwapChain(NULL, m_driverType, NULL, 0, &featureLevel, 1, 
 										   D3D11_SDK_VERSION, &swapChainDesc, &m_swapChain, &m_device, NULL, &m_deviceContext);
         if( SUCCEEDED( result ) )
             break;

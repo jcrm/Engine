@@ -11,3 +11,6 @@
 *.lai
 *.la
 *.a
+Debug/Engine.exe
+Engine.opensdf
+Debug/Engine.exe

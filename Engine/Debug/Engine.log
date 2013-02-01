@@ -1,4 +1,4 @@
-﻿Build started 2/1/2013 6:35:47 PM.
+﻿Build started 2/1/2013 9:18:06 PM.
      1>Project "C:\Users\Jake\Documents\Visual Studio 2010\Projects\Engine\Engine\Engine.vcxproj" on node 2 (build target(s)).
      1>InitializeBuildStatus:
          Creating "Debug\Engine.unsuccessfulbuild" because "AlwaysCreate" was specified.
@@ -39,4 +39,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:02.68
+Time Elapsed 00:00:06.95
