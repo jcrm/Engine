@@ -152,11 +152,15 @@ bool TerrainClass::GenerateHeightMap(ID3D11Device* device, bool keydown)
 				index = (m_terrainHeight * j) + i;
 
 				m_heightMap[index].x = (float)i;
-				m_heightMap[index].y=  10.0f;
+				m_heightMap[index].y=  0.0f;
 				m_heightMap[index].z = (float)j;
 			}
 		}
-		MidPoint();
+		int i = 0;
+		while(i++ < 15){
+			Particle(8320);
+		}
+		//MidPoint();
 		/*
 		
 		//GenerateRandomHeightMap();
@@ -742,7 +746,7 @@ void TerrainClass::MidPoint(){
 							m_heightMap[index[2]].y + m_heightMap[index[3]].y;
 				avg /= 4.0;
 
-				m_heightMap[(m_terrainHeight * (y+halfSide)) + x+halfSide].y = avg + rand()%3 -h;
+				m_heightMap[(m_terrainHeight * (y+halfSide)) + x+halfSide].y = avg + ((rand()%6)-3) -h;
 				//center is average plus random offset
 			}
 		}
@@ -762,9 +766,9 @@ void TerrainClass::MidPoint(){
 				//note we must use mod  and add DATA_SIZE for subtraction 
 				//so that we can wrap around the array to find the corners
 
-				int index[4] = {(m_terrainHeight * y) +((x -halfSide + m_terrainHeight-1)%(m_terrainHeight-1)),	//left of centre
-								(m_terrainHeight * y) + (x+halfSide)%(m_terrainHeight-1),						//right of centre
-								(m_terrainHeight * ((y+halfSide)%(m_terrainHeight-1))) + x,						//below centre
+				int index[4] = {(m_terrainHeight * y) +((x -halfSide + m_terrainHeight-1)%(m_terrainHeight-1)),		//left of centre
+								(m_terrainHeight * y) + (x+halfSide)%(m_terrainHeight-1),							//right of centre
+								(m_terrainHeight * ((y+halfSide)%(m_terrainHeight-1))) + x,							//below centre
 								(m_terrainHeight * ((y -halfSide + m_terrainHeight-1)%(m_terrainHeight-1))) + x};	//above centre
 
 				float avg = m_heightMap[index[0]].y + m_heightMap[index[1]].y +
@@ -776,7 +780,7 @@ void TerrainClass::MidPoint(){
 				//and then subtract h so the end value is
 				//in the range (-h, +h)
 				//update value for center of diamond
-				m_heightMap[(m_terrainHeight * y) + x].y = avg + rand()%3 -h;
+				m_heightMap[(m_terrainHeight * y) + x].y = avg + ((rand()%6)-3) -h;
 
 				//wrap values on the edges, remove
 				//this and adjust loop condition above
@@ -790,4 +794,19 @@ void TerrainClass::MidPoint(){
 			}
 		}
 	}
+}
+void TerrainClass::Particle(int index){
+	static float size = 10.0f;
+	if(m_heightMap[index].y != 0){
+		size -= 0.05f;
+		switch(rand()%4){
+		case 0: Particle(index+m_terrainHeight); break;
+		case 1:	Particle(index-m_terrainHeight); break;
+		case 2: Particle(index+1); break;
+		case 3: Particle(index-1); break;
+		}
+	}else{
+		m_heightMap[index].y += size;
+	}
+	
 }

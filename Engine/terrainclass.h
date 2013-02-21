@@ -49,7 +49,7 @@ public:
 	void GenerateRandomHeightMap();
 	int  GetIndexCount();
 	void MidPoint();
-
+	void Particle(int index);
 private:
 	bool LoadHeightMap(char*);
 	void NormalizeHeightMap();
