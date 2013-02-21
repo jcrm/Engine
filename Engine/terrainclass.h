@@ -48,6 +48,7 @@ public:
 	bool GenerateHeightMap(ID3D11Device* device, bool keydown);
 	void GenerateRandomHeightMap();
 	int  GetIndexCount();
+	void MidPoint();
 
 private:
 	bool LoadHeightMap(char*);

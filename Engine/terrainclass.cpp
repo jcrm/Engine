@@ -40,7 +40,7 @@ bool TerrainClass::InitializeTerrain(ID3D11Device* device, int terrainWidth, int
 		return false;
 	}
 
-	// Initialise the data in the height map (flat).
+	// Initialize the data in the height map (flat).
 	for(int j=0; j<m_terrainHeight; j++)
 	{
 		for(int i=0; i<m_terrainWidth; i++)
@@ -55,7 +55,7 @@ bool TerrainClass::InitializeTerrain(ID3D11Device* device, int terrainWidth, int
 	}
 
 
-	//even though we are generating a flat terrain, we still need to normalise it. 
+	//even though we are generating a flat terrain, we still need to normalize it. 
 	// Calculate the normals for the terrain data.
 	result = CalculateNormals();
 	if(!result)
@@ -87,7 +87,7 @@ bool TerrainClass::Initialize(ID3D11Device* device, char* heightMapFilename)
 	// Normalize the height of the height map.
 	NormalizeHeightMap();
 
-	// Calculate the normals for the terrain data.
+	// Calculate the normal's for the terrain data.
 	result = CalculateNormals();
 	if(!result)
 	{
@@ -136,7 +136,7 @@ bool TerrainClass::GenerateHeightMap(ID3D11Device* device, bool keydown)
 
 	bool result;
 	//the toggle is just a bool that I use to make sure this is only called ONCE when you press a key
-	//until you release the key and start again. We dont want to be generating the terrain 500
+	//until you release the key and start again. We don t want to be generating the terrain 500
 	//times per second. 
 	if(keydown&&(!m_terrainGeneratedToggle))
 	{
@@ -144,24 +144,24 @@ bool TerrainClass::GenerateHeightMap(ID3D11Device* device, bool keydown)
 		float height = 0.0;
 		
 
-		//MidPoint();
-		/*for(int j=0; j<m_terrainHeight; j++)
+		
+		for(int j=0; j<m_terrainHeight; j++)
 		{
 			for(int i=0; i<m_terrainWidth; i++)
 			{			
 				index = (m_terrainHeight * j) + i;
 
 				m_heightMap[index].x = (float)i;
-				m_heightMap[index].y=  i;
+				m_heightMap[index].y=  10.0f;
 				m_heightMap[index].z = (float)j;
 			}
-		}*/
-
-
+		}
+		MidPoint();
+		/*
 		
 		//GenerateRandomHeightMap();
 
-		//loop through the terrain and set the hieghts how we want. This is where we generate the terrain
+		//loop through the terrain and set the heights how we want. This is where we generate the terrain
 		//in this case I will run a sin-wave through the terrain in one axis.
 		float sinValue = (rand()%12)+1;
 		float cosValue = (((float(rand()%200))/10)-10);
@@ -358,7 +358,7 @@ bool TerrainClass::CalculateNormals()
 			index2 = (j * m_terrainHeight) + (i+1);
 			index3 = ((j+1) * m_terrainHeight) + i;
 
-			// Get three vertices from the face.
+			// Get three vertices's from the face.
 			vertex1[0] = m_heightMap[index1].x;
 			vertex1[1] = m_heightMap[index1].y;
 			vertex1[2] = m_heightMap[index1].z;
@@ -388,7 +388,7 @@ bool TerrainClass::CalculateNormals()
 		}
 	}
 
-	// Now go through all the vertices and take an average of each face normal 	
+	// Now go through all the vertices's and take an average of each face normal 	
 	// that the vertex touches to get the averaged normal for that vertex.
 	for(j=0; j<m_terrainHeight; j++)
 	{
@@ -495,7 +495,7 @@ bool TerrainClass::InitializeBuffers(ID3D11Device* device)
 	int index1, index2, index3, index4;
 
 
-	// Calculate the number of vertices in the terrain mesh.
+	// Calculate the number of vertices's in the terrain mesh.
 	m_vertexCount = (m_terrainWidth - 1) * (m_terrainHeight - 1) * 6;
 
 	// Set the index count to the same as the vertex count.
@@ -698,12 +698,12 @@ void TerrainClass::RenderBuffers(ID3D11DeviceContext* deviceContext)
 void TerrainClass::GenerateRandomHeightMap()
 {
 	//the toggle is just a bool that I use to make sure this is only called ONCE when you press a key
-	//until you release the key and start again. We dont want to be generating the terrain 500
+	//until you release the key and start again. We don t want to be generating the terrain 500
 	//times per second. 
 	int index;
 	float height = (float(rand()%200)/10)-10;
 
-	//loop through the terrain and set the hieghts how we want. This is where we generate the terrain
+	//loop through the terrain and set the heights how we want. This is where we generate the terrain
 	//in this case I will run a sin-wave through the terrain in one axis.
 
 	for(int j=0; j<m_terrainHeight; j++){
@@ -714,6 +714,80 @@ void TerrainClass::GenerateRandomHeightMap()
 			m_heightMap[index].x = (float)i;
 			m_heightMap[index].y = height;
 			m_heightMap[index].z = (float)j;
+		}
+	}
+}
+
+void TerrainClass::MidPoint(){
+	float h = 2.0f;
+	//side length is distance of a single square side
+	//or distance of diagonal in diamond
+	for(int sideLength = m_terrainWidth-1; sideLength >= 2; sideLength /=2, h/= 2.0){
+		//half the length of the side of a square
+		//or distance from diamond center to one corner
+		//(just to make calcs below a little clearer)
+		int halfSide = sideLength/2;
+
+		//generate the new square values
+		for(int x=0;x<m_terrainWidth-1;x+=sideLength){
+			for(int y=0;y<m_terrainWidth-1;y+=sideLength){
+				//x, y is upper left corner of square
+				//calculate average of existing corners
+				int index[4] = {(m_terrainHeight * y) + x,								//top left
+								(m_terrainHeight * y) + x + sideLength,					//top right
+								(m_terrainHeight * (y+sideLength)) + x,					//lower left
+								(m_terrainHeight * (y+sideLength)) + x+sideLength};		//lower right
+
+				float avg = m_heightMap[index[0]].y + m_heightMap[index[1]].y +
+							m_heightMap[index[2]].y + m_heightMap[index[3]].y;
+				avg /= 4.0;
+
+				m_heightMap[(m_terrainHeight * (y+halfSide)) + x+halfSide].y = avg + rand()%3 -h;
+				//center is average plus random offset
+			}
+		}
+
+		//generate the diamond values
+		//since the diamonds are staggered we only move x
+		//by half side
+		//NOTE: if the data shouldn't wrap then x < DATA_SIZE
+		//to generate the far edge values
+		for(int x=0;x<m_terrainWidth-1;x+=halfSide){
+			//and y is x offset by half a side, but moved by
+			//the full side length
+			//NOTE: if the data shouldn't wrap then y < DATA_SIZE
+			//to generate the far edge values
+			for(int y=(x+halfSide)%sideLength;y<m_terrainWidth-1;y+=sideLength){
+				//x, y is center of diamond
+				//note we must use mod  and add DATA_SIZE for subtraction 
+				//so that we can wrap around the array to find the corners
+
+				int index[4] = {(m_terrainHeight * y) +((x -halfSide + m_terrainHeight-1)%(m_terrainHeight-1)),	//left of centre
+								(m_terrainHeight * y) + (x+halfSide)%(m_terrainHeight-1),						//right of centre
+								(m_terrainHeight * ((y+halfSide)%(m_terrainHeight-1))) + x,						//below centre
+								(m_terrainHeight * ((y -halfSide + m_terrainHeight-1)%(m_terrainHeight-1))) + x};	//above centre
+
+				float avg = m_heightMap[index[0]].y + m_heightMap[index[1]].y +
+					m_heightMap[index[2]].y + m_heightMap[index[3]].y;
+				avg /= 4.0;
+
+				//new value = average plus random offset
+				//We calculate random value in range of 2h
+				//and then subtract h so the end value is
+				//in the range (-h, +h)
+				//update value for center of diamond
+				m_heightMap[(m_terrainHeight * y) + x].y = avg + rand()%3 -h;
+
+				//wrap values on the edges, remove
+				//this and adjust loop condition above
+				//for non-wrapping values.
+				if(x == 0) {
+					m_heightMap[(m_terrainHeight * m_terrainHeight)-1 + x].y = avg;
+				}
+				if(y == 0){
+					m_heightMap[(m_terrainHeight * y) + m_terrainHeight-1].y = avg;
+				}
+			}
 		}
 	}
 }
