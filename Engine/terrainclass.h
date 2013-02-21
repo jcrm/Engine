@@ -46,6 +46,7 @@ public:
 	void Shutdown();
 	void Render(ID3D11DeviceContext*);
 	bool GenerateHeightMap(ID3D11Device* device, bool keydown);
+	void GenerateRandomHeightMap();
 	int  GetIndexCount();
 
 private:

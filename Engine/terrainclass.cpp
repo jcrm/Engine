@@ -144,9 +144,30 @@ bool TerrainClass::GenerateHeightMap(ID3D11Device* device, bool keydown)
 		float height = 0.0;
 		
 
+		//MidPoint();
+		/*for(int j=0; j<m_terrainHeight; j++)
+		{
+			for(int i=0; i<m_terrainWidth; i++)
+			{			
+				index = (m_terrainHeight * j) + i;
+
+				m_heightMap[index].x = (float)i;
+				m_heightMap[index].y=  i;
+				m_heightMap[index].z = (float)j;
+			}
+		}*/
+
+
+		
+		//GenerateRandomHeightMap();
+
 		//loop through the terrain and set the hieghts how we want. This is where we generate the terrain
 		//in this case I will run a sin-wave through the terrain in one axis.
-
+		float sinValue = (rand()%12)+1;
+		float cosValue = (((float(rand()%200))/10)-10);
+		float sinMulti = (((float(rand()%100))/10)-5);
+		float cosMulti = (((float(rand()%50))/10)-2.5);
+		if(cosValue == 0)	cosValue = 1;
  		for(int j=0; j<m_terrainHeight; j++)
 		{
 			for(int i=0; i<m_terrainWidth; i++)
@@ -154,10 +175,24 @@ bool TerrainClass::GenerateHeightMap(ID3D11Device* device, bool keydown)
 				index = (m_terrainHeight * j) + i;
 
 				m_heightMap[index].x = (float)i;
-				m_heightMap[index].y = (float)(sin((float)i/(m_terrainWidth/12))*3.0); //magic numbers ahoy, just to ramp up the height of the sin function so its visible.
+				m_heightMap[index].y+= (float)((sin((float)i/(m_terrainWidth/sinValue))*sinMulti) + (cos((float)j/cosValue)*cosMulti)); //magic numbers ahoy, just to ramp up the height of the sin function so its visible.
 				m_heightMap[index].z = (float)j;
 			}
 		}
+		
+		/*
+		for(int i=0; i<m_terrainWidth; i++)
+		{	
+			cosValue = (((float(rand()%200))/10)-10);
+			for(int j=0; j<m_terrainHeight; j++)
+			{	
+				index = (m_terrainWidth * i) + j;
+
+				m_heightMap[index].x = (float)j;
+				m_heightMap[index].y+= (cos((float)j/cosValue)*cosMulti); //magic numbers ahoy, just to ramp up the height of the sin function so its visible.
+				m_heightMap[index].z = (float)i;
+			}
+		}*/
 
 		result = CalculateNormals();
 		if(!result)
@@ -484,50 +519,87 @@ bool TerrainClass::InitializeBuffers(ID3D11Device* device)
 	index = 0;
 
 	// Load the vertex and index array with the terrain data.
-	for(j=0; j<(m_terrainHeight-1); j++)
-	{
-		for(i=0; i<(m_terrainWidth-1); i++)
-		{
+	for(j=0; j<(m_terrainHeight-1); j++){
+		for(i=0; i<(m_terrainWidth-1); i++){
 			index1 = (m_terrainHeight * j) + i;          // Bottom left.
 			index2 = (m_terrainHeight * j) + (i+1);      // Bottom right.
 			index3 = (m_terrainHeight * (j+1)) + i;      // Upper left.
 			index4 = (m_terrainHeight * (j+1)) + (i+1);  // Upper right.
 
-			// Upper left.
-			vertices[index].position = D3DXVECTOR3(m_heightMap[index3].x, m_heightMap[index3].y, m_heightMap[index3].z);
-			vertices[index].normal = D3DXVECTOR3(m_heightMap[index3].nx, m_heightMap[index3].ny, m_heightMap[index3].nz);
-			indices[index] = index;
-			index++;
+			if((i%2 !=0 && j%2 ==0) || (i%2 ==0 && j%2 != 0)){
+				// Upper left.
+				vertices[index].position = D3DXVECTOR3(m_heightMap[index3].x, m_heightMap[index3].y, m_heightMap[index3].z);
+				vertices[index].normal = D3DXVECTOR3(m_heightMap[index3].nx, m_heightMap[index3].ny, m_heightMap[index3].nz);
+				indices[index] = index;
+				index++;
 
-			// Upper right.
-			vertices[index].position = D3DXVECTOR3(m_heightMap[index4].x, m_heightMap[index4].y, m_heightMap[index4].z);
-			vertices[index].normal = D3DXVECTOR3(m_heightMap[index4].nx, m_heightMap[index4].ny, m_heightMap[index4].nz);
-			indices[index] = index;
-			index++;
+				// Upper right.
+				vertices[index].position = D3DXVECTOR3(m_heightMap[index4].x, m_heightMap[index4].y, m_heightMap[index4].z);
+				vertices[index].normal = D3DXVECTOR3(m_heightMap[index4].nx, m_heightMap[index4].ny, m_heightMap[index4].nz);
+				indices[index] = index;
+				index++;
 
-			// Bottom left.
-			vertices[index].position = D3DXVECTOR3(m_heightMap[index1].x, m_heightMap[index1].y, m_heightMap[index1].z);
-			vertices[index].normal = D3DXVECTOR3(m_heightMap[index1].nx, m_heightMap[index1].ny, m_heightMap[index1].nz);
-			indices[index] = index;
-			index++;
+				// Bottom right.
+				vertices[index].position = D3DXVECTOR3(m_heightMap[index2].x, m_heightMap[index2].y, m_heightMap[index2].z);
+				vertices[index].normal = D3DXVECTOR3(m_heightMap[index2].nx, m_heightMap[index2].ny, m_heightMap[index2].nz);
+				indices[index] = index;
+				index++;
 
-			// Bottom left.
-			vertices[index].position = D3DXVECTOR3(m_heightMap[index1].x, m_heightMap[index1].y, m_heightMap[index1].z);
-			vertices[index].normal = D3DXVECTOR3(m_heightMap[index1].nx, m_heightMap[index1].ny, m_heightMap[index1].nz);
-			indices[index] = index;
-			index++;
+				// Bottom right.
+				vertices[index].position = D3DXVECTOR3(m_heightMap[index2].x, m_heightMap[index2].y, m_heightMap[index2].z);
+				vertices[index].normal = D3DXVECTOR3(m_heightMap[index2].nx, m_heightMap[index2].ny, m_heightMap[index2].nz);
+				indices[index] = index;
+				index++;
 
-			// Upper right.
-			vertices[index].position = D3DXVECTOR3(m_heightMap[index4].x, m_heightMap[index4].y, m_heightMap[index4].z);
-			vertices[index].normal = D3DXVECTOR3(m_heightMap[index4].nx, m_heightMap[index4].ny, m_heightMap[index4].nz);
-			indices[index] = index;
-			index++;
+				// Bottom left.
+				vertices[index].position = D3DXVECTOR3(m_heightMap[index1].x, m_heightMap[index1].y, m_heightMap[index1].z);
+				vertices[index].normal = D3DXVECTOR3(m_heightMap[index1].nx, m_heightMap[index1].ny, m_heightMap[index1].nz);
+				indices[index] = index;
+				index++;
 
-			// Bottom right.
-			vertices[index].position = D3DXVECTOR3(m_heightMap[index2].x, m_heightMap[index2].y, m_heightMap[index2].z);
-			vertices[index].normal = D3DXVECTOR3(m_heightMap[index2].nx, m_heightMap[index2].ny, m_heightMap[index2].nz);
-			indices[index] = index;
-			index++;
+				// Upper left.
+				vertices[index].position = D3DXVECTOR3(m_heightMap[index3].x, m_heightMap[index3].y, m_heightMap[index3].z);
+				vertices[index].normal = D3DXVECTOR3(m_heightMap[index3].nx, m_heightMap[index3].ny, m_heightMap[index3].nz);
+				indices[index] = index;
+				index++;
+
+			}else{
+				// Upper left.
+				vertices[index].position = D3DXVECTOR3(m_heightMap[index3].x, m_heightMap[index3].y, m_heightMap[index3].z);
+				vertices[index].normal = D3DXVECTOR3(m_heightMap[index3].nx, m_heightMap[index3].ny, m_heightMap[index3].nz);
+				indices[index] = index;
+				index++;
+
+				// Upper right.
+				vertices[index].position = D3DXVECTOR3(m_heightMap[index4].x, m_heightMap[index4].y, m_heightMap[index4].z);
+				vertices[index].normal = D3DXVECTOR3(m_heightMap[index4].nx, m_heightMap[index4].ny, m_heightMap[index4].nz);
+				indices[index] = index;
+				index++;
+
+				// Bottom left.
+				vertices[index].position = D3DXVECTOR3(m_heightMap[index1].x, m_heightMap[index1].y, m_heightMap[index1].z);
+				vertices[index].normal = D3DXVECTOR3(m_heightMap[index1].nx, m_heightMap[index1].ny, m_heightMap[index1].nz);
+				indices[index] = index;
+				index++;
+
+				// Bottom left.
+				vertices[index].position = D3DXVECTOR3(m_heightMap[index1].x, m_heightMap[index1].y, m_heightMap[index1].z);
+				vertices[index].normal = D3DXVECTOR3(m_heightMap[index1].nx, m_heightMap[index1].ny, m_heightMap[index1].nz);
+				indices[index] = index;
+				index++;
+
+				// Upper right.
+				vertices[index].position = D3DXVECTOR3(m_heightMap[index4].x, m_heightMap[index4].y, m_heightMap[index4].z);
+				vertices[index].normal = D3DXVECTOR3(m_heightMap[index4].nx, m_heightMap[index4].ny, m_heightMap[index4].nz);
+				indices[index] = index;
+				index++;
+
+				// Bottom right.
+				vertices[index].position = D3DXVECTOR3(m_heightMap[index2].x, m_heightMap[index2].y, m_heightMap[index2].z);
+				vertices[index].normal = D3DXVECTOR3(m_heightMap[index2].nx, m_heightMap[index2].ny, m_heightMap[index2].nz);
+				indices[index] = index;
+				index++;
+			}
 		}
 	}
 
@@ -622,4 +694,26 @@ void TerrainClass::RenderBuffers(ID3D11DeviceContext* deviceContext)
 	deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	return;
+}
+void TerrainClass::GenerateRandomHeightMap()
+{
+	//the toggle is just a bool that I use to make sure this is only called ONCE when you press a key
+	//until you release the key and start again. We dont want to be generating the terrain 500
+	//times per second. 
+	int index;
+	float height = (float(rand()%200)/10)-10;
+
+	//loop through the terrain and set the hieghts how we want. This is where we generate the terrain
+	//in this case I will run a sin-wave through the terrain in one axis.
+
+	for(int j=0; j<m_terrainHeight; j++){
+		for(int i=0; i<m_terrainWidth; i++){
+			float height = (float(rand()%200)/10)-10;
+			index = (m_terrainHeight * j) + i;
+
+			m_heightMap[index].x = (float)i;
+			m_heightMap[index].y = height;
+			m_heightMap[index].z = (float)j;
+		}
+	}
 }
