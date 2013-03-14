@@ -161,9 +161,13 @@ bool TerrainClass::GenerateHeightMap(ID3D11Device* device, bool keydown)
 		while(i++ < 15){
 			Particle(8320);
 		}*/
-		for (int i = 0; i <15; i++){
-			terrainIterateParticleDeposition(1000);
+		for (int i = 0; i <12; i++){
+			terrainIterateParticleDeposition(1000, true);
 		}
+		for (int i = 0; i <6; i++){
+			terrainIterateParticleDeposition(1000, false);
+		}
+		smooth(0.2f);
 		//MPD();
 		//bool generate = Generation::MidPointDisplacement(m_heightMap,m_terrainWidth-1,rand()%RAND_MAX,5.0f,0.1f);
 		/*
@@ -927,7 +931,7 @@ void TerrainClass::MPD(){
 		}
 	}
 }
-void TerrainClass::deposit( int x, int z)
+void TerrainClass::depositPlus( int x, int z)
 {
 	int j,k,kk,jj,flag;
 	
@@ -944,10 +948,31 @@ void TerrainClass::deposit( int x, int z)
 				if (!flag){
 						m_heightMap[x * m_terrainHeight + z].y += (rand()%40)/10 + (rand()%40)/10;
 				}else{
-					deposit(x+kk,z+jj);
+					depositPlus(x+kk,z+jj);
 				}
 }
-int TerrainClass::terrainIterateParticleDeposition(int numIt) {
+void TerrainClass::depositMinus( int x, int z)
+{
+	int j,k,kk,jj,flag;
+
+	flag = 0;
+	for (k=-1;k<2;k++)
+		for(j=-1;j<2;j++)
+			if (k!=0 && j!=0 && x+k>-1 && x+k<m_terrainWidth && z+j>-1 && z+j<m_terrainHeight) 
+				if (m_heightMap[(x+k) * m_terrainHeight + (z+j)].y > m_heightMap[x * m_terrainHeight + z].y) {
+					flag = 1;
+					kk = k;
+					jj = j;
+				}
+
+				if (!flag){
+					m_heightMap[x * m_terrainHeight + z].y -= (rand()%40)/10 + (rand()%40)/10;
+				}else{
+					depositMinus(x+kk,z+jj);
+				}
+}
+int TerrainClass::terrainIterateParticleDeposition( int numIt, bool up )
+{
 	int x,z,i,dir;
 
 	if (m_heightMap == NULL){
@@ -981,7 +1006,38 @@ int TerrainClass::terrainIterateParticleDeposition(int numIt) {
 			if (z == -1)
 				z = m_terrainHeight - 1;
 		}
-		deposit(x,z);
+		if(up == true){
+			depositPlus(x,z);
+		}else{
+			depositMinus(x,z);
+		}
 	}
 	return 1;
+}
+void TerrainClass::smooth(float k) {
+
+	int i,j;
+
+	for(i=0;i<m_terrainHeight;i++)
+		for(j=1;j<m_terrainWidth;j++)
+			m_heightMap[i*m_terrainWidth + j].y =
+			m_heightMap[i*m_terrainWidth + j].y * (1-k) + 
+			m_heightMap[i*m_terrainWidth + j-1].y * k;
+	for(i=1;i<m_terrainHeight;i++)
+		for(j=0;j<m_terrainWidth;j++)
+			m_heightMap[i*m_terrainWidth + j].y =
+			m_heightMap[i*m_terrainWidth + j].y * (1-k) + 
+			m_heightMap[(i-1)*m_terrainWidth + j].y * k;
+
+	for(i=0; i<m_terrainHeight; i++)
+		for(j=m_terrainWidth-1;j>-1;j--)
+			m_heightMap[i*m_terrainWidth + j].y =
+			m_heightMap[i*m_terrainWidth + j].y * (1-k) + 
+			m_heightMap[i*m_terrainWidth + j+1].y * k;
+	for(i=m_terrainHeight-2;i<-1;i--)
+		for(j=0;j<m_terrainWidth;j++)
+			m_heightMap[i*m_terrainWidth + j].y =
+			m_heightMap[i*m_terrainWidth + j].y * (1-k) + 
+			m_heightMap[(i+1)*m_terrainWidth + j].y * k;
+
 }

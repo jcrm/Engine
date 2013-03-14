@@ -61,8 +61,10 @@ private:
 	void ShutdownBuffers();
 	void RenderBuffers(ID3D11DeviceContext*);
 	void MPD();
-	int terrainIterateParticleDeposition(int numIt);
-	void deposit(int x, int z);
+	int terrainIterateParticleDeposition(int numIt, bool up);
+	void depositPlus(int x, int z);
+	void smooth(float k);
+	void depositMinus( int x, int z);
 private:
 	bool m_terrainGeneratedToggle;
 	int m_terrainWidth, m_terrainHeight;
