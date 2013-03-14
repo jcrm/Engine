@@ -978,10 +978,14 @@ int TerrainClass::terrainIterateParticleDeposition( int numIt, bool up )
 	if (m_heightMap == NULL){
 		return 0;
 	}
-
 	x = rand() % m_terrainWidth;
 	z = rand() % m_terrainHeight;
-
+	if(up == true){
+		while(m_heightMap[x * m_terrainHeight + z].y != 0){
+			x = rand() % m_terrainWidth;
+			z = rand() % m_terrainHeight;
+		}
+	}
 	for (i=0; i < numIt; i++) {
 		dir = rand() % 4;
 
@@ -1006,10 +1010,19 @@ int TerrainClass::terrainIterateParticleDeposition( int numIt, bool up )
 			if (z == -1)
 				z = m_terrainHeight - 1;
 		}
+		int sticky = rand()%5;
 		if(up == true){
-			depositPlus(x,z);
+			if(sticky == 0){
+				m_heightMap[x * m_terrainHeight + z].y += (rand()%40)/10 + (rand()%40)/10;
+			}else{
+				depositPlus(x,z);
+			}
 		}else{
-			depositMinus(x,z);
+			if(sticky ==0){
+				m_heightMap[x * m_terrainHeight + z].y -= (rand()%40)/10 + (rand()%40)/10;
+			}else{
+				depositMinus(x,z);
+			}
 		}
 	}
 	return 1;
