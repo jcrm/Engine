@@ -3,7 +3,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 #include "terrainclass.h"
 #include <cmath>
-#include "Generation.h"
 
 
 TerrainClass::TerrainClass()
@@ -146,10 +145,8 @@ bool TerrainClass::GenerateHeightMap(ID3D11Device* device, bool keydown)
 		
 
 		
-		for(int j=0; j<m_terrainHeight; j++)
-		{
-			for(int i=0; i<m_terrainWidth; i++)
-			{			
+		for(int j=0; j<m_terrainHeight; j++){
+			for(int i=0; i<m_terrainWidth; i++){			
 				index = (m_terrainHeight * j) + i;
 
 				m_heightMap[index].x = (float)i;
@@ -157,10 +154,10 @@ bool TerrainClass::GenerateHeightMap(ID3D11Device* device, bool keydown)
 				m_heightMap[index].z = (float)j;
 			}
 		}
-		/*int i = 0;
-		while(i++ < 15){
-			Particle(8320);
-		}*/
+		
+		MPD();
+		smooth(0.4f);
+		/*
 		for (int i = 0; i <12; i++){
 			terrainIterateParticleDeposition(1000, true);
 		}
@@ -168,44 +165,7 @@ bool TerrainClass::GenerateHeightMap(ID3D11Device* device, bool keydown)
 			terrainIterateParticleDeposition(1000, false);
 		}
 		smooth(0.2f);
-		//MPD();
-		//bool generate = Generation::MidPointDisplacement(m_heightMap,m_terrainWidth-1,rand()%RAND_MAX,5.0f,0.1f);
-		/*
-		//GenerateRandomHeightMap();
-
-		//loop through the terrain and set the heights how we want. This is where we generate the terrain
-		//in this case I will run a sin-wave through the terrain in one axis.
-		float sinValue = (rand()%12)+1;
-		float cosValue = (((float(rand()%200))/10)-10);
-		float sinMulti = (((float(rand()%100))/10)-5);
-		float cosMulti = (((float(rand()%50))/10)-2.5);
-		if(cosValue == 0)	cosValue = 1;
- 		for(int j=0; j<m_terrainHeight; j++)
-		{
-			for(int i=0; i<m_terrainWidth; i++)
-			{			
-				index = (m_terrainHeight * j) + i;
-
-				m_heightMap[index].x = (float)i;
-				m_heightMap[index].y+= (float)((sin((float)i/(m_terrainWidth/sinValue))*sinMulti) + (cos((float)j/cosValue)*cosMulti)); //magic numbers ahoy, just to ramp up the height of the sin function so its visible.
-				m_heightMap[index].z = (float)j;
-			}
-		}
-		
-		/*
-		for(int i=0; i<m_terrainWidth; i++)
-		{	
-			cosValue = (((float(rand()%200))/10)-10);
-			for(int j=0; j<m_terrainHeight; j++)
-			{	
-				index = (m_terrainWidth * i) + j;
-
-				m_heightMap[index].x = (float)j;
-				m_heightMap[index].y+= (cos((float)j/cosValue)*cosMulti); //magic numbers ahoy, just to ramp up the height of the sin function so its visible.
-				m_heightMap[index].z = (float)i;
-			}
-		}*/
-
+		*/
 		result = CalculateNormals();
 		if(!result)
 		{
@@ -767,7 +727,7 @@ void TerrainClass::MidPoint(float ranMax){
 							m_heightMap[index[2]].y + m_heightMap[index[3]].y;
 				avg /= 4.0;
 
-				m_heightMap[(m_terrainHeight * (y+halfSide)) + x+halfSide].y = avg + (randnum(0,0.4)) -h;
+				m_heightMap[(m_terrainHeight * (y+halfSide)) + x+halfSide].y = avg + (randnum(0,4.0)) -h;
 				//center is average plus random offset
 			}
 		}
@@ -801,7 +761,7 @@ void TerrainClass::MidPoint(float ranMax){
 				//and then subtract h so the end value is
 				//in the range (-h, +h)
 				//update value for center of diamond
-				m_heightMap[(m_terrainHeight * y) + x].y = avg + (randnum(0,4)) -h;
+				m_heightMap[(m_terrainHeight * y) + x].y = avg + (randnum(0,4.0)) -h;
 
 				//wrap values on the edges, remove
 				//this and adjust loop condition above
@@ -869,8 +829,8 @@ signed char** mdp(signed char** base, unsigned base_n, signed char r) {
 			int rv = scrand(r);
 			if (map_ij + rv > 16 )
 				map_ij = 16;
-			else if(map_ij + rv < -16)
-				map_ij = -16;
+			else if(map_ij + rv < -4)
+				map_ij = -4;
 			else
 				map_ij += rv;
 		}
@@ -901,8 +861,8 @@ signed char** mdp(signed char** base, unsigned base_n, signed char r) {
 			int rv = scrand(r);
 			if (map_ij + rv > 16 )
 				map_ij = 16;
-			else if(map_ij + rv < -16)
-				map_ij = -16;
+			else if(map_ij + rv < -4)
+				map_ij = -4;
 			else
 				map_ij += rv;
 		}
@@ -916,10 +876,10 @@ void TerrainClass::MPD(){
 	
 	signed char** final = new signed char*[n];
 	for (unsigned i = 0;i < n; ++i) {
-			final[i] = new signed char[n];
-			for (unsigned j = 0; j < n; ++j){
-				final[i][j] = scrand();
-			}
+		final[i] = new signed char[n];
+		for (unsigned j = 0; j < n; ++j){
+			final[i][j] = scrand();
+		}
 	}
 
 	for (unsigned i = 1; i < 8; ++i){ 
@@ -936,40 +896,45 @@ void TerrainClass::depositPlus( int x, int z)
 	int j,k,kk,jj,flag;
 	
 	flag = 0;
-	for (k=-1;k<2;k++)
-		for(j=-1;j<2;j++)
-			if (k!=0 && j!=0 && x+k>-1 && x+k<m_terrainWidth && z+j>-1 && z+j<m_terrainHeight) 
+	for (k=-1;k<2;k++){
+		for(j=-1;j<2;j++){
+			if (k!=0 && j!=0 && x+k>-1 && x+k<m_terrainWidth && z+j>-1 && z+j<m_terrainHeight) {
 				if (m_heightMap[(x+k) * m_terrainHeight + (z+j)].y < m_heightMap[x * m_terrainHeight + z].y) {
 					flag = 1;
 					kk = k;
 					jj = j;
 				}
-
-				if (!flag){
-						m_heightMap[x * m_terrainHeight + z].y += (rand()%40)/10 + (rand()%40)/10;
-				}else{
-					depositPlus(x+kk,z+jj);
-				}
+			}
+		}
+	}
+	if (!flag){
+		m_heightMap[x * m_terrainHeight + z].y += (rand()%40)/10 + (rand()%40)/10;
+	}else{
+		depositPlus(x+kk,z+jj);
+	}
 }
 void TerrainClass::depositMinus( int x, int z)
 {
 	int j,k,kk,jj,flag;
 
 	flag = 0;
-	for (k=-1;k<2;k++)
-		for(j=-1;j<2;j++)
-			if (k!=0 && j!=0 && x+k>-1 && x+k<m_terrainWidth && z+j>-1 && z+j<m_terrainHeight) 
+	for (k=-1;k<2;k++){
+		for(j=-1;j<2;j++){
+			if (k!=0 && j!=0 && x+k>-1 && x+k<m_terrainWidth && z+j>-1 && z+j<m_terrainHeight){
 				if (m_heightMap[(x+k) * m_terrainHeight + (z+j)].y > m_heightMap[x * m_terrainHeight + z].y) {
 					flag = 1;
 					kk = k;
 					jj = j;
 				}
+			}
+		}
+	}
 
-				if (!flag){
-					m_heightMap[x * m_terrainHeight + z].y -= (rand()%40)/10 + (rand()%40)/10;
-				}else{
-					depositMinus(x+kk,z+jj);
-				}
+	if (!flag){
+		m_heightMap[x * m_terrainHeight + z].y -= (rand()%40)/10 + (rand()%40)/10;
+	}else{
+		depositMinus(x+kk,z+jj);
+	}
 }
 int TerrainClass::terrainIterateParticleDeposition( int numIt, bool up )
 {
@@ -986,26 +951,22 @@ int TerrainClass::terrainIterateParticleDeposition( int numIt, bool up )
 			z = rand() % m_terrainHeight;
 		}
 	}
-	for (i=0; i < numIt; i++) {
+	for (i=0; i < numIt; i++){
 		dir = rand() % 4;
 
-		if (dir == 2) {
+		if (dir == 2){
 			x++;
 			if (x >= m_terrainWidth)
 				x = 0;
-		}
-		else if (dir == 3){
+		}else if (dir == 3){
 			x--;
 			if (x == -1)
 				x = m_terrainWidth-1;
-		}
-
-		else if (dir == 1) {
+		}else if (dir == 1) {
 			z++;
 			if (z >= m_terrainHeight)
 				z = 0;
-		}
-		else if (dir == 0){
+		}else if (dir == 0){
 			z--;
 			if (z == -1)
 				z = m_terrainHeight - 1;
@@ -1053,4 +1014,39 @@ void TerrainClass::smooth(float k) {
 			m_heightMap[i*m_terrainWidth + j].y * (1-k) + 
 			m_heightMap[(i+1)*m_terrainWidth + j].y * k;
 
+}
+
+void TerrainClass::GenerateSinCos(int index)
+{
+	//loop through the terrain and set the heights how we want. This is where we generate the terrain
+	//in this case I will run a sin-wave through the terrain in one axis.
+	float sinValue = (rand()%12)+1;
+	float cosValue = (((float(rand()%200))/10)-10);
+	float sinMulti = (((float(rand()%100))/10)-5);
+	float cosMulti = (((float(rand()%50))/10)-2.5);
+	if(cosValue == 0)	cosValue = 1;
+ 	for(int j=0; j<m_terrainHeight; j++)
+	{
+		for(int i=0; i<m_terrainWidth; i++)
+		{			
+			index = (m_terrainHeight * j) + i;
+
+			m_heightMap[index].x = (float)i;
+			m_heightMap[index].y+= (float)((sin((float)i/(m_terrainWidth/sinValue))*sinMulti) + (cos((float)j/cosValue)*cosMulti)); //magic numbers ahoy, just to ramp up the height of the sin function so its visible.
+			m_heightMap[index].z = (float)j;
+		}
+	}
+		
+	for(int i=0; i<m_terrainWidth; i++)
+	{	
+		cosValue = (((float(rand()%200))/10)-10);
+		for(int j=0; j<m_terrainHeight; j++)
+		{	
+			index = (m_terrainWidth * i) + j;
+
+			m_heightMap[index].x = (float)j;
+			m_heightMap[index].y+= (cos((float)j/cosValue)*cosMulti); //magic numbers ahoy, just to ramp up the height of the sin function so its visible.
+			m_heightMap[index].z = (float)i;
+		}
+	}
 }

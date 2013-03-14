@@ -13,6 +13,15 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Shader Files\Convolution Files">
+      <UniqueIdentifier>{d5824d82-cef7-4f89-bda3-0e1f2c342336}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shader Files\Font Files">
+      <UniqueIdentifier>{b8ee1a23-9dbb-4c88-b387-294a8e3e4a3e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shader Files\Terrain Files">
+      <UniqueIdentifier>{82af73c2-2bd6-463c-8000-cbef5230fb69}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="applicationclass.cpp">
@@ -66,7 +75,10 @@
     <ClCompile Include="timerclass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Generation.cpp">
+    <ClCompile Include="convolutionshaderclass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="rendertextureclass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -119,22 +131,31 @@
     <ClInclude Include="timerclass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Generation.h">
+    <ClInclude Include="convolutionshaderclass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="rendertextureclass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="terrain.vs">
-      <Filter>Shader Files</Filter>
+    <None Include="convolution.vs">
+      <Filter>Shader Files\Convolution Files</Filter>
     </None>
-    <None Include="font.ps">
-      <Filter>Shader Files</Filter>
+    <None Include="convolution.ps">
+      <Filter>Shader Files\Convolution Files</Filter>
     </None>
     <None Include="font.vs">
-      <Filter>Shader Files</Filter>
+      <Filter>Shader Files\Font Files</Filter>
+    </None>
+    <None Include="font.ps">
+      <Filter>Shader Files\Font Files</Filter>
+    </None>
+    <None Include="terrain.vs">
+      <Filter>Shader Files\Terrain Files</Filter>
     </None>
     <None Include="terrain.ps">
-      <Filter>Shader Files</Filter>
+      <Filter>Shader Files\Terrain Files</Filter>
     </None>
   </ItemGroup>
 </Project>

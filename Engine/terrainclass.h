@@ -65,6 +65,7 @@ private:
 	void depositPlus(int x, int z);
 	void smooth(float k);
 	void depositMinus( int x, int z);
+	void GenerateSinCos(int index);
 private:
 	bool m_terrainGeneratedToggle;
 	int m_terrainWidth, m_terrainHeight;

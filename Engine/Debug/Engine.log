@@ -1,27 +1,29 @@
-﻿Build started 3/14/2013 10:43:00 AM.
+﻿Build started 3/14/2013 2:46:35 PM.
      1>Project "C:\Users\Jake\Documents\Visual Studio 2010\Projects\Engine\Engine\Engine.vcxproj" on node 2 (build target(s)).
      1>InitializeBuildStatus:
          Creating "Debug\Engine.unsuccessfulbuild" because "AlwaysCreate" was specified.
        ClCompile:
          c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /I"C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include" /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _WINDOWS /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc100.pdb" /Gd /TP /analyze- /errorReport:prompt terrainclass.cpp
          terrainclass.cpp
-     1>c:\users\jake\documents\visual studio 2010\projects\engine\engine\terrainclass.cpp(770): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\jake\documents\visual studio 2010\projects\engine\engine\terrainclass.cpp(1023): warning C4244: 'initializing' : conversion from 'int' to 'float', possible loss of data
+     1>c:\users\jake\documents\visual studio 2010\projects\engine\engine\terrainclass.cpp(1026): warning C4244: 'initializing' : conversion from 'double' to 'float', possible loss of data
        ManifestResourceCompile:
          All outputs are up-to-date.
        Link:
          c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Jake\Documents\Visual Studio 2010\Projects\Engine\Debug\Engine.exe" /INCREMENTAL /NOLOGO /LIBPATH:"C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Lib\x86" kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /ManifestFile:"Debug\Engine.exe.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /DEBUG /PDB:"C:\Users\Jake\Documents\Visual Studio 2010\Projects\Engine\Debug\Engine.pdb" /SUBSYSTEM:WINDOWS /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\Jake\Documents\Visual Studio 2010\Projects\Engine\Debug\Engine.lib" /MACHINE:X86 Debug\Engine.exe.embed.manifest.res
          Debug\applicationclass.obj
          Debug\cameraclass.obj
+         Debug\convolutionshaderclass.obj
          Debug\cpuclass.obj
          Debug\d3dclass.obj
          Debug\fontclass.obj
          Debug\fontshaderclass.obj
          Debug\fpsclass.obj
-         Debug\Generation.obj
          Debug\inputclass.obj
          Debug\lightclass.obj
          Debug\main.obj
          Debug\positionclass.obj
+         Debug\rendertextureclass.obj
          Debug\systemclass.obj
          Debug\terrainclass.obj
          Debug\terrainshaderclass.obj
@@ -41,4 +43,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:02.65
+Time Elapsed 00:00:08.35
