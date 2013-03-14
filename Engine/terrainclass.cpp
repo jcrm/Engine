@@ -3,6 +3,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 #include "terrainclass.h"
 #include <cmath>
+#include "Generation.h"
 
 
 TerrainClass::TerrainClass()
@@ -156,13 +157,16 @@ bool TerrainClass::GenerateHeightMap(ID3D11Device* device, bool keydown)
 				m_heightMap[index].z = (float)j;
 			}
 		}
-		int i = 0;
+		/*int i = 0;
 		while(i++ < 15){
 			Particle(8320);
+		}*/
+		for (int i = 0; i <15; i++){
+			terrainIterateParticleDeposition(1000);
 		}
-		//MidPoint();
+		//MPD();
+		//bool generate = Generation::MidPointDisplacement(m_heightMap,m_terrainWidth-1,rand()%RAND_MAX,5.0f,0.1f);
 		/*
-		
 		//GenerateRandomHeightMap();
 
 		//loop through the terrain and set the heights how we want. This is where we generate the terrain
@@ -721,9 +725,22 @@ void TerrainClass::GenerateRandomHeightMap()
 		}
 	}
 }
+float RandF(float min, float max){
+	float randFloat  = min + float(rand()/ (float(RAND_MAX) / (max-min)));
+	return randFloat;
+}
+static float randnum (float min, float max)
+{
+	int r;
+	float	x;
 
-void TerrainClass::MidPoint(){
-	float h = 2.0f;
+	r = rand();
+	x = (float)(r & 0x7fff) /
+		(float)0x7fff;
+	return (x * (max - min) + min);
+} 
+void TerrainClass::MidPoint(float ranMax){
+	float h = 5.0f;
 	//side length is distance of a single square side
 	//or distance of diagonal in diamond
 	for(int sideLength = m_terrainWidth-1; sideLength >= 2; sideLength /=2, h/= 2.0){
@@ -746,7 +763,7 @@ void TerrainClass::MidPoint(){
 							m_heightMap[index[2]].y + m_heightMap[index[3]].y;
 				avg /= 4.0;
 
-				m_heightMap[(m_terrainHeight * (y+halfSide)) + x+halfSide].y = avg + ((rand()%6)-3) -h;
+				m_heightMap[(m_terrainHeight * (y+halfSide)) + x+halfSide].y = avg + (randnum(0,0.4)) -h;
 				//center is average plus random offset
 			}
 		}
@@ -780,7 +797,7 @@ void TerrainClass::MidPoint(){
 				//and then subtract h so the end value is
 				//in the range (-h, +h)
 				//update value for center of diamond
-				m_heightMap[(m_terrainHeight * y) + x].y = avg + ((rand()%6)-3) -h;
+				m_heightMap[(m_terrainHeight * y) + x].y = avg + (randnum(0,4)) -h;
 
 				//wrap values on the edges, remove
 				//this and adjust loop condition above
@@ -808,5 +825,163 @@ void TerrainClass::Particle(int index){
 	}else{
 		m_heightMap[index].y += size;
 	}
+}
+int createIndex(int size, int i, int j){
+	return (size * i) + j;
+}
+signed char scrand(signed char r = 4) {
+	return (-r + 2 * (rand() % r)); 
+}
+signed char** mdp(signed char** base, unsigned base_n, signed char r) {
+	size_t n = (2 * base_n) - 1;
+
+	signed char** map = new signed char*[n];
+	for (unsigned i = 0; i < n; ++i) map[i] = new signed char[n];
+
+	// Resize
+	// 1 0 1
+	// 0 0 0
+	// 1 0 1
+	for (size_t i = 0; i < n; i += 2) {
+		for (size_t j = !(i % 2 == 0); j < n; j += 2) {
+			map[i][j] = base[i / 2][j / 2];
+		}
+	}
+
+	// Diamond algorithm
+	// 0 0 0
+	// 0 X 0
+	// 0 0 0
+	for (size_t i = 1; i < n; i += 2) {
+		for (size_t j = 1; j < n; j += 2) {
+			signed char& map_ij = map[i][j];
+
+			signed char a = map[i - 1][j - 1];
+			signed char b = map[i - 1][j + 1];
+			signed char c = map[i + 1][j - 1];
+			signed char d = map[i + 1][j + 1];
+			map_ij = (a + b + c + d) / 4;
+
+			int rv = scrand(r);
+			if (map_ij + rv > 16 )
+				map_ij = 16;
+			else if(map_ij + rv < -16)
+				map_ij = -16;
+			else
+				map_ij += rv;
+		}
+	}
+
+	// Square algorithm
+	// 0 1 0
+	// 1 0 1
+	// 0 1 0
+	for (size_t i = 0; i < n; ++i) {
+		for (size_t j = (i % 2 == 0); j < n; j += 2) {
+			signed char& map_ij = map[i][j];
+
+			// get surrounding values
+			signed char a = 0, b = a, c = a, d = a;
+			if (i != 0) a = map[i - 1][j];
+			if (j != 0) b = map[i][j - 1];
+			if (j + 1 != n) c = map[i][j + 1];
+			if (i + 1 != n) d = map[i + 1][j];
+
+			// average calculation
+			if (i == 0) map_ij = (b + c + d) / 3;
+			else if (j == 0) map_ij = (a + c + d) / 3;
+			else if (j + 1 == n) map_ij = (a + b + d) / 3;
+			else if (i + 1 == n) map_ij = (a + b + c) / 3;
+			else map_ij = (a + b + c + d) / 4;
+
+			int rv = scrand(r);
+			if (map_ij + rv > 16 )
+				map_ij = 16;
+			else if(map_ij + rv < -16)
+				map_ij = -16;
+			else
+				map_ij += rv;
+		}
+
+	}
+
+	return map;
+}
+void TerrainClass::MPD(){
+	const unsigned n = 130;
 	
+	signed char** final = new signed char*[n];
+	for (unsigned i = 0;i < n; ++i) {
+			final[i] = new signed char[n];
+			for (unsigned j = 0; j < n; ++j){
+				final[i][j] = scrand();
+			}
+	}
+
+	for (unsigned i = 1; i < 8; ++i){ 
+		final = mdp(final, n,  16/ i);
+	}
+	for (size_t i = 0; i < n-1; ++i) {
+		for (size_t j = 0; j < n-1; ++j) {
+			m_heightMap[(i * (n-1)) + j].y = final[i][j];
+		}
+	}
+}
+void TerrainClass::deposit( int x, int z)
+{
+	int j,k,kk,jj,flag;
+	
+	flag = 0;
+	for (k=-1;k<2;k++)
+		for(j=-1;j<2;j++)
+			if (k!=0 && j!=0 && x+k>-1 && x+k<m_terrainWidth && z+j>-1 && z+j<m_terrainHeight) 
+				if (m_heightMap[(x+k) * m_terrainHeight + (z+j)].y < m_heightMap[x * m_terrainHeight + z].y) {
+					flag = 1;
+					kk = k;
+					jj = j;
+				}
+
+				if (!flag){
+						m_heightMap[x * m_terrainHeight + z].y += (rand()%40)/10 + (rand()%40)/10;
+				}else{
+					deposit(x+kk,z+jj);
+				}
+}
+int TerrainClass::terrainIterateParticleDeposition(int numIt) {
+	int x,z,i,dir;
+
+	if (m_heightMap == NULL){
+		return 0;
+	}
+
+	x = rand() % m_terrainWidth;
+	z = rand() % m_terrainHeight;
+
+	for (i=0; i < numIt; i++) {
+		dir = rand() % 4;
+
+		if (dir == 2) {
+			x++;
+			if (x >= m_terrainWidth)
+				x = 0;
+		}
+		else if (dir == 3){
+			x--;
+			if (x == -1)
+				x = m_terrainWidth-1;
+		}
+
+		else if (dir == 1) {
+			z++;
+			if (z >= m_terrainHeight)
+				z = 0;
+		}
+		else if (dir == 0){
+			z--;
+			if (z == -1)
+				z = m_terrainHeight - 1;
+		}
+		deposit(x,z);
+	}
+	return 1;
 }

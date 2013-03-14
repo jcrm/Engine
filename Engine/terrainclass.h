@@ -12,6 +12,7 @@
 #include <d3dx10math.h>
 #include <stdio.h>
 
+class Generation;
 
 ////////////////////////////////////////////////////////////////////////////////
 // Class name: TerrainClass
@@ -25,11 +26,6 @@ private:
 	    D3DXVECTOR3 normal;
 	};
 
-	struct HeightMapType 
-	{ 
-		float x, y, z;
-		float nx, ny, nz;
-	};
 
 	struct VectorType 
 	{ 
@@ -37,6 +33,11 @@ private:
 	};
 
 public:
+	struct HeightMapType 
+	{ 
+		float x, y, z;
+		float nx, ny, nz;
+	};
 	TerrainClass();
 	TerrainClass(const TerrainClass&);
 	~TerrainClass();
@@ -48,7 +49,7 @@ public:
 	bool GenerateHeightMap(ID3D11Device* device, bool keydown);
 	void GenerateRandomHeightMap();
 	int  GetIndexCount();
-	void MidPoint();
+	void MidPoint(float);
 	void Particle(int index);
 private:
 	bool LoadHeightMap(char*);
@@ -59,7 +60,9 @@ private:
 	bool InitializeBuffers(ID3D11Device*);
 	void ShutdownBuffers();
 	void RenderBuffers(ID3D11DeviceContext*);
-	
+	void MPD();
+	int terrainIterateParticleDeposition(int numIt);
+	void deposit(int x, int z);
 private:
 	bool m_terrainGeneratedToggle;
 	int m_terrainWidth, m_terrainHeight;
