@@ -11,6 +11,7 @@ TerrainClass::TerrainClass()
 	m_indexBuffer = 0;
 	m_heightMap = 0;
 	mWave = 1.0f;
+	mWaveTime = 1/(2 * sqrt(2.0f));
 	m_terrainGeneratedToggle = false;
 }
 
@@ -42,10 +43,8 @@ bool TerrainClass::InitializeTerrain(ID3D11Device* device, int terrainWidth, int
 	}
 
 	// Initialize the data in the height map (flat).
-	for(int j=0; j<m_terrainHeight; j++)
-	{
-		for(int i=0; i<m_terrainWidth; i++)
-		{			
+	for(int j=0; j<m_terrainHeight; j++){
+		for(int i=0; i<m_terrainWidth; i++){			
 			index = (m_terrainHeight * j) + i;
 
 			m_heightMap[index].x = (float)i;
@@ -56,17 +55,13 @@ bool TerrainClass::InitializeTerrain(ID3D11Device* device, int terrainWidth, int
 
 		}
 	}
-	for(int j=m_terrainHeight/2-2; j<m_terrainHeight/2+2; j++)
-	{
-		for(int i=m_terrainWidth/2-2; i<m_terrainWidth/2+2; i++)
-		{			
+	for(int j=m_terrainHeight/2-2; j<m_terrainHeight/2+2; j++){
+		for(int i=m_terrainWidth/2-2; i<m_terrainWidth/2+2; i++){			
 			index = (m_terrainHeight * j) + i;
-
-			m_heightMap[index].y = 2.0f;
+			m_heightMap[index].y = -2.0f;
 
 		}
 	}
-
 	//even though we are generating a flat terrain, we still need to normalize it. 
 	// Calculate the normals for the terrain data.
 	result = CalculateNormals();
@@ -150,28 +145,10 @@ bool TerrainClass::GenerateHeightMap(ID3D11Device* device, bool keydown)
 	//the toggle is just a bool that I use to make sure this is only called ONCE when you press a key
 	//until you release the key and start again. We don t want to be generating the terrain 500
 	//times per second. 
-	if(keydown&&(!m_terrainGeneratedToggle))
-	{
-		int index;
-		float height = 0.0;
-		
-
-		/*
-		for(int j=0; j<m_terrainHeight; j++){
-			for(int i=0; i<m_terrainWidth; i++){			
-				index = (m_terrainHeight * j) + i;
-
-				m_heightMap[index].x = (float)i;
-				m_heightMap[index].y=  0.0f;
-				m_heightMap[index].z = (float)j;
-				m_heightMap[index].nextY = 0.0f;
-				m_heightMap[index].prevY = 0.0f;
-			}
-		}*/
+	if(/*keydown&&*/(!m_terrainGeneratedToggle)){
 		Water();
+		//MPD();
 		/*
-		MPD();
-		
 		for (int i = 0; i <12; i++){
 			terrainIterateParticleDeposition(1000, true);
 		}
@@ -328,10 +305,8 @@ bool TerrainClass::CalculateNormals()
 	}
 
 	// Go through all the faces in the mesh and calculate their normals.
-	for(j=0; j<(m_terrainHeight-1); j++)
-	{
-		for(i=0; i<(m_terrainWidth-1); i++)
-		{
+	for(j=0; j<(m_terrainHeight-1); j++){
+		for(i=0; i<(m_terrainWidth-1); i++){
 			index1 = (j * m_terrainHeight) + i;
 			index2 = (j * m_terrainHeight) + (i+1);
 			index3 = ((j+1) * m_terrainHeight) + i;
@@ -782,27 +757,9 @@ void TerrainClass::MidPoint(float ranMax){
 		}
 	}
 }
-void TerrainClass::Particle(int index){
-	static float size = 10.0f;
-	if(m_heightMap[index].y != 0){
-		size -= 0.05f;
-		switch(rand()%4){
-		case 0: Particle(index+m_terrainHeight); break;
-		case 1:	Particle(index-m_terrainHeight); break;
-		case 2: Particle(index+1); break;
-		case 3: Particle(index-1); break;
-		}
-	}else{
-		m_heightMap[index].y += size;
-	}
-}
-int createIndex(int size, int i, int j){
-	return (size * i) + j;
-}
-signed char scrand(signed char r = 4) {
-	return (-r + 2 * (rand() % r)); 
-}
-signed char** mdp(signed char** base, unsigned base_n, signed char r) {
+
+
+signed char** TerrainClass::mdp(signed char** base, unsigned base_n, signed char r) {
 	size_t n = (2 * base_n) - 1;
 
 	signed char** map = new signed char*[n];
@@ -846,8 +803,8 @@ signed char** mdp(signed char** base, unsigned base_n, signed char r) {
 	// 0 1 0
 	// 1 0 1
 	// 0 1 0
-	for (size_t i = 0; i < n; ++i) {
-		for (size_t j = (i % 2 == 0); j < n; j += 2) {
+	for (size_t i = 0; i < n; ++i){
+		for (size_t j = (i % 2 == 0); j < n; j += 2){
 			signed char& map_ij = map[i][j];
 
 			// get surrounding values
@@ -888,10 +845,10 @@ void TerrainClass::MPD(){
 		}
 	}
 
-	for (unsigned i = 1; i < 8; ++i){ 
+	for(unsigned i = 1; i < 8; ++i){ 
 		final = mdp(final, n,  16/ i);
 	}
-	for (size_t i = 0; i < n-1; ++i) {
+	for(size_t i = 0; i < n-1; ++i) {
 		for (size_t j = 0; j < n-1; ++j) {
 			m_heightMap[(i * (n-1)) + j].y = final[i][j];
 		}
@@ -946,7 +903,7 @@ int TerrainClass::terrainIterateParticleDeposition( int numIt, bool up )
 {
 	int x,z,i,dir;
 
-	if (m_heightMap == NULL){
+	if(m_heightMap == NULL){
 		return 0;
 	}
 	x = rand() % m_terrainWidth;
@@ -957,7 +914,7 @@ int TerrainClass::terrainIterateParticleDeposition( int numIt, bool up )
 			z = rand() % m_terrainHeight;
 		}
 	}
-	for (i=0; i < numIt; i++){
+	for(i=0; i < numIt; i++){
 		dir = rand() % 4;
 
 		if (dir == 2){
@@ -1026,15 +983,13 @@ void TerrainClass::GenerateSinCos(int index)
 {
 	//loop through the terrain and set the heights how we want. This is where we generate the terrain
 	//in this case I will run a sin-wave through the terrain in one axis.
-	float sinValue = (rand()%12)+1;
+	float sinValue = float(rand()%12)+1;
 	float cosValue = (((float(rand()%200))/10)-10);
 	float sinMulti = (((float(rand()%100))/10)-5);
-	float cosMulti = (((float(rand()%50))/10)-2.5);
+	float cosMulti = float(((float(rand()%50))/10)-2.5);
 	if(cosValue == 0)	cosValue = 1;
- 	for(int j=0; j<m_terrainHeight; j++)
-	{
-		for(int i=0; i<m_terrainWidth; i++)
-		{			
+ 	for(int j=0; j<m_terrainHeight; j++){
+		for(int i=0; i<m_terrainWidth; i++){			
 			index = (m_terrainHeight * j) + i;
 
 			m_heightMap[index].x = (float)i;
@@ -1043,11 +998,9 @@ void TerrainClass::GenerateSinCos(int index)
 		}
 	}
 		
-	for(int i=0; i<m_terrainWidth; i++)
-	{	
+	for(int i=0; i<m_terrainWidth; i++){	
 		cosValue = (((float(rand()%200))/10)-10);
-		for(int j=0; j<m_terrainHeight; j++)
-		{	
+		for(int j=0; j<m_terrainHeight; j++){	
 			index = (m_terrainWidth * i) + j;
 
 			m_heightMap[index].x = (float)j;
@@ -1058,16 +1011,15 @@ void TerrainClass::GenerateSinCos(int index)
 }
 
 void TerrainClass::Water(){
-	static float mWaveTime = 1/(2 * sqrt(2.0f));
-	float newVal = 0.0f;
-	
+	static const float WaveAndTime = mWave*mWave*mWaveTime*mWaveTime;
+	static const float CurrentWaveAndTime = 2-(4*WaveAndTime);
 	for(int i = 1; i<m_terrainWidth-1; i++){
 		for(int j = 1; j<m_terrainWidth-1; j++){
 			int index = (m_terrainWidth * j) + i;
-			newVal = (2-(4*mWave*mWave*mWaveTime*mWaveTime))*m_heightMap[index].y;
+			float newVal = CurrentWaveAndTime*m_heightMap[index].y;
 			newVal-= m_heightMap[index].prevY;
 			float sum = ValuesAroundPoint(i,j);
-			newVal+= (mWave*mWave*mWaveTime*mWaveTime)*sum;
+			newVal+= WaveAndTime*sum;
 			m_heightMap[index].nextY = newVal;
 		}
 	}
@@ -1084,8 +1036,8 @@ void TerrainClass::UpdateWaterValues(){
 }
 float TerrainClass::ValuesAroundPoint(int x, int z){
 	float sum = 0.0f;
-	sum += m_heightMap[(m_terrainWidth * ( z-1 ) ) + x].y;
-	sum += m_heightMap[(m_terrainWidth * ( z+1 ) ) + x].y;
+	sum += m_heightMap[(m_terrainWidth * (z-1) ) + x].y;
+	sum += m_heightMap[(m_terrainWidth * (z+1) ) + x].y;
 	sum += m_heightMap[(m_terrainWidth * z) + x-1].y;
 	sum += m_heightMap[(m_terrainWidth * z) + x+1].y;
 	return sum;

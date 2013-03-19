@@ -70,13 +70,17 @@ private:
 	void GenerateSinCos(int index);
 	float ValuesAroundPoint(int x, int z);
 	void UpdateWaterValues();
+	inline int createIndex(int size, int i, int j){ return (size * i) + j;}
+	inline signed char scrand(signed char r = 4) {return (-r + 2 * (rand() % r)); }
+	signed char** mdp(signed char** base, unsigned base_n, signed char r);
 private:
 	bool m_terrainGeneratedToggle;
 	int m_terrainWidth, m_terrainHeight;
 	int m_vertexCount, m_indexCount;
 	ID3D11Buffer *m_vertexBuffer, *m_indexBuffer;
 	HeightMapType* m_heightMap;
-	float mWave; 
+	float mWave;
+	float mWaveTime;
 };
 
 #endif

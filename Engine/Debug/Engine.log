@@ -1,13 +1,10 @@
-﻿Build started 3/19/2013 4:54:20 PM.
+﻿Build started 3/19/2013 10:59:19 PM.
      1>Project "C:\Users\Jake\Documents\Visual Studio 2010\Projects\Engine\Engine\Engine.vcxproj" on node 2 (build target(s)).
      1>InitializeBuildStatus:
          Creating "Debug\Engine.unsuccessfulbuild" because "AlwaysCreate" was specified.
        ClCompile:
          c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /I"C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include" /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _WINDOWS /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc100.pdb" /Gd /TP /analyze- /errorReport:prompt terrainclass.cpp
          terrainclass.cpp
-     1>c:\users\jake\documents\visual studio 2010\projects\engine\engine\terrainclass.cpp(155): warning C4101: 'index' : unreferenced local variable
-     1>c:\users\jake\documents\visual studio 2010\projects\engine\engine\terrainclass.cpp(1029): warning C4244: 'initializing' : conversion from 'int' to 'float', possible loss of data
-     1>c:\users\jake\documents\visual studio 2010\projects\engine\engine\terrainclass.cpp(1032): warning C4244: 'initializing' : conversion from 'double' to 'float', possible loss of data
        ManifestResourceCompile:
          All outputs are up-to-date.
        Link:
