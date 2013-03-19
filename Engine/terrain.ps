@@ -24,6 +24,7 @@ struct PixelInputType
 {
     float4 position : SV_POSITION;
 	float3 normal : NORMAL;
+	float4  hColor : HCOLOR;
 };
 
 
@@ -51,7 +52,7 @@ float4 TerrainPixelShader(PixelInputType input) : SV_TARGET
         // Determine the final diffuse color based on the diffuse color and the amount of light intensity.
         color += (diffuseColor * lightIntensity);
     }
-
+	color += input.hColor;
     // Saturate the final light color.
     color = saturate(color);
 

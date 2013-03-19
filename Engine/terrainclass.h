@@ -37,6 +37,7 @@ public:
 	{ 
 		float x, y, z;
 		float nx, ny, nz;
+		float prevY, nextY;
 	};
 	TerrainClass();
 	TerrainClass(const TerrainClass&);
@@ -51,6 +52,7 @@ public:
 	int  GetIndexCount();
 	void MidPoint(float);
 	void Particle(int index);
+	void Water();
 private:
 	bool LoadHeightMap(char*);
 	void NormalizeHeightMap();
@@ -66,12 +68,15 @@ private:
 	void smooth(float k);
 	void depositMinus( int x, int z);
 	void GenerateSinCos(int index);
+	float ValuesAroundPoint(int x, int z);
+	void UpdateWaterValues();
 private:
 	bool m_terrainGeneratedToggle;
 	int m_terrainWidth, m_terrainHeight;
 	int m_vertexCount, m_indexCount;
 	ID3D11Buffer *m_vertexBuffer, *m_indexBuffer;
 	HeightMapType* m_heightMap;
+	float mWave; 
 };
 
 #endif
