@@ -10,6 +10,61 @@
       <Platform>Win32</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Source\applicationclass.h" />
+    <ClInclude Include="Source\cameraclass.h" />
+    <ClInclude Include="Source\convolutionshaderclass.h" />
+    <ClInclude Include="Source\cpuclass.h" />
+    <ClInclude Include="Source\d3dclass.h" />
+    <ClInclude Include="Source\fluidclass.h" />
+    <ClInclude Include="Source\fluidshaderclass.h" />
+    <ClInclude Include="Source\fontclass.h" />
+    <ClInclude Include="Source\fontshaderclass.h" />
+    <ClInclude Include="Source\fpsclass.h" />
+    <ClInclude Include="Source\inputclass.h" />
+    <ClInclude Include="Source\lightclass.h" />
+    <ClInclude Include="Source\positionclass.h" />
+    <ClInclude Include="Source\rendertextureclass.h" />
+    <ClInclude Include="Source\systemclass.h" />
+    <ClInclude Include="Source\terrainclass.h" />
+    <ClInclude Include="Source\terrainshaderclass.h" />
+    <ClInclude Include="Source\textclass.h" />
+    <ClInclude Include="Source\textureclass.h" />
+    <ClInclude Include="Source\timerclass.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Source\applicationclass.cpp" />
+    <ClCompile Include="Source\cameraclass.cpp" />
+    <ClCompile Include="Source\convolutionshaderclass.cpp" />
+    <ClCompile Include="Source\cpuclass.cpp" />
+    <ClCompile Include="Source\d3dclass.cpp" />
+    <ClCompile Include="Source\fluidclass.cpp" />
+    <ClCompile Include="Source\fluidshaderclass.cpp" />
+    <ClCompile Include="Source\fontclass.cpp" />
+    <ClCompile Include="Source\fontshaderclass.cpp" />
+    <ClCompile Include="Source\fpsclass.cpp" />
+    <ClCompile Include="Source\inputclass.cpp" />
+    <ClCompile Include="Source\lightclass.cpp" />
+    <ClCompile Include="Source\main.cpp" />
+    <ClCompile Include="Source\positionclass.cpp" />
+    <ClCompile Include="Source\rendertextureclass.cpp" />
+    <ClCompile Include="Source\systemclass.cpp" />
+    <ClCompile Include="Source\terrainclass.cpp" />
+    <ClCompile Include="Source\terrainshaderclass.cpp" />
+    <ClCompile Include="Source\textclass.cpp" />
+    <ClCompile Include="Source\textureclass.cpp" />
+    <ClCompile Include="Source\timerclass.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Shader\convolution.ps" />
+    <None Include="Shader\convolution.vs" />
+    <None Include="Shader\fluid.ps" />
+    <None Include="Shader\fluid.vs" />
+    <None Include="Shader\font.ps" />
+    <None Include="Shader\font.vs" />
+    <None Include="Shader\terrain.ps" />
+    <None Include="Shader\terrain.vs" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{CC8EB8E1-1A10-4345-88B7-C839B29AF7FB}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
@@ -77,55 +132,6 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClCompile Include="applicationclass.cpp" />
-    <ClCompile Include="cameraclass.cpp" />
-    <ClCompile Include="convolutionshaderclass.cpp" />
-    <ClCompile Include="cpuclass.cpp" />
-    <ClCompile Include="d3dclass.cpp" />
-    <ClCompile Include="fontclass.cpp" />
-    <ClCompile Include="fontshaderclass.cpp" />
-    <ClCompile Include="fpsclass.cpp" />
-    <ClCompile Include="inputclass.cpp" />
-    <ClCompile Include="lightclass.cpp" />
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="positionclass.cpp" />
-    <ClCompile Include="rendertextureclass.cpp" />
-    <ClCompile Include="systemclass.cpp" />
-    <ClCompile Include="terrainclass.cpp" />
-    <ClCompile Include="terrainshaderclass.cpp" />
-    <ClCompile Include="textclass.cpp" />
-    <ClCompile Include="textureclass.cpp" />
-    <ClCompile Include="timerclass.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="applicationclass.h" />
-    <ClInclude Include="cameraclass.h" />
-    <ClInclude Include="convolutionshaderclass.h" />
-    <ClInclude Include="cpuclass.h" />
-    <ClInclude Include="d3dclass.h" />
-    <ClInclude Include="fontclass.h" />
-    <ClInclude Include="fontshaderclass.h" />
-    <ClInclude Include="fpsclass.h" />
-    <ClInclude Include="inputclass.h" />
-    <ClInclude Include="lightclass.h" />
-    <ClInclude Include="positionclass.h" />
-    <ClInclude Include="rendertextureclass.h" />
-    <ClInclude Include="systemclass.h" />
-    <ClInclude Include="terrainclass.h" />
-    <ClInclude Include="terrainshaderclass.h" />
-    <ClInclude Include="textclass.h" />
-    <ClInclude Include="textureclass.h" />
-    <ClInclude Include="timerclass.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="convolution.ps" />
-    <None Include="convolution.vs" />
-    <None Include="font.ps" />
-    <None Include="font.vs" />
-    <None Include="terrain.ps" />
-    <None Include="terrain.vs" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
