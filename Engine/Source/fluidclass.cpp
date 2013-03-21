@@ -72,7 +72,7 @@ bool FluidClass::InitializeTerrain(ID3D11Device* device, int terrainWidth, int t
 	for(int j=m_terrainHeight/2+20; j<m_terrainHeight/2+25; j++){
 		for(int i=m_terrainWidth/2+20; i<m_terrainWidth/2+25; i++){			
 			index = (m_terrainHeight * j) + i;
-			m_heightMap[index].y = 0.5f;
+			m_heightMap[index].y = 1.5f;
 
 		}
 	}
