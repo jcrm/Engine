@@ -29,6 +29,8 @@ const float SCREEN_NEAR = 0.1f;
 #include "textclass.h"
 #include "terrainshaderclass.h"
 #include "lightclass.h"
+#include "fluidclass.h"
+#include "fluidshaderclass.h"
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -54,6 +56,7 @@ private:
 	D3DClass* m_Direct3D;
 	CameraClass* m_Camera;
 	TerrainClass* m_Terrain;
+	FluidClass* mFluid;
 	TimerClass* m_Timer;
 	PositionClass* m_Position;
 	FpsClass* m_Fps;
@@ -61,6 +64,7 @@ private:
 	FontShaderClass* m_FontShader;
 	TextClass* m_Text;
 	TerrainShaderClass* m_TerrainShader;
+	FluidShaderClass* mFluidShader;
 	LightClass* m_Light;
 };
 

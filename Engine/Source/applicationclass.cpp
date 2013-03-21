@@ -10,6 +10,7 @@ ApplicationClass::ApplicationClass()
 	m_Direct3D = 0;
 	m_Camera = 0;
 	m_Terrain = 0;
+	mFluid = 0;
 	m_Timer = 0;
 	m_Position = 0;
 	m_Fps = 0;
@@ -17,6 +18,7 @@ ApplicationClass::ApplicationClass()
 	m_FontShader = 0;
 	m_Text = 0;
 	m_TerrainShader = 0;
+	mFluidShader = 0;
 	m_Light = 0;
 }
 
@@ -102,6 +104,17 @@ bool ApplicationClass::Initialize(HINSTANCE hinstance, HWND hwnd, int screenWidt
 	if(!result)
 	{
 		MessageBox(hwnd, L"Could not initialize the terrain object.", L"Error", MB_OK);
+		return false;
+	}
+
+	mFluid = new FluidClass;
+	if(!mFluid){
+		return false;
+	}
+
+	result = mFluid->InitializeTerrain(m_Direct3D->GetDevice(), 129, 129);   //initialise the flat terrain.
+	if(!result){
+		MessageBox(hwnd, L"Could not initialize the fluid object.", L"Error", MB_OK);
 		return false;
 	}
 
@@ -206,6 +219,20 @@ bool ApplicationClass::Initialize(HINSTANCE hinstance, HWND hwnd, int screenWidt
 		return false;
 	}
 
+	mFluidShader = new FluidShaderClass;
+	if(!mFluidShader)
+	{
+		return false;
+	}
+
+	// Initialize the terrain shader object.
+	result = mFluidShader->Initialize(m_Direct3D->GetDevice(), hwnd);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the fluid shader object.", L"Error", MB_OK);
+		return false;
+	}
+
 	// Create the light object.
 	m_Light = new LightClass;
 	if(!m_Light)
@@ -238,7 +265,12 @@ void ApplicationClass::Shutdown()
 		delete m_TerrainShader;
 		m_TerrainShader = 0;
 	}
-
+	if(mFluidShader)
+	{
+		mFluidShader->Shutdown();
+		delete mFluidShader;
+		mFluidShader = 0;
+	}
 	// Release the text object.
 	if(m_Text)
 	{
@@ -291,7 +323,12 @@ void ApplicationClass::Shutdown()
 		delete m_Terrain;
 		m_Terrain = 0;
 	}
-
+	if(mFluid)
+	{
+		mFluid->Shutdown();
+		delete mFluid;
+		mFluid = 0;
+	}
 	// Release the camera object.
 	if(m_Camera)
 	{
@@ -362,7 +399,7 @@ bool ApplicationClass::Frame()
 	{
 		return false;
 	}
-
+	mFluid->GenerateHeightMap(m_Direct3D->GetDevice());
 	// Render the graphics.
 	result = RenderGraphics();
 	if(!result)
@@ -385,7 +422,7 @@ bool ApplicationClass::HandleInput(float frameTime)
 
 	// Handle the input.
 	keyDown = m_Input->IsSpacePressed();
-	m_Terrain->GenerateHeightMap(m_Direct3D->GetDevice(), keyDown);	
+	m_Terrain->GenerateHeightMap(m_Direct3D->GetDevice(), keyDown);
 
 	keyDown = m_Input->IsLeftPressed();
 	m_Position->TurnLeft(keyDown);
@@ -455,9 +492,16 @@ bool ApplicationClass::RenderGraphics()
 	m_Direct3D->GetProjectionMatrix(projectionMatrix);
 	m_Direct3D->GetOrthoMatrix(orthoMatrix);
 
+	mFluid->Render(m_Direct3D->GetDeviceContext());
+	result = mFluidShader->Render(m_Direct3D->GetDeviceContext(), mFluid->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, 
+									m_Light->GetAmbientColor(), m_Light->GetDiffuseColor(), m_Light->GetDirection());
+	if(!result)
+	{
+		return false;
+	}
+
 	// Render the terrain buffers.
 	m_Terrain->Render(m_Direct3D->GetDeviceContext());
-
 	// Render the terrain using the terrain shader.
 	result = m_TerrainShader->Render(m_Direct3D->GetDeviceContext(), m_Terrain->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, 
 									 m_Light->GetAmbientColor(), m_Light->GetDiffuseColor(), m_Light->GetDirection());
@@ -465,7 +509,6 @@ bool ApplicationClass::RenderGraphics()
 	{
 		return false;
 	}
-
 	// Turn off the Z buffer to begin all 2D rendering.
 	m_Direct3D->TurnZBufferOff();
 		
