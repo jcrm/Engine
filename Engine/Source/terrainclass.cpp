@@ -45,9 +45,9 @@ bool TerrainClass::InitializeTerrain(ID3D11Device* device, int terrainWidth, int
 		for(int i=0; i<m_terrainWidth; i++){			
 			index = (m_terrainHeight * j) + i;
 
-			m_heightMap[index].x = (float)i+(m_terrainWidth/2);
+			m_heightMap[index].x = (float)(i*2)+(m_terrainWidth/2);
 			m_heightMap[index].y = (float)height;
-			m_heightMap[index].z = (float)j;
+			m_heightMap[index].z = (float)(j*2)-(m_terrainWidth/2);
 		}
 	}
 	//even though we are generating a flat terrain, we still need to normalize it. 
@@ -137,15 +137,15 @@ bool TerrainClass::GenerateHeightMap(ID3D11Device* device, bool keydown)
 
 	if(keydown&&(!m_terrainGeneratedToggle)){
 		ShutdownBuffers();
-		//MPD();
-		
+
+		MPD();
 		for (int i = 0; i <12; i++){
-			terrainIterateParticleDeposition(1000, true);
+			terrainIterateParticleDeposition(3000, true);
 		}
 		for (int i = 0; i <6; i++){
-			terrainIterateParticleDeposition(1000, false);
+			terrainIterateParticleDeposition(2000, false);
 		}
-		smooth(0.2f);
+		smooth(0.4f);
 		
 		result = CalculateNormals();
 		if(!result){
@@ -780,10 +780,10 @@ signed char** TerrainClass::mdp(signed char** base, unsigned base_n, signed char
 			map_ij = (a + b + c + d) / 4;
 
 			int rv = scrand(r);
-			if (map_ij + rv > 16 )
-				map_ij = 16;
-			else if(map_ij + rv < -4)
-				map_ij = -4;
+			if (map_ij + rv > 32 )
+				map_ij = 32;
+			else if(map_ij + rv < -8)
+				map_ij = -8;
 			else
 				map_ij += rv;
 		}
@@ -812,10 +812,10 @@ signed char** TerrainClass::mdp(signed char** base, unsigned base_n, signed char
 			else map_ij = (a + b + c + d) / 4;
 
 			int rv = scrand(r);
-			if (map_ij + rv > 16 )
-				map_ij = 16;
-			else if(map_ij + rv < -4)
-				map_ij = -4;
+			if (map_ij + rv > 32 )
+				map_ij = 32;
+			else if(map_ij + rv < -8)
+				map_ij = -8;
 			else
 				map_ij += rv;
 		}
@@ -927,13 +927,13 @@ int TerrainClass::terrainIterateParticleDeposition( int numIt, bool up )
 		int sticky = rand()%5;
 		if(up == true){
 			if(sticky == 0){
-				m_heightMap[x * m_terrainHeight + z].y += (rand()%40)/10 + (rand()%40)/10;
+				m_heightMap[x * m_terrainHeight + z].y += (rand()%40)/10 + (rand()%80)/10;
 			}else{
 				depositPlus(x,z);
 			}
 		}else{
 			if(sticky ==0){
-				m_heightMap[x * m_terrainHeight + z].y -= (rand()%40)/10 + (rand()%40)/10;
+				m_heightMap[x * m_terrainHeight + z].y -= (rand()%40)/10 + (rand()%80)/10;
 			}else{
 				depositMinus(x,z);
 			}
