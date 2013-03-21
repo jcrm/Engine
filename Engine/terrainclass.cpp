@@ -58,7 +58,21 @@ bool TerrainClass::InitializeTerrain(ID3D11Device* device, int terrainWidth, int
 	for(int j=m_terrainHeight/2-2; j<m_terrainHeight/2+2; j++){
 		for(int i=m_terrainWidth/2-2; i<m_terrainWidth/2+2; i++){			
 			index = (m_terrainHeight * j) + i;
-			m_heightMap[index].y = -2.0f;
+			m_heightMap[index].y = 2.0f;
+
+		}
+	}
+	for(int j=m_terrainHeight/2-10; j<m_terrainHeight/2-5; j++){
+		for(int i=m_terrainWidth/2-10; i<m_terrainWidth/2-5; i++){			
+			index = (m_terrainHeight * j) + i;
+			m_heightMap[index].y = -5.0f;
+
+		}
+	}
+	for(int j=m_terrainHeight/2+20; j<m_terrainHeight/2+25; j++){
+		for(int i=m_terrainWidth/2+20; i<m_terrainWidth/2+25; i++){			
+			index = (m_terrainHeight * j) + i;
+			m_heightMap[index].y = 0.5f;
 
 		}
 	}
@@ -114,6 +128,7 @@ bool TerrainClass::Initialize(ID3D11Device* device, char* heightMapFilename)
 
 void TerrainClass::Shutdown()
 {
+
 	// Release the vertex and index buffer.
 	ShutdownBuffers();
 
@@ -145,7 +160,9 @@ bool TerrainClass::GenerateHeightMap(ID3D11Device* device, bool keydown)
 	//the toggle is just a bool that I use to make sure this is only called ONCE when you press a key
 	//until you release the key and start again. We don t want to be generating the terrain 500
 	//times per second. 
-	if(/*keydown&&*/(!m_terrainGeneratedToggle)){
+
+	//if(/*keydown&&*/(!m_terrainGeneratedToggle)){
+		ShutdownBuffers();
 		Water();
 		//MPD();
 		/*
@@ -169,9 +186,9 @@ bool TerrainClass::GenerateHeightMap(ID3D11Device* device, bool keydown)
 		}
 
 		m_terrainGeneratedToggle = true;
-	}else{
+	/*}else{
 		m_terrainGeneratedToggle = false;
-	}
+	}*/
 	return true;
 }
 bool TerrainClass::LoadHeightMap(char* filename)
@@ -568,7 +585,7 @@ bool TerrainClass::InitializeBuffers(ID3D11Device* device)
     vertexData.pSysMem = vertices;
 	vertexData.SysMemPitch = 0;
 	vertexData.SysMemSlicePitch = 0;
-
+	
 	// Now create the vertex buffer.
     result = device->CreateBuffer(&vertexBufferDesc, &vertexData, &m_vertexBuffer);
 	if(FAILED(result))
@@ -1035,10 +1052,11 @@ void TerrainClass::UpdateWaterValues(){
 	}
 }
 float TerrainClass::ValuesAroundPoint(int x, int z){
-	float sum = 0.0f;
-	sum += m_heightMap[(m_terrainWidth * (z-1) ) + x].y;
+	float sum = m_heightMap[(m_terrainWidth * (z-1) ) + x].y;
 	sum += m_heightMap[(m_terrainWidth * (z+1) ) + x].y;
 	sum += m_heightMap[(m_terrainWidth * z) + x-1].y;
 	sum += m_heightMap[(m_terrainWidth * z) + x+1].y;
 	return sum;
 }
+/*generate texture and do calculations*/
+/*then generate new texture based upon old data*/

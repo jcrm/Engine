@@ -58,5 +58,6 @@ PixelInputType TerrainVertexShader(VertexInputType input)
 	}else{
 		output.hColor = lerp(float4(0.32,0.2,0.09,1.0),float4(1.0,1.0,1.0,1.0),height/20);
 	}
+	output.hColor = lerp(float4(0.0,0.0,0.1,1.0),float4(0.0,0.0,1.0,1.0),height/30);
     return output;
 }
