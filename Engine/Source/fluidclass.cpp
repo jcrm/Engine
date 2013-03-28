@@ -156,7 +156,7 @@ bool FluidClass::GenerateHeightMap( ID3D11Device* device )
 	//times per second. 
 
 	ReleaseBuffers();
-	Water();
+	DiminishWater();
 	result = CalculateNormals();
 	if(!result){
 		return false;
@@ -698,3 +698,24 @@ float FluidClass::ValuesAroundPoint(int x, int z){
 }
 /*generate texture and do calculations*/
 /*then generate new texture based upon old data*/
+
+void FluidClass::DiminishWater(){
+	static const float UDeltaTime = mWaveTime * 0.05;
+	static const float WaveAndTime = mWave*mWave*mWaveTime*mWaveTime;
+	static const float CurrentWaveAndTime = ((4-(8*WaveAndTime))/(UDeltaTime+2));
+	static const float PrevTime = ((UDeltaTime-2)/(UDeltaTime+2));
+	for(int i = 1; i<m_terrainWidth-1; i++){
+		for(int j = 1; j<m_terrainWidth-1; j++){
+			int index = (m_terrainWidth * j) + i;
+			float newVal = CurrentWaveAndTime*m_heightMap[index].y;
+			newVal+= PrevTime*m_heightMap[index].prevY;
+			float sum = ValuesAroundPoint(i,j);
+			newVal+= ((2*WaveAndTime)/(UDeltaTime+2))*sum;
+			m_heightMap[index].nextY = newVal;
+		}
+	}
+	UpdateWaterValues();
+}
+void FluidClass::AddWater(int x, int z, float height){
+	m_heightMap[(m_terrainWidth * x) + z].y+=height;
+}

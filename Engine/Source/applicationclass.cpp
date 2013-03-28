@@ -734,6 +734,12 @@ bool ApplicationClass::HandleInput(float frameTime)
 	bool keyDown, result;
 	float posX, posY, posZ, rotX, rotY, rotZ;
 
+	keyDown = m_Input->IsHPressed();
+	if(keyDown){
+		for(int i = 0; i <5; i++){
+			mFluid->AddWater(rand()%120+1,rand()%120+1, float(rand()%20)/10);
+		}
+	}
 
 	// Set the frame time for calculating the updated position.
 	m_Position->SetFrameTime(frameTime);

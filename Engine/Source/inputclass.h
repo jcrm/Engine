@@ -50,12 +50,12 @@ public:
 	bool IsZPressed();
 	bool IsPgUpPressed();
 	bool IsPgDownPressed();
+	bool IsHPressed();
 
 private:
 	bool ReadKeyboard();
 	bool ReadMouse();
 	void ProcessInput();
-
 private:
 	IDirectInput8* m_directInput;
 	IDirectInputDevice8* m_keyboard;

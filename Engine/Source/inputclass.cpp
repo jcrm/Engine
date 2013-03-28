@@ -346,3 +346,13 @@ bool InputClass::IsPgDownPressed()
 
 	return false;
 }
+bool InputClass::IsHPressed()
+{
+	// Do a bitwise and on the keyboard state to check if the key is currently being pressed.
+	if(m_keyboardState[DIK_H] & 0x80)
+	{
+		return true;
+	}
+
+	return false;
+}

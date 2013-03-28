@@ -51,6 +51,7 @@ public:
 	void Water();
 
 	inline int  GetIndexCount() {return m_indexCount;}
+	void AddWater(int x, int z, float height);
 private:
 	bool LoadHeightMap(char*);
 	void NormalizeHeightMap();
@@ -64,6 +65,7 @@ private:
 	void UpdateWaterValues();
 	inline int createIndex(int size, int i, int j){ return (size * i) + j;}
 	inline signed char scrand(signed char r = 4) {return (-r + 2 * (rand() % r)); }
+	void DiminishWater();
 private:
 	bool m_terrainGeneratedToggle;
 	int m_terrainWidth, m_terrainHeight;
