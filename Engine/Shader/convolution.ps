@@ -20,6 +20,7 @@ cbuffer ConvolutuionBuffer
 	float weight6;
 	float weight7;
 	float weight8;
+	float3 padding;
 };
 
 //////////////
@@ -38,7 +39,6 @@ struct PixelInputType
 	float2 texCoord7 : TEXCOORD7;
 	float2 texCoord8 : TEXCOORD8;
 	float2 texCoord9 : TEXCOORD9;
-	matrix convolution: CONVOLUTION;
 };
 
 

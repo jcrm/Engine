@@ -31,6 +31,14 @@ const float SCREEN_NEAR = 0.1f;
 #include "lightclass.h"
 #include "fluidclass.h"
 #include "fluidshaderclass.h"
+#include "textureshaderclass.h"
+#include "rendertextureclass.h"
+#include "modelclass.h"
+#include "verticalblurshaderclass.h"
+#include "horizontalblurshaderclass.h"
+#include "orthowindowclass.h"
+#include "convolutionshaderclass.h"
+#include "ShaderClass.h"
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -56,6 +64,7 @@ private:
 	D3DClass* m_Direct3D;
 	CameraClass* m_Camera;
 	TerrainClass* m_Terrain;
+	ModelClass* m_Model[4];
 	FluidClass* mFluid;
 	TimerClass* m_Timer;
 	PositionClass* m_Position;
@@ -66,6 +75,13 @@ private:
 	TerrainShaderClass* m_TerrainShader;
 	FluidShaderClass* mFluidShader;
 	LightClass* m_Light;
+	RenderTextureClass *m_RenderTexture, *m_DownSampleTexure, *m_HorizontalBlurTexture, *m_VerticalBlurTexture, *m_UpSampleTexure, *m_ConvolutionTexture;
+	OrthoWindowClass *m_SmallWindow, *m_FullScreenWindow;
+	TextureShaderClass* m_TextureShader;
+	ConvolutionShaderClass* m_ConvolutionShader;
+	VerticalBlurShaderClass* m_VerticalBlurShader;
+	HorizontalBlurShaderClass* m_HorizontalBlurShader;
+
 };
 
 #endif

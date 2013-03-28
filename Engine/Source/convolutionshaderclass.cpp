@@ -32,7 +32,7 @@ bool ConvolutionShaderClass::Initialize(ID3D11Device* device, HWND hwnd)
 
 
 	// Initialize the vertex and pixel shaders.
-	result = InitializeShader(device, hwnd, L"convolution.vs", L"convolution.ps");
+	result = InitializeShader(device, hwnd, L"Shader/convolution.vs", L"Shader/convolution.ps");
 	if(!result)
 	{
 		return false;
@@ -246,7 +246,6 @@ bool ConvolutionShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, W
 	{
 		return false;
 	}
-
 	return true;
 }
 
@@ -333,11 +332,6 @@ void ConvolutionShaderClass::OutputShaderErrorMessage(ID3D10Blob* errorMessage, 
 
 	return;
 }
-/*
-float RandF(float min, float max){
-	float randFloat  = min + float(rand()/ (float(RAND_MAX) / (max-min)));
-	return randFloat;
-}*/
 bool ConvolutionShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext, D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix, 
 												  D3DXMATRIX projectionMatrix, ID3D11ShaderResourceView* texture, float screenHeight, float screenWidth)
 {
@@ -412,18 +406,18 @@ bool ConvolutionShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceCont
 	dataPtr3 = (ConvolutuionBufferType*)mappedResource.pData;
 
 	// Copy the data into the constant buffer.
-	dataPtr3->weight0 = 1;
-	dataPtr3->weight1 = 1;
-	dataPtr3->weight2 = 1;
+	dataPtr3->weight0 = -1;
+	dataPtr3->weight1 = -2;
+	dataPtr3->weight2 = -1;
 
 	dataPtr3->weight3 = 0;
 	dataPtr3->weight4 = 0;
 	dataPtr3->weight5 = 0;
 	
-	dataPtr3->weight6 = -1;
-	dataPtr3->weight7 = -1;
-	dataPtr3->weight8 = -1;
-
+	dataPtr3->weight6 = 1;
+	dataPtr3->weight7 = 2;
+	dataPtr3->weight8 = 1;
+	dataPtr3->padding = D3DXVECTOR3(0.0,0.0,0.0);
 	// Unlock the constant buffer.
 	deviceContext->Unmap(m_convolutionBuffer, 0);
 

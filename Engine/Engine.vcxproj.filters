@@ -13,18 +13,6 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Shader Files\Convolution Files">
-      <UniqueIdentifier>{d5824d82-cef7-4f89-bda3-0e1f2c342336}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Shader Files\Font Files">
-      <UniqueIdentifier>{b8ee1a23-9dbb-4c88-b387-294a8e3e4a3e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Shader Files\Terrain Files">
-      <UniqueIdentifier>{82af73c2-2bd6-463c-8000-cbef5230fb69}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Shader Files\Fluid Files">
-      <UniqueIdentifier>{5b46be28-2f8d-41c9-959c-b04d98efc9c5}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\systemclass.h">
@@ -85,6 +73,24 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\rendertextureclass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\horizontalblurshaderclass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\orthowindowclass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ShaderClass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\verticalblurshaderclass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\modelclass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\textureshaderclass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -152,31 +158,67 @@
     <ClCompile Include="Source\timerclass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source\horizontalblurshaderclass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\orthowindowclass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\ShaderClass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\verticalblurshaderclass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\modelclass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\textureshaderclass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Shader\convolution.ps">
-      <Filter>Shader Files\Convolution Files</Filter>
+    <None Include="Shader\terrain.ps">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="Shader\texture.ps">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="Shader\verticalblur.ps">
+      <Filter>Shader Files</Filter>
     </None>
     <None Include="Shader\convolution.vs">
-      <Filter>Shader Files\Convolution Files</Filter>
-    </None>
-    <None Include="Shader\font.ps">
-      <Filter>Shader Files\Font Files</Filter>
-    </None>
-    <None Include="Shader\font.vs">
-      <Filter>Shader Files\Font Files</Filter>
-    </None>
-    <None Include="Shader\terrain.ps">
-      <Filter>Shader Files\Terrain Files</Filter>
-    </None>
-    <None Include="Shader\terrain.vs">
-      <Filter>Shader Files\Terrain Files</Filter>
-    </None>
-    <None Include="Shader\fluid.ps">
-      <Filter>Shader Files\Fluid Files</Filter>
+      <Filter>Shader Files</Filter>
     </None>
     <None Include="Shader\fluid.vs">
-      <Filter>Shader Files\Fluid Files</Filter>
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="Shader\font.vs">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="Shader\horizontalblur.vs">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="Shader\terrain.vs">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="Shader\texture.vs">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="Shader\verticalblur.vs">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="Shader\convolution.ps">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="Shader\fluid.ps">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="Shader\font.ps">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="Shader\horizontalblur.ps">
+      <Filter>Shader Files</Filter>
     </None>
   </ItemGroup>
 </Project>

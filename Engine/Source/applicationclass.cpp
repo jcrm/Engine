@@ -20,6 +20,22 @@ ApplicationClass::ApplicationClass()
 	m_TerrainShader = 0;
 	mFluidShader = 0;
 	m_Light = 0;
+	m_TextureShader = 0;
+	m_HorizontalBlurShader = 0;
+	m_VerticalBlurShader = 0;
+	m_RenderTexture = 0;
+	m_DownSampleTexure = 0;
+	m_HorizontalBlurTexture = 0;
+	m_VerticalBlurTexture = 0;
+	m_UpSampleTexure = 0;
+	m_SmallWindow = 0;
+	m_FullScreenWindow = 0;
+	m_ConvolutionShader = 0;
+	m_ConvolutionTexture = 0;
+	m_Model[0] = 0;
+	m_Model[1] = 0;
+	m_Model[2] = 0;
+	m_Model[3] = 0;
 }
 
 
@@ -41,7 +57,12 @@ bool ApplicationClass::Initialize(HINSTANCE hinstance, HWND hwnd, int screenWidt
 	char videoCard[128];
 	int videoMemory;
 
-	
+	int downSampleWidth, downSampleHeight;
+
+	// Set the size to sample down to.
+	downSampleWidth = screenWidth / 2;
+	downSampleHeight = screenHeight / 2;
+
 	// Create the input object.  The input object will be used to handle reading the keyboard and mouse input from the user.
 	m_Input = new InputClass;
 	if(!m_Input)
@@ -90,7 +111,22 @@ bool ApplicationClass::Initialize(HINSTANCE hinstance, HWND hwnd, int screenWidt
 	cameraZ = -7.0f;
 
 	m_Camera->SetPosition(cameraX, cameraY, cameraZ);
+	for(int i = 0; i < 4; i++){
+		// Create the model object.
+		m_Model[i] = new ModelClass(float(i-2));
+		if(!m_Model)
+		{
+			return false;
+		}
 
+		// Initialize the model object.
+		result = m_Model[i]->Initialize(m_Direct3D->GetDevice(), "data/cube.txt", L"data/seafloor.dds");
+		if(!result)
+		{
+			MessageBox(hwnd, L"Could not initialize the model object.", L"Error", MB_OK);
+			return false;
+		}
+	}
 	// Create the terrain object.
 	m_Terrain = new TerrainClass;
 	if(!m_Terrain)
@@ -244,13 +280,278 @@ bool ApplicationClass::Initialize(HINSTANCE hinstance, HWND hwnd, int screenWidt
 	m_Light->SetAmbientColor(0.05f, 0.05f, 0.05f, 1.0f);
 	m_Light->SetDiffuseColor(1.0f, 1.0f, 1.0f, 1.0f);
 	m_Light->SetDirection(1.0f,0.0f, 0.0f);
+	// Create the texture shader object.
+	m_TextureShader = new TextureShaderClass;
+	if(!m_TextureShader)
+	{
+		return false;
+	}
 
+	// Initialize the texture shader object.
+	result = m_TextureShader->Initialize(m_Direct3D->GetDevice(), hwnd);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the texture shader object.", L"Error", MB_OK);
+		return false;
+	}
+
+	m_ConvolutionShader = new ConvolutionShaderClass;
+	if (!m_ConvolutionShader){
+		return false;
+	}
+	result= m_ConvolutionShader->Initialize(m_Direct3D->GetDevice(),hwnd);
+	if (!result){
+		MessageBox(hwnd, L"Could not initialize the convolution shader object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the horizontal blur shader object.
+	m_HorizontalBlurShader = new HorizontalBlurShaderClass;
+	if(!m_HorizontalBlurShader)
+	{
+		return false;
+	}
+
+	// Initialize the horizontal blur shader object.
+	result = m_HorizontalBlurShader->Initialize(m_Direct3D->GetDevice(), hwnd);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the horizontal blur shader object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the vertical blur shader object.
+	m_VerticalBlurShader = new VerticalBlurShaderClass;
+	if(!m_VerticalBlurShader)
+	{
+		return false;
+	}
+
+	// Initialize the vertical blur shader object.
+	result = m_VerticalBlurShader->Initialize(m_Direct3D->GetDevice(), hwnd);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the vertical blur shader object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the render to texture object.
+	m_RenderTexture = new RenderTextureClass;
+	if(!m_RenderTexture)
+	{
+		return false;
+	}
+
+	// Initialize the render to texture object.
+	result = m_RenderTexture->Initialize(m_Direct3D->GetDevice(), screenWidth, screenHeight, SCREEN_DEPTH, SCREEN_NEAR);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the render to texture object.", L"Error", MB_OK);
+		return false;
+	}
+	// Create the down sample render to texture object.
+	m_DownSampleTexure = new RenderTextureClass;
+	if(!m_DownSampleTexure)
+	{
+		return false;
+	}
+
+	// Initialize the down sample render to texture object.
+	result = m_DownSampleTexure->Initialize(m_Direct3D->GetDevice(), downSampleWidth, downSampleHeight, SCREEN_DEPTH, SCREEN_NEAR);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the down sample render to texture object.", L"Error", MB_OK);
+		return false;
+	}
+
+	m_ConvolutionTexture = new RenderTextureClass;
+	if (!m_ConvolutionTexture){
+		return false;
+	}
+	result = m_ConvolutionTexture->Initialize(m_Direct3D->GetDevice(), downSampleWidth, downSampleHeight, SCREEN_DEPTH, SCREEN_NEAR);
+	if (!result){
+		MessageBox(hwnd, L"Could not initialize the Convolution to texture object.", L"Error", MB_OK);		
+		return false;
+	}
+
+	// Create the horizontal blur render to texture object.
+	m_HorizontalBlurTexture = new RenderTextureClass;
+	if(!m_HorizontalBlurTexture)
+	{
+		return false;
+	}
+
+	// Initialize the horizontal blur render to texture object.
+	result = m_HorizontalBlurTexture->Initialize(m_Direct3D->GetDevice(), downSampleWidth, downSampleHeight, SCREEN_DEPTH, SCREEN_NEAR);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the horizontal blur render to texture object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the vertical blur render to texture object.
+	m_VerticalBlurTexture = new RenderTextureClass;
+	if(!m_VerticalBlurTexture)
+	{
+		return false;
+	}
+
+	// Initialize the vertical blur render to texture object.
+	result = m_VerticalBlurTexture->Initialize(m_Direct3D->GetDevice(), downSampleWidth, downSampleHeight, SCREEN_DEPTH, SCREEN_NEAR);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the vertical blur render to texture object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the up sample render to texture object.
+	m_UpSampleTexure = new RenderTextureClass;
+	if(!m_UpSampleTexure)
+	{
+		return false;
+	}
+
+	// Initialize the up sample render to texture object.
+	result = m_UpSampleTexure->Initialize(m_Direct3D->GetDevice(), screenWidth, screenHeight, SCREEN_DEPTH, SCREEN_NEAR);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the up sample render to texture object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the small ortho window object.
+	m_SmallWindow = new OrthoWindowClass;
+	if(!m_SmallWindow)
+	{
+		return false;
+	}
+
+	// Initialize the small ortho window object.
+	result = m_SmallWindow->Initialize(m_Direct3D->GetDevice(), downSampleWidth, downSampleHeight);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the small ortho window object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the full screen ortho window object.
+	m_FullScreenWindow = new OrthoWindowClass;
+	if(!m_FullScreenWindow)
+	{
+		return false;
+	}
+
+	// Initialize the full screen ortho window object.
+	result = m_FullScreenWindow->Initialize(m_Direct3D->GetDevice(), screenWidth, screenHeight);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the full screen ortho window object.", L"Error", MB_OK);
+		return false;
+	}
 	return true;
 }
 
 
 void ApplicationClass::Shutdown()
 {
+	if(m_FullScreenWindow)
+	{
+		m_FullScreenWindow->Shutdown();
+		delete m_FullScreenWindow;
+		m_FullScreenWindow = 0;
+	}
+
+	// Release the small ortho window object.
+	if(m_SmallWindow)
+	{
+		m_SmallWindow->Shutdown();
+		delete m_SmallWindow;
+		m_SmallWindow = 0;
+	}
+
+	// Release the up sample render to texture object.
+	if(m_UpSampleTexure)
+	{
+		m_UpSampleTexure->Shutdown();
+		delete m_UpSampleTexure;
+		m_UpSampleTexure = 0;
+	}
+
+	// Release the vertical blur render to texture object.
+	if(m_VerticalBlurTexture)
+	{
+		m_VerticalBlurTexture->Shutdown();
+		delete m_VerticalBlurTexture;
+		m_VerticalBlurTexture = 0;
+	}
+
+	// Release the horizontal blur render to texture object.
+	if(m_HorizontalBlurTexture)
+	{
+		m_HorizontalBlurTexture->Shutdown();
+		delete m_HorizontalBlurTexture;
+		m_HorizontalBlurTexture = 0;
+	}
+
+	// Release the down sample render to texture object.
+	if(m_DownSampleTexure)
+	{
+		m_DownSampleTexure->Shutdown();
+		delete m_DownSampleTexure;
+		m_DownSampleTexure = 0;
+	}
+
+	// Release the render to texture object.
+	if(m_RenderTexture)
+	{
+		m_RenderTexture->Shutdown();
+		delete m_RenderTexture;
+		m_RenderTexture = 0;
+	}
+	if (m_ConvolutionTexture){
+		m_ConvolutionTexture->Shutdown();
+		delete m_ConvolutionTexture;
+		m_ConvolutionTexture = 0;
+	}
+	// Release the vertical blur shader object.
+	if(m_VerticalBlurShader)
+	{
+		m_VerticalBlurShader->Shutdown();
+		delete m_VerticalBlurShader;
+		m_VerticalBlurShader = 0;
+	}
+
+	// Release the horizontal blur shader object.
+	if(m_HorizontalBlurShader)
+	{
+		m_HorizontalBlurShader->Shutdown();
+		delete m_HorizontalBlurShader;
+		m_HorizontalBlurShader = 0;
+	}
+
+	// Release the texture shader object.
+	if(m_TextureShader)
+	{
+		m_TextureShader->Shutdown();
+		delete m_TextureShader;
+		m_TextureShader = 0;
+	}
+	if (m_ConvolutionShader){
+		m_ConvolutionShader->Shutdown();
+		delete m_ConvolutionShader;
+		m_ConvolutionShader = 0;
+	}
+
+	for(int i = 0; i < 4; i++){
+		// Release the model object.
+		if(m_Model[i])
+		{
+			m_Model[i]->Shutdown();
+			delete m_Model[i];
+			m_Model[i] = 0;
+		}
+	}
+
 	// Release the light object.
 	if(m_Light)
 	{

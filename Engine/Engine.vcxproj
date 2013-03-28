@@ -21,16 +21,22 @@
     <ClInclude Include="Source\fontclass.h" />
     <ClInclude Include="Source\fontshaderclass.h" />
     <ClInclude Include="Source\fpsclass.h" />
+    <ClInclude Include="Source\horizontalblurshaderclass.h" />
     <ClInclude Include="Source\inputclass.h" />
     <ClInclude Include="Source\lightclass.h" />
+    <ClInclude Include="Source\modelclass.h" />
+    <ClInclude Include="Source\orthowindowclass.h" />
     <ClInclude Include="Source\positionclass.h" />
     <ClInclude Include="Source\rendertextureclass.h" />
+    <ClInclude Include="Source\ShaderClass.h" />
     <ClInclude Include="Source\systemclass.h" />
     <ClInclude Include="Source\terrainclass.h" />
     <ClInclude Include="Source\terrainshaderclass.h" />
     <ClInclude Include="Source\textclass.h" />
     <ClInclude Include="Source\textureclass.h" />
+    <ClInclude Include="Source\textureshaderclass.h" />
     <ClInclude Include="Source\timerclass.h" />
+    <ClInclude Include="Source\verticalblurshaderclass.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\applicationclass.cpp" />
@@ -43,17 +49,23 @@
     <ClCompile Include="Source\fontclass.cpp" />
     <ClCompile Include="Source\fontshaderclass.cpp" />
     <ClCompile Include="Source\fpsclass.cpp" />
+    <ClCompile Include="Source\horizontalblurshaderclass.cpp" />
     <ClCompile Include="Source\inputclass.cpp" />
     <ClCompile Include="Source\lightclass.cpp" />
     <ClCompile Include="Source\main.cpp" />
+    <ClCompile Include="Source\modelclass.cpp" />
+    <ClCompile Include="Source\orthowindowclass.cpp" />
     <ClCompile Include="Source\positionclass.cpp" />
     <ClCompile Include="Source\rendertextureclass.cpp" />
+    <ClCompile Include="Source\ShaderClass.cpp" />
     <ClCompile Include="Source\systemclass.cpp" />
     <ClCompile Include="Source\terrainclass.cpp" />
     <ClCompile Include="Source\terrainshaderclass.cpp" />
     <ClCompile Include="Source\textclass.cpp" />
     <ClCompile Include="Source\textureclass.cpp" />
+    <ClCompile Include="Source\textureshaderclass.cpp" />
     <ClCompile Include="Source\timerclass.cpp" />
+    <ClCompile Include="Source\verticalblurshaderclass.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Shader\convolution.ps" />
@@ -62,8 +74,14 @@
     <None Include="Shader\fluid.vs" />
     <None Include="Shader\font.ps" />
     <None Include="Shader\font.vs" />
+    <None Include="Shader\horizontalblur.ps" />
+    <None Include="Shader\horizontalblur.vs" />
     <None Include="Shader\terrain.ps" />
     <None Include="Shader\terrain.vs" />
+    <None Include="Shader\texture.ps" />
+    <None Include="Shader\texture.vs" />
+    <None Include="Shader\verticalblur.ps" />
+    <None Include="Shader\verticalblur.vs" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{CC8EB8E1-1A10-4345-88B7-C839B29AF7FB}</ProjectGuid>
@@ -94,8 +112,8 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(DXSDK_DIR)\Include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(DXSDK_DIR)\Lib\x86;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(DXSDK_DIR)include;$(FrameWorkSDKDir)\include;$(WindowsSdkDir)include;$VCInstallDir)atlmfc\include;$(VCInstallDir)include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(DXSDK_DIR)lib\x86;$(FrameworkSDKDir)\lib;$(WindowsSdkDir)lib;$(VCInstallDir)atlmfc\lib;$(VCInstallDir)lib</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -113,6 +131,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>C:\Program Files %28x86%29\Microsoft DirectX SDK %28June 2010%29\Lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
