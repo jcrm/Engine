@@ -52,6 +52,7 @@ public:
 
 	inline int  GetIndexCount() {return m_indexCount;}
 	void AddWater(int x, int z, float height);
+	void ResetWater();
 private:
 	bool LoadHeightMap(char*);
 	void NormalizeHeightMap();

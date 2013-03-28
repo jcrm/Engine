@@ -27,8 +27,6 @@ FluidClass::~FluidClass()
 
 bool FluidClass::InitializeTerrain(ID3D11Device* device, int terrainWidth, int terrainHeight)
 {
-	int index;
-	float height = 0.0;
 	bool result;
 
 	// Save the dimensions of the terrain.
@@ -42,40 +40,7 @@ bool FluidClass::InitializeTerrain(ID3D11Device* device, int terrainWidth, int t
 		return false;
 	}
 
-	// Initialize the data in the height map (flat).
-	for(int j=0; j<m_terrainHeight; j++){
-		for(int i=0; i<m_terrainWidth; i++){			
-			index = (m_terrainHeight * j) + i;
-
-			m_heightMap[index].x = (float)i-(m_terrainWidth/2);
-			m_heightMap[index].y = (float)height;
-			m_heightMap[index].z = (float)j;
-			m_heightMap[index].nextY = 0.0f;
-			m_heightMap[index].prevY = 0.0f;
-
-		}
-	}
-	for(int j=m_terrainHeight/2-2; j<m_terrainHeight/2+2; j++){
-		for(int i=m_terrainWidth/2-2; i<m_terrainWidth/2+2; i++){			
-			index = (m_terrainHeight * j) + i;
-			m_heightMap[index].y = 2.0f;
-
-		}
-	}
-	for(int j=m_terrainHeight/2-10; j<m_terrainHeight/2-5; j++){
-		for(int i=m_terrainWidth/2-10; i<m_terrainWidth/2-5; i++){			
-			index = (m_terrainHeight * j) + i;
-			m_heightMap[index].y = -5.0f;
-
-		}
-	}
-	for(int j=m_terrainHeight/2+20; j<m_terrainHeight/2+25; j++){
-		for(int i=m_terrainWidth/2+20; i<m_terrainWidth/2+25; i++){			
-			index = (m_terrainHeight * j) + i;
-			m_heightMap[index].y = 1.5f;
-
-		}
-	}
+	ResetWater();
 	//even though we are generating a flat terrain, we still need to normalize it. 
 	// Calculate the normals for the terrain data.
 	result = CalculateNormals();
@@ -700,7 +665,7 @@ float FluidClass::ValuesAroundPoint(int x, int z){
 /*then generate new texture based upon old data*/
 
 void FluidClass::DiminishWater(){
-	static const float UDeltaTime = mWaveTime * 0.05;
+	static const float UDeltaTime = mWaveTime * 0.05f;
 	static const float WaveAndTime = mWave*mWave*mWaveTime*mWaveTime;
 	static const float CurrentWaveAndTime = ((4-(8*WaveAndTime))/(UDeltaTime+2));
 	static const float PrevTime = ((UDeltaTime-2)/(UDeltaTime+2));
@@ -718,4 +683,42 @@ void FluidClass::DiminishWater(){
 }
 void FluidClass::AddWater(int x, int z, float height){
 	m_heightMap[(m_terrainWidth * x) + z].y+=height;
+}
+void FluidClass::ResetWater(){
+	int index;
+	float height = 0.0;
+	// Initialize the data in the height map (flat).
+	for(int j=0; j<m_terrainHeight; j++){
+		for(int i=0; i<m_terrainWidth; i++){			
+			index = (m_terrainHeight * j) + i;
+
+			m_heightMap[index].x = (float)i-(m_terrainWidth/2);
+			m_heightMap[index].y = (float)height;
+			m_heightMap[index].z = (float)j;
+			m_heightMap[index].nextY = 0.0f;
+			m_heightMap[index].prevY = 0.0f;
+
+		}
+	}
+	for(int j=m_terrainHeight/2-2; j<m_terrainHeight/2+2; j++){
+		for(int i=m_terrainWidth/2-2; i<m_terrainWidth/2+2; i++){			
+			index = (m_terrainHeight * j) + i;
+			m_heightMap[index].y = 2.0f;
+
+		}
+	}
+	for(int j=m_terrainHeight/2-10; j<m_terrainHeight/2-5; j++){
+		for(int i=m_terrainWidth/2-10; i<m_terrainWidth/2-5; i++){			
+			index = (m_terrainHeight * j) + i;
+			m_heightMap[index].y = -5.0f;
+
+		}
+	}
+	for(int j=m_terrainHeight/2+20; j<m_terrainHeight/2+25; j++){
+		for(int i=m_terrainWidth/2+20; i<m_terrainWidth/2+25; i++){			
+			index = (m_terrainHeight * j) + i;
+			m_heightMap[index].y = 1.5f;
+
+		}
+	}
 }

@@ -135,7 +135,6 @@ bool ApplicationClass::Initialize(HINSTANCE hinstance, HWND hwnd, int screenWidt
 	}
 
 	// Initialize the terrain object.
-//	result = m_Terrain->Initialize(m_Direct3D->GetDevice(), "Data/heightmap01.bmp");
 	result = m_Terrain->InitializeTerrain(m_Direct3D->GetDevice(), 129, 129);   //initialise the flat terrain.
 	if(!result)
 	{
@@ -740,7 +739,12 @@ bool ApplicationClass::HandleInput(float frameTime)
 			mFluid->AddWater(rand()%120+1,rand()%120+1, float(rand()%20)/10);
 		}
 	}
-
+	keyDown = m_Input->IsRPressed();
+	if(keyDown){
+		for(int i = 0; i <5; i++){
+			mFluid->ResetWater();
+		}
+	}
 	// Set the frame time for calculating the updated position.
 	m_Position->SetFrameTime(frameTime);
 
