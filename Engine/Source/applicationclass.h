@@ -58,7 +58,10 @@ public:
 private:
 	bool HandleInput(float);
 	bool RenderGraphics();
-
+	bool Render(float rotation);
+	bool RenderSceneToTexture(RenderTextureClass* mWrite, float rotation);
+	bool RenderTexture(ShaderClass *mShader, RenderTextureClass *mReadTexture, RenderTextureClass *mWriteTexture, OrthoWindowClass *mWindow);
+	bool Render2DTextureScene(RenderTextureClass* mRead);
 private:
 	InputClass* m_Input;
 	D3DClass* m_Direct3D;

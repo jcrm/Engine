@@ -701,6 +701,23 @@ bool ApplicationClass::Frame()
 		return false;
 	}
 	mFluid->GenerateHeightMap(m_Direct3D->GetDevice());
+
+	static float rotation = 0.0f;
+
+
+	// Update the rotation variable each frame.
+	rotation += (float)D3DX_PI * 0.005f;
+	if(rotation > 360.0f)
+	{
+		rotation -= 360.0f;
+	}
+	/*
+	// Render the graphics scene.
+	result = Render(rotation);
+	if(!result)
+	{
+		return false;
+	}*/
 	// Render the graphics.
 	result = RenderGraphics();
 	if(!result)
@@ -813,6 +830,208 @@ bool ApplicationClass::RenderGraphics()
 	// Turn off the Z buffer to begin all 2D rendering.
 	m_Direct3D->TurnZBufferOff();
 		
+	// Turn on the alpha blending before rendering the text.
+	m_Direct3D->TurnOnAlphaBlending();
+
+	// Render the text user interface elements.
+	result = m_Text->Render(m_Direct3D->GetDeviceContext(), m_FontShader, worldMatrix, orthoMatrix);
+	if(!result)
+	{
+		return false;
+	}
+
+	// Turn off alpha blending after rendering the text.
+	m_Direct3D->TurnOffAlphaBlending();
+
+	// Turn the Z buffer back on now that all 2D rendering has completed.
+	m_Direct3D->TurnZBufferOn();
+
+	// Present the rendered scene to the screen.
+	m_Direct3D->EndScene();
+
+	return true;
+}
+
+bool ApplicationClass::Render(float rotation)
+{
+	bool result;
+
+
+	// First render the scene to a render texture.
+	result = RenderSceneToTexture(m_RenderTexture, rotation);
+	if(!result){
+		return false;
+	}
+	result = RenderTexture(m_TextureShader,m_RenderTexture,m_DownSampleTexure, m_SmallWindow);
+	if(!result){
+		return false;
+	}
+	result = RenderTexture(m_ConvolutionShader, m_DownSampleTexure, m_ConvolutionTexture, m_SmallWindow);
+	if(!result){
+		return false;
+	}
+	result = RenderTexture(m_TextureShader,m_ConvolutionTexture, m_UpSampleTexure, m_FullScreenWindow);
+	if(!result){
+		return false;
+	}
+	// Render the blurred up sampled render texture to the screen.
+	result = Render2DTextureScene(m_UpSampleTexure);
+	if(!result){
+		return false;
+	}
+
+	return true;
+}
+
+bool ApplicationClass::RenderSceneToTexture(RenderTextureClass* mWrite, float rotation)
+{
+	D3DXMATRIX worldMatrix, viewMatrix, projectionMatrix;
+	bool result;
+
+
+	// Set the render target to be the render to texture.
+	mWrite->SetRenderTarget(m_Direct3D->GetDeviceContext());
+
+	// Clear the render to texture.
+	mWrite->ClearRenderTarget(m_Direct3D->GetDeviceContext(), 0.0f, 0.0f, 0.0f, 1.0f);
+
+	// Generate the view matrix based on the camera's position.
+	m_Camera->Render();
+
+	// Get the world, view, and projection matrices from the camera and d3d objects.
+	m_Direct3D->GetWorldMatrix(worldMatrix);
+	m_Camera->GetViewMatrix(viewMatrix);
+	m_Direct3D->GetProjectionMatrix(projectionMatrix);
+	/*
+	mFluid->Render(m_Direct3D->GetDeviceContext());
+	result = mFluidShader->Render(m_Direct3D->GetDeviceContext(), mFluid->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, 
+		m_Light->GetAmbientColor(), m_Light->GetDiffuseColor(), m_Light->GetDirection());
+	if(!result)
+	{
+		return false;
+	}
+
+	// Render the terrain buffers.
+	m_Terrain->Render(m_Direct3D->GetDeviceContext());
+	// Render the terrain using the terrain shader.
+	result = m_TerrainShader->Render(m_Direct3D->GetDeviceContext(), m_Terrain->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, 
+		m_Light->GetAmbientColor(), m_Light->GetDiffuseColor(), m_Light->GetDirection());
+	if(!result)
+	{
+		return false;
+	}*/
+
+	// Rotate the world matrix by the rotation value so that the cube will spin.
+	D3DXMatrixRotationY(&worldMatrix, rotation);
+
+	for(int i = 0; i< 4; i++){
+		// Put the model vertex and index buffers on the graphics pipeline to prepare them for drawing.
+		m_Model[i]->Render(m_Direct3D->GetDeviceContext());
+
+		// Render the model using the texture shader.
+		result = m_TextureShader->Render(m_Direct3D->GetDeviceContext(), m_Model[i]->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, 
+			m_Model[i]->GetTexture());
+		if(!result)
+		{
+			return false;
+		}
+	}
+
+	// Reset the render target back to the original back buffer and not the render to texture anymore.
+	m_Direct3D->SetBackBufferRenderTarget();
+
+	// Reset the viewport back to the original.
+	m_Direct3D->ResetViewport();
+
+	return true;
+}
+
+bool ApplicationClass::RenderTexture(ShaderClass *mShader, RenderTextureClass *mReadTexture, RenderTextureClass *mWriteTexture, OrthoWindowClass *mWindow)
+{
+	D3DXMATRIX worldMatrix, viewMatrix, orthoMatrix;
+	float screenSizeX, screenSizeY;
+	bool result;
+
+	screenSizeY = (float)mWriteTexture->GetTextureHeight();
+	screenSizeX = (float)mWriteTexture->GetTextureWidth();
+
+	// Set the render target to be the render to texture.
+	mWriteTexture->SetRenderTarget(m_Direct3D->GetDeviceContext());
+
+	// Clear the render to texture.
+	mWriteTexture->ClearRenderTarget(m_Direct3D->GetDeviceContext(), 0.0f, 0.0f, 0.0f, 1.0f);
+
+	// Generate the view matrix based on the camera's position.
+	m_Camera->Render();
+
+	// Get the world and view matrices from the camera and d3d objects.
+	m_Camera->GetViewMatrix(viewMatrix);
+	m_Direct3D->GetWorldMatrix(worldMatrix);
+
+	// Get the ortho matrix from the render to texture since texture has different dimensions being that it is smaller.
+	mWriteTexture->GetOrthoMatrix(orthoMatrix);
+
+	// Turn off the Z buffer to begin all 2D rendering.
+	m_Direct3D->TurnZBufferOff();
+
+	// Put the small ortho window vertex and index buffers on the graphics pipeline to prepare them for drawing.
+	mWindow->Render(m_Direct3D->GetDeviceContext());
+
+	// Render the small ortho window using the texture shader and the render to texture of the scene as the texture resource.
+	result = mShader->Render(m_Direct3D->GetDeviceContext(), mWindow->GetIndexCount(), worldMatrix, viewMatrix, orthoMatrix, 
+		mReadTexture->GetShaderResourceView(),screenSizeY,screenSizeX);
+	if(!result){
+		return false;
+	}
+
+	// Turn the Z buffer back on now that all 2D rendering has completed.
+	m_Direct3D->TurnZBufferOn();
+
+	// Reset the render target back to the original back buffer and not the render to texture anymore.
+	m_Direct3D->SetBackBufferRenderTarget();
+
+	// Reset the viewport back to the original.
+	m_Direct3D->ResetViewport();
+	return true;
+}
+
+bool ApplicationClass::Render2DTextureScene(RenderTextureClass* mRead)
+{
+	D3DXMATRIX worldMatrix, viewMatrix, orthoMatrix;
+	bool result;
+
+
+	// Clear the buffers to begin the scene.
+	m_Direct3D->BeginScene(0.0f, 0.0f, 0.0f, 0.0f);
+
+	// Generate the view matrix based on the camera's position.
+	m_Camera->Render();
+
+	// Get the world, view, and ortho matrices from the camera and d3d objects.
+	m_Camera->GetViewMatrix(viewMatrix);
+	m_Direct3D->GetWorldMatrix(worldMatrix);
+	m_Direct3D->GetOrthoMatrix(orthoMatrix);
+
+	// Turn off the Z buffer to begin all 2D rendering.
+	m_Direct3D->TurnZBufferOff();
+
+	// Put the full screen ortho window vertex and index buffers on the graphics pipeline to prepare them for drawing.
+	m_FullScreenWindow->Render(m_Direct3D->GetDeviceContext());
+
+	// Render the full screen ortho window using the texture shader and the full screen sized blurred render to texture resource.
+	result = m_TextureShader->Render(m_Direct3D->GetDeviceContext(), m_FullScreenWindow->GetIndexCount(), worldMatrix, viewMatrix, orthoMatrix, 
+		mRead->GetShaderResourceView());
+	if(!result)
+	{
+		return false;
+	}
+
+	// Turn the Z buffer back on now that all 2D rendering has completed.
+	m_Direct3D->TurnZBufferOn();
+
+	// Turn off the Z buffer to begin all 2D rendering.
+	m_Direct3D->TurnZBufferOff();
+
 	// Turn on the alpha blending before rendering the text.
 	m_Direct3D->TurnOnAlphaBlending();
 
