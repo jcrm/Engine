@@ -54,10 +54,10 @@ PixelInputType TerrainVertexShader(VertexInputType input)
     // Normalize the normal vector.
     output.normal = normalize(output.normal);
 	if(height<=-1){
-		output.hColor = lerp(float4(0.0,0.0,0.0,1.0),float4(0.0,0.0,0.0,1.0),height/2);
+		output.hColor = lerp(float4(0.0,0.0,0.0,1.0),float4(0.0,0.0,0.0,0.0),height/2);
 	}else{
-		output.hColor = lerp(float4(0.32,0.2,0.09,1.0),float4(1.0,1.0,1.0,1.0),height/20);
+		output.hColor = lerp(float4(0.32,0.2,0.09,1.0),float4(1.0,1.0,1.0,0.0),height/20);
 	}
-	output.hColor = lerp(float4(0.0,0.0,0.1,1.0),float4(0.0,0.0,1.0,1.0),height/30);
+	output.hColor = lerp(float4(0.0,0.0,0.1,1.0),float4(0.0,0.0,1.0,0.0),height/30);
     return output;
 }

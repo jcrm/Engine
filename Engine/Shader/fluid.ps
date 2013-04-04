@@ -55,6 +55,6 @@ float4 TerrainPixelShader(PixelInputType input) : SV_TARGET
 	color += input.hColor;
     // Saturate the final light color.
     color = saturate(color);
-
+	color.a = 0.5f;
     return color;
 }

@@ -112,8 +112,8 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(DXSDK_DIR)include;$(FrameWorkSDKDir)\include;$(WindowsSdkDir)include;$VCInstallDir)atlmfc\include;$(VCInstallDir)include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(DXSDK_DIR)lib\x86;$(FrameworkSDKDir)\lib;$(WindowsSdkDir)lib;$(VCInstallDir)atlmfc\lib;$(VCInstallDir)lib</LibraryPath>
+    <IncludePath>$(DXSDK_DIR)include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(DXSDK_DIR)lib\x86;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>

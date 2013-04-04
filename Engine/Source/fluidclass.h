@@ -37,6 +37,7 @@ public:
 		float x, y, z;
 		float nx, ny, nz;
 		float prevY, nextY;
+		bool border; 
 	};
 	FluidClass();
 	FluidClass(const FluidClass&);
@@ -67,6 +68,7 @@ private:
 	inline int createIndex(int size, int i, int j){ return (size * i) + j;}
 	inline signed char scrand(signed char r = 4) {return (-r + 2 * (rand() % r)); }
 	void DiminishWater();
+	bool CheckBorder(int x, int z);
 private:
 	bool m_terrainGeneratedToggle;
 	int m_terrainWidth, m_terrainHeight;
@@ -75,6 +77,7 @@ private:
 	HeightMapType* m_heightMap;
 	float mWave;
 	float mWaveTime;
+	float mScale;
 };
 
 #endif

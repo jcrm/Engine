@@ -11,6 +11,7 @@ FluidClass::FluidClass()
 	m_indexBuffer = 0;
 	m_heightMap = 0;
 	mWave = 1.0f;
+	mScale = 10.0f;
 	mWaveTime = 1/(2 * sqrt(2.0f));
 	m_terrainGeneratedToggle = false;
 }
@@ -672,17 +673,32 @@ void FluidClass::DiminishWater(){
 	for(int i = 1; i<m_terrainWidth-1; i++){
 		for(int j = 1; j<m_terrainWidth-1; j++){
 			int index = (m_terrainWidth * j) + i;
-			float newVal = CurrentWaveAndTime*m_heightMap[index].y;
-			newVal+= PrevTime*m_heightMap[index].prevY;
-			float sum = ValuesAroundPoint(i,j);
-			newVal+= ((2*WaveAndTime)/(UDeltaTime+2))*sum;
-			m_heightMap[index].nextY = newVal;
+			if(m_heightMap[index].border == false){
+				float newVal = CurrentWaveAndTime*m_heightMap[index].y;
+				newVal+= PrevTime*m_heightMap[index].prevY;
+				float sum = ValuesAroundPoint(i,j);
+				newVal+= ((2*WaveAndTime)/(UDeltaTime+2))*sum;
+				m_heightMap[index].nextY = newVal;
+			}
 		}
 	}
 	UpdateWaterValues();
 }
 void FluidClass::AddWater(int x, int z, float height){
-	m_heightMap[(m_terrainWidth * x) + z].y+=height;
+	m_heightMap[(m_terrainWidth * x) + z].y+=(height/mScale);
+}
+bool FluidClass::CheckBorder(int x, int z){
+	int numOfCircle = 3;
+	float CircleX[3] = {64,84,31};
+	float CircleZ[3] = {64,28,90};
+	float CircleRadiusSq[3] = {40,20,30};
+	bool bound = true;
+	for(int i = 0; i < numOfCircle; i++){
+		if(((CircleX[i]-x)*(CircleX[i]-x))+((CircleZ[i]-z)*(CircleZ[i]-z))< CircleRadiusSq[i]*CircleRadiusSq[i]){
+			bound = false;
+		}
+	}
+	return bound;
 }
 void FluidClass::ResetWater(){
 	int index;
@@ -692,32 +708,38 @@ void FluidClass::ResetWater(){
 		for(int i=0; i<m_terrainWidth; i++){			
 			index = (m_terrainHeight * j) + i;
 
-			m_heightMap[index].x = (float)i-(m_terrainWidth/2);
+			m_heightMap[index].x = ((float)i)/mScale-(float(m_terrainWidth)/mScale);
 			m_heightMap[index].y = (float)height;
-			m_heightMap[index].z = (float)j;
+			m_heightMap[index].z = ((float)j)/10;
 			m_heightMap[index].nextY = 0.0f;
 			m_heightMap[index].prevY = 0.0f;
-
+			m_heightMap[index].border = CheckBorder(i,j);
+			/*
+			if(i<(m_terrainWidth/4) || i>3*(m_terrainWidth/4) || j<(m_terrainWidth/4) || j>3*(m_terrainWidth/4)){
+				m_heightMap[index].border = true;
+			}else{
+				m_heightMap[index].border = false;
+			}*/
 		}
 	}
 	for(int j=m_terrainHeight/2-2; j<m_terrainHeight/2+2; j++){
 		for(int i=m_terrainWidth/2-2; i<m_terrainWidth/2+2; i++){			
 			index = (m_terrainHeight * j) + i;
-			m_heightMap[index].y = 2.0f;
+			m_heightMap[index].y = 2.0f/mScale;
 
 		}
 	}
 	for(int j=m_terrainHeight/2-10; j<m_terrainHeight/2-5; j++){
 		for(int i=m_terrainWidth/2-10; i<m_terrainWidth/2-5; i++){			
 			index = (m_terrainHeight * j) + i;
-			m_heightMap[index].y = -5.0f;
+			m_heightMap[index].y = -5.0f/mScale;
 
 		}
 	}
 	for(int j=m_terrainHeight/2+20; j<m_terrainHeight/2+25; j++){
 		for(int i=m_terrainWidth/2+20; i<m_terrainWidth/2+25; i++){			
 			index = (m_terrainHeight * j) + i;
-			m_heightMap[index].y = 1.5f;
+			m_heightMap[index].y = 1.5f/mScale;
 
 		}
 	}

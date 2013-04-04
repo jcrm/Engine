@@ -13,6 +13,33 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Shader Files\Convolution">
+      <UniqueIdentifier>{6cc81bd1-0509-4f0a-bb6a-7c0b74e222b6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shader Files\Fluid">
+      <UniqueIdentifier>{68dd6257-dff9-42d0-9f7b-62e8e50584b0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shader Files\Font">
+      <UniqueIdentifier>{6445d52d-6399-46ed-817b-8996087d516e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shader Files\Horizontal">
+      <UniqueIdentifier>{ca67396d-ff27-4ca1-aa37-783b15906493}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shader Files\Vertical">
+      <UniqueIdentifier>{417d6c47-453a-4350-9eeb-e11b5d1b69a3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shader Files\Texture">
+      <UniqueIdentifier>{061b70d6-d890-4de1-8772-d44a7eb71bdd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shader Files\Terrain">
+      <UniqueIdentifier>{bd6cba4c-742e-4117-b280-20ff4f6b4ffe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Water files">
+      <UniqueIdentifier>{db26d014-5206-432e-a6c5-af38e55bfc00}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Water Files">
+      <UniqueIdentifier>{a2bf4e86-0db7-4fca-844c-f24b183a1a1e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\systemclass.h">
@@ -46,12 +73,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\d3dclass.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\fluidclass.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\fluidshaderclass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\fontclass.h">
@@ -93,6 +114,12 @@
     <ClInclude Include="Source\textureshaderclass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Source\fluidclass.h">
+      <Filter>Header Files\Water Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\fluidshaderclass.h">
+      <Filter>Header Files\Water Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\applicationclass.cpp">
@@ -108,12 +135,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Source\d3dclass.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\fluidclass.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\fluidshaderclass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Source\fontclass.cpp">
@@ -176,49 +197,55 @@
     <ClCompile Include="Source\textureshaderclass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source\fluidshaderclass.cpp">
+      <Filter>Source Files\Water files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\fluidclass.cpp">
+      <Filter>Source Files\Water files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Shader\terrain.ps">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="Shader\texture.ps">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="Shader\verticalblur.ps">
-      <Filter>Shader Files</Filter>
+    <None Include="Shader\convolution.ps">
+      <Filter>Shader Files\Convolution</Filter>
     </None>
     <None Include="Shader\convolution.vs">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="Shader\fluid.vs">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="Shader\font.vs">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="Shader\horizontalblur.vs">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="Shader\terrain.vs">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="Shader\texture.vs">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="Shader\verticalblur.vs">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="Shader\convolution.ps">
-      <Filter>Shader Files</Filter>
+      <Filter>Shader Files\Convolution</Filter>
     </None>
     <None Include="Shader\fluid.ps">
-      <Filter>Shader Files</Filter>
+      <Filter>Shader Files\Fluid</Filter>
+    </None>
+    <None Include="Shader\fluid.vs">
+      <Filter>Shader Files\Fluid</Filter>
+    </None>
+    <None Include="Shader\font.vs">
+      <Filter>Shader Files\Font</Filter>
     </None>
     <None Include="Shader\font.ps">
-      <Filter>Shader Files</Filter>
+      <Filter>Shader Files\Font</Filter>
+    </None>
+    <None Include="Shader\horizontalblur.vs">
+      <Filter>Shader Files\Horizontal</Filter>
     </None>
     <None Include="Shader\horizontalblur.ps">
-      <Filter>Shader Files</Filter>
+      <Filter>Shader Files\Horizontal</Filter>
+    </None>
+    <None Include="Shader\verticalblur.vs">
+      <Filter>Shader Files\Vertical</Filter>
+    </None>
+    <None Include="Shader\verticalblur.ps">
+      <Filter>Shader Files\Vertical</Filter>
+    </None>
+    <None Include="Shader\texture.vs">
+      <Filter>Shader Files\Texture</Filter>
+    </None>
+    <None Include="Shader\texture.ps">
+      <Filter>Shader Files\Texture</Filter>
+    </None>
+    <None Include="Shader\terrain.vs">
+      <Filter>Shader Files\Terrain</Filter>
+    </None>
+    <None Include="Shader\terrain.ps">
+      <Filter>Shader Files\Terrain</Filter>
     </None>
   </ItemGroup>
 </Project>

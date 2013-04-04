@@ -106,7 +106,7 @@ bool ApplicationClass::Initialize(HINSTANCE hinstance, HWND hwnd, int screenWidt
 	m_Camera->GetViewMatrix(baseViewMatrix);
 
 	// Set the initial position of the camera.
-	cameraX = 50.0f;
+	cameraX = 0.0f;
 	cameraY = 2.0f;
 	cameraZ = -7.0f;
 
@@ -819,14 +819,7 @@ bool ApplicationClass::RenderGraphics()
 	m_Camera->GetViewMatrix(viewMatrix);
 	m_Direct3D->GetProjectionMatrix(projectionMatrix);
 	m_Direct3D->GetOrthoMatrix(orthoMatrix);
-
-	mFluid->Render(m_Direct3D->GetDeviceContext());
-	result = mFluidShader->Render(m_Direct3D->GetDeviceContext(), mFluid->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, 
-									m_Light->GetAmbientColor(), m_Light->GetDiffuseColor(), m_Light->GetDirection());
-	if(!result)
-	{
-		return false;
-	}
+	
 
 	// Render the terrain buffers.
 	m_Terrain->Render(m_Direct3D->GetDeviceContext());
@@ -837,11 +830,18 @@ bool ApplicationClass::RenderGraphics()
 	{
 		return false;
 	}
-	// Turn off the Z buffer to begin all 2D rendering.
 	m_Direct3D->TurnZBufferOff();
 		
 	// Turn on the alpha blending before rendering the text.
 	m_Direct3D->TurnOnAlphaBlending();
+
+	mFluid->Render(m_Direct3D->GetDeviceContext());
+	result = mFluidShader->Render(m_Direct3D->GetDeviceContext(), mFluid->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, 
+		m_Light->GetAmbientColor(), m_Light->GetDiffuseColor(), m_Light->GetDirection());
+	if(!result)
+	{
+		return false;
+	}
 
 	// Render the text user interface elements.
 	result = m_Text->Render(m_Direct3D->GetDeviceContext(), m_FontShader, worldMatrix, orthoMatrix);
