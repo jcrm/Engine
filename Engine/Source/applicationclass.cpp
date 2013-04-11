@@ -835,7 +835,12 @@ bool ApplicationClass::RenderSceneToTexture(RenderTextureClass* mWrite, float ro
 	m_Camera->GetViewMatrix(viewMatrix);
 	m_Direct3D->GetProjectionMatrix(projectionMatrix);
 
-	/*
+	
+	m_Direct3D->TurnZBufferOff();
+
+	// Turn on the alpha blending before rendering the text.
+	m_Direct3D->TurnOnAlphaBlending();
+
 	mFluid->Render(m_Direct3D->GetDeviceContext());
 	result = mFluidShader->Render(m_Direct3D->GetDeviceContext(), mFluid->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, 
 		m_Light->GetAmbientColor(), m_Light->GetDiffuseColor(), m_Light->GetDirection());
@@ -843,6 +848,12 @@ bool ApplicationClass::RenderSceneToTexture(RenderTextureClass* mWrite, float ro
 	{
 		return false;
 	}
+
+	// Turn off alpha blending after rendering the text.
+	m_Direct3D->TurnOffAlphaBlending();
+
+	// Turn the Z buffer back on now that all 2D rendering has completed.
+	m_Direct3D->TurnZBufferOn();
 
 	// Render the terrain buffers.
 	m_Terrain->Render(m_Direct3D->GetDeviceContext());
@@ -852,7 +863,7 @@ bool ApplicationClass::RenderSceneToTexture(RenderTextureClass* mWrite, float ro
 	if(!result)
 	{
 		return false;
-	}*/
+	}
 
 	// Rotate the world matrix by the rotation value so that the cube will spin.
 	D3DXMatrixRotationY(&worldMatrix, rotation);
@@ -955,7 +966,7 @@ bool ApplicationClass::Render2DTextureScene(RenderTextureClass* mRead)
 	if(!result){
 		return false;
 	}
-	/*
+	
 	// Turn on the alpha blending before rendering the text.
 	m_Direct3D->TurnOnAlphaBlending();
 
@@ -968,7 +979,7 @@ bool ApplicationClass::Render2DTextureScene(RenderTextureClass* mRead)
 
 	// Turn off alpha blending after rendering the text.
 	m_Direct3D->TurnOffAlphaBlending();
-	*/
+	
 	// Turn the Z buffer back on now that all 2D rendering has completed.
 	m_Direct3D->TurnZBufferOn();
 
