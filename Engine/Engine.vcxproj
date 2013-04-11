@@ -21,7 +21,6 @@
     <ClInclude Include="Source\fontclass.h" />
     <ClInclude Include="Source\fontshaderclass.h" />
     <ClInclude Include="Source\fpsclass.h" />
-    <ClInclude Include="Source\horizontalblurshaderclass.h" />
     <ClInclude Include="Source\inputclass.h" />
     <ClInclude Include="Source\lightclass.h" />
     <ClInclude Include="Source\modelclass.h" />
@@ -35,8 +34,8 @@
     <ClInclude Include="Source\textclass.h" />
     <ClInclude Include="Source\textureclass.h" />
     <ClInclude Include="Source\textureshaderclass.h" />
+    <ClInclude Include="Source\texturetotextureshaderclass .h" />
     <ClInclude Include="Source\timerclass.h" />
-    <ClInclude Include="Source\verticalblurshaderclass.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\applicationclass.cpp" />
@@ -49,7 +48,6 @@
     <ClCompile Include="Source\fontclass.cpp" />
     <ClCompile Include="Source\fontshaderclass.cpp" />
     <ClCompile Include="Source\fpsclass.cpp" />
-    <ClCompile Include="Source\horizontalblurshaderclass.cpp" />
     <ClCompile Include="Source\inputclass.cpp" />
     <ClCompile Include="Source\lightclass.cpp" />
     <ClCompile Include="Source\main.cpp" />
@@ -64,8 +62,8 @@
     <ClCompile Include="Source\textclass.cpp" />
     <ClCompile Include="Source\textureclass.cpp" />
     <ClCompile Include="Source\textureshaderclass.cpp" />
+    <ClCompile Include="Source\texturetotextureshaderclass.cpp" />
     <ClCompile Include="Source\timerclass.cpp" />
-    <ClCompile Include="Source\verticalblurshaderclass.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Shader\convolution.ps" />
@@ -74,14 +72,12 @@
     <None Include="Shader\fluid.vs" />
     <None Include="Shader\font.ps" />
     <None Include="Shader\font.vs" />
-    <None Include="Shader\horizontalblur.ps" />
-    <None Include="Shader\horizontalblur.vs" />
     <None Include="Shader\terrain.ps" />
     <None Include="Shader\terrain.vs" />
     <None Include="Shader\texture.ps" />
     <None Include="Shader\texture.vs" />
-    <None Include="Shader\verticalblur.ps" />
-    <None Include="Shader\verticalblur.vs" />
+    <None Include="Shader\texturetotexture.ps" />
+    <None Include="Shader\texturetotexture.vs" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{CC8EB8E1-1A10-4345-88B7-C839B29AF7FB}</ProjectGuid>

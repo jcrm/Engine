@@ -23,6 +23,9 @@ void ShaderClass::Shutdown(){
 bool ShaderClass::Render(ID3D11DeviceContext*, int, D3DXMATRIX, D3DXMATRIX, D3DXMATRIX, ID3D11ShaderResourceView*, float, float){
 	return false;
 }
+bool ShaderClass::Render(ID3D11DeviceContext*, int, D3DXMATRIX, ID3D11ShaderResourceView*, float, float){
+	return false;
+}
 bool ShaderClass::InitializeShader(ID3D11Device*, HWND, WCHAR*, WCHAR*){
 	return false;
 }

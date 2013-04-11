@@ -38,18 +38,12 @@ bool TextureShaderClass::Initialize(ID3D11Device* device, HWND hwnd)
 
 	return true;
 }
-
-
 void TextureShaderClass::Shutdown()
 {
 	// Shutdown the vertex and pixel shaders as well as the related objects.
 	ShutdownShader();
 
 	return;
-}
-bool TextureShaderClass::Render(ID3D11DeviceContext* deviceContext, int indexCount, D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix, 
-								D3DXMATRIX projectionMatrix, ID3D11ShaderResourceView* texture, float height, float width){
-		return Render(deviceContext,indexCount,worldMatrix,viewMatrix,projectionMatrix,texture);
 }
 
 bool TextureShaderClass::Render(ID3D11DeviceContext* deviceContext, int indexCount, D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix, 
@@ -70,8 +64,6 @@ bool TextureShaderClass::Render(ID3D11DeviceContext* deviceContext, int indexCou
 
 	return true;
 }
-
-
 bool TextureShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* vsFilename, WCHAR* psFilename)
 {
 	HRESULT result;

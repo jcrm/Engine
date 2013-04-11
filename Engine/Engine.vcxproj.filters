@@ -22,12 +22,6 @@
     <Filter Include="Shader Files\Font">
       <UniqueIdentifier>{6445d52d-6399-46ed-817b-8996087d516e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Shader Files\Horizontal">
-      <UniqueIdentifier>{ca67396d-ff27-4ca1-aa37-783b15906493}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Shader Files\Vertical">
-      <UniqueIdentifier>{417d6c47-453a-4350-9eeb-e11b5d1b69a3}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Shader Files\Texture">
       <UniqueIdentifier>{061b70d6-d890-4de1-8772-d44a7eb71bdd}</UniqueIdentifier>
     </Filter>
@@ -96,16 +90,10 @@
     <ClInclude Include="Source\rendertextureclass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Source\horizontalblurshaderclass.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Source\orthowindowclass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\ShaderClass.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\verticalblurshaderclass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\modelclass.h">
@@ -119,6 +107,9 @@
     </ClInclude>
     <ClInclude Include="Source\fluidshaderclass.h">
       <Filter>Header Files\Water Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\texturetotextureshaderclass .h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -179,16 +170,10 @@
     <ClCompile Include="Source\timerclass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\horizontalblurshaderclass.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Source\orthowindowclass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Source\ShaderClass.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\verticalblurshaderclass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Source\modelclass.cpp">
@@ -202,6 +187,9 @@
     </ClCompile>
     <ClCompile Include="Source\fluidclass.cpp">
       <Filter>Source Files\Water files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\texturetotextureshaderclass.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -223,29 +211,23 @@
     <None Include="Shader\font.ps">
       <Filter>Shader Files\Font</Filter>
     </None>
-    <None Include="Shader\horizontalblur.vs">
-      <Filter>Shader Files\Horizontal</Filter>
-    </None>
-    <None Include="Shader\horizontalblur.ps">
-      <Filter>Shader Files\Horizontal</Filter>
-    </None>
-    <None Include="Shader\verticalblur.vs">
-      <Filter>Shader Files\Vertical</Filter>
-    </None>
-    <None Include="Shader\verticalblur.ps">
-      <Filter>Shader Files\Vertical</Filter>
-    </None>
-    <None Include="Shader\texture.vs">
-      <Filter>Shader Files\Texture</Filter>
-    </None>
-    <None Include="Shader\texture.ps">
-      <Filter>Shader Files\Texture</Filter>
-    </None>
     <None Include="Shader\terrain.vs">
       <Filter>Shader Files\Terrain</Filter>
     </None>
     <None Include="Shader\terrain.ps">
       <Filter>Shader Files\Terrain</Filter>
+    </None>
+    <None Include="Shader\texture.ps">
+      <Filter>Shader Files\Texture</Filter>
+    </None>
+    <None Include="Shader\texture.vs">
+      <Filter>Shader Files\Texture</Filter>
+    </None>
+    <None Include="Shader\texturetotexture.ps">
+      <Filter>Shader Files\Texture</Filter>
+    </None>
+    <None Include="Shader\texturetotexture.vs">
+      <Filter>Shader Files\Texture</Filter>
     </None>
   </ItemGroup>
 </Project>

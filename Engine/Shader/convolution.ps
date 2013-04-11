@@ -47,6 +47,7 @@ struct PixelInputType
 ////////////////////////////////////////////////////////////////////////////////
 float4 ConvolutionPixelShader(PixelInputType input) : SV_TARGET
 {
+	//return shaderTexture.Sample(SampleType, input.tex) * weight4;
 	float normalization;
 	float4 color;
 

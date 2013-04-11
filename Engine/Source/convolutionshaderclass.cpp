@@ -69,7 +69,24 @@ bool ConvolutionShaderClass::Render(ID3D11DeviceContext* deviceContext, int inde
 
 	return true;
 }
+bool ConvolutionShaderClass::Render(ID3D11DeviceContext* deviceContext, int indexCount, 
+	D3DXMATRIX projectionMatrix, ID3D11ShaderResourceView* texture, float screenHeight, float screenWidth)
+{
+	bool result;
 
+
+	// Set the shader parameters that it will use for rendering.
+	result = SetShaderParameters(deviceContext, projectionMatrix, texture, screenHeight, screenWidth);
+	if(!result)
+	{
+		return false;
+	}
+
+	// Now render the prepared buffers with the shader.
+	RenderShader(deviceContext, indexCount);
+
+	return true;
+}
 
 bool ConvolutionShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* vsFilename, WCHAR* psFilename)
 {
@@ -331,6 +348,96 @@ void ConvolutionShaderClass::OutputShaderErrorMessage(ID3D10Blob* errorMessage, 
 	MessageBox(hwnd, L"Error compiling shader.  Check shader-error.txt for message.", shaderFilename, MB_OK);
 
 	return;
+}
+bool ConvolutionShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext, 
+	D3DXMATRIX projectionMatrix, ID3D11ShaderResourceView* texture, float screenHeight, float screenWidth)
+{
+	HRESULT result;
+	D3D11_MAPPED_SUBRESOURCE mappedResource;
+	MatrixBufferType* dataPtr;
+	unsigned int bufferNumber;
+	ScreenSizeBufferType* dataPtr2;
+	ConvolutuionBufferType* dataPtr3;
+
+
+	D3DXMatrixTranspose(&projectionMatrix, &projectionMatrix);
+
+	// Lock the matrix constant buffer so it can be written to.
+	result = deviceContext->Map(m_matrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Get a pointer to the data in the constant buffer.
+	dataPtr = (MatrixBufferType*)mappedResource.pData;
+
+	// Copy the matrices into the constant buffer.
+	dataPtr->projection = projectionMatrix;
+
+	// Unlock the constant buffer.
+	deviceContext->Unmap(m_matrixBuffer, 0);
+
+	// Set the position of the constant buffer in the vertex shader.
+	bufferNumber = 0;
+
+	// Now set the constant buffer in the vertex shader with the updated values.
+	deviceContext->VSSetConstantBuffers(bufferNumber, 1, &m_matrixBuffer);
+
+	// Lock the screen size constant buffer so it can be written to.
+	result = deviceContext->Map(m_screenSizeBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Get a pointer to the data in the constant buffer.
+	dataPtr2 = (ScreenSizeBufferType*)mappedResource.pData;
+
+	// Copy the data into the constant buffer.
+	dataPtr2->screenHeight = screenHeight;
+	dataPtr2->screenWidth = screenWidth;
+	dataPtr2->padding = D3DXVECTOR2(0.0f, 0.0f);
+
+	// Unlock the constant buffer.
+	deviceContext->Unmap(m_screenSizeBuffer, 0);
+
+	// Set the position of the constant buffer in the vertex shader.
+	bufferNumber = 1;
+
+	// Now set the constant buffer in the vertex shader with the updated values.
+	deviceContext->VSSetConstantBuffers(bufferNumber, 1, &m_screenSizeBuffer);
+
+	result = deviceContext->Map(m_convolutionBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Get a pointer to the data in the constant buffer.
+	dataPtr3 = (ConvolutuionBufferType*)mappedResource.pData;
+
+	// Copy the data into the constant buffer.
+	dataPtr3->weight0 = 0;
+	dataPtr3->weight1 = 0.05;
+	dataPtr3->weight2 = 0;
+
+	dataPtr3->weight3 = 0.05;
+	dataPtr3->weight4 = 0.8;
+	dataPtr3->weight5 = 0.05;
+
+	dataPtr3->weight6 = 0;
+	dataPtr3->weight7 = 0.05;
+	dataPtr3->weight8 = 0;
+	dataPtr3->padding = D3DXVECTOR3(0.0,0.0,0.0);
+	// Unlock the constant buffer.
+	deviceContext->Unmap(m_convolutionBuffer, 0);
+
+	deviceContext->PSSetConstantBuffers(0,1,&m_convolutionBuffer);
+	// Set shader texture resource in the pixel shader.
+	deviceContext->PSSetShaderResources(0, 1, &texture);
+
+	return true;
 }
 bool ConvolutionShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext, D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix, 
 												  D3DXMATRIX projectionMatrix, ID3D11ShaderResourceView* texture, float screenHeight, float screenWidth)

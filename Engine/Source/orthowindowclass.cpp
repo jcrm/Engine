@@ -71,7 +71,7 @@ bool OrthoWindowClass::InitializeBuffers(ID3D11Device* device, int windowWidth, 
 	HRESULT result;
 	int i;
 
-
+	/*
 	// Calculate the screen coordinates of the left side of the window.
 	left = (float)((windowWidth / 2) * -1);
 
@@ -82,8 +82,20 @@ bool OrthoWindowClass::InitializeBuffers(ID3D11Device* device, int windowWidth, 
 	top = (float)(windowHeight / 2);
 
 	// Calculate the screen coordinates of the bottom of the window.
-	bottom = top - (float)windowHeight;
+	bottom = top - (float)windowHeight;*/
 	
+	// Calculate the screen coordinates of the left side of the window.
+	left = -1;
+
+	// Calculate the screen coordinates of the right side of the window.
+	right = 1;
+
+	// Calculate the screen coordinates of the top of the window.
+	top = 1;
+
+	// Calculate the screen coordinates of the bottom of the window.
+	bottom = -1;
+
 	// Set the number of vertices in the vertex array.
 	m_vertexCount = 6;
 

@@ -34,7 +34,7 @@ public:
 	virtual bool Initialize(ID3D11Device*, HWND);
 	virtual void Shutdown();
 	virtual bool Render(ID3D11DeviceContext*, int, D3DXMATRIX, D3DXMATRIX, D3DXMATRIX, ID3D11ShaderResourceView*, float, float);
-
+	virtual	bool Render(ID3D11DeviceContext*, int, D3DXMATRIX, ID3D11ShaderResourceView*, float, float);
 protected:
 	virtual bool InitializeShader(ID3D11Device*, HWND, WCHAR*, WCHAR*);
 	virtual void ShutdownShader();
