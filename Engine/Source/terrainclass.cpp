@@ -941,8 +941,20 @@ int TerrainClass::terrainIterateParticleDeposition( int numIt, bool up )
 	}
 	return 1;
 }
+float TerrainClass::ValuesAroundPoint(int x, int z){
+	float sum = m_heightMap[(m_terrainWidth * (z-1) ) + x].y;
+	sum += m_heightMap[(m_terrainWidth * (z+1) ) + x].y;
+	sum += m_heightMap[(m_terrainWidth * z) + x-1].y;
+	sum += m_heightMap[(m_terrainWidth * z) + x+1].y;
+	return sum;
+}
 void TerrainClass::smooth(float k) {
-
+	for(int i = 1; i<m_terrainWidth-1;i++){
+		for(int j = 1; j<m_terrainHeight-1; j++){
+			int index = (m_terrainWidth * j) + i;
+			m_heightMap[index].y = ValuesAroundPoint(i, j)/4;
+		}
+	}/*
 	int i,j;
 
 	for(i=0;i<m_terrainHeight;i++)
@@ -966,7 +978,7 @@ void TerrainClass::smooth(float k) {
 		for(j=0;j<m_terrainWidth;j++)
 			m_heightMap[i*m_terrainWidth + j].y =
 			m_heightMap[i*m_terrainWidth + j].y * (1-k) + 
-			m_heightMap[(i+1)*m_terrainWidth + j].y * k;
+			m_heightMap[(i+1)*m_terrainWidth + j].y * k;*/
 }
 
 void TerrainClass::GenerateSinCos(int index)

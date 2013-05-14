@@ -26,7 +26,7 @@ FluidClass::~FluidClass()
 {
 }
 
-bool FluidClass::InitializeTerrain(ID3D11Device* device, int terrainWidth, int terrainHeight)
+bool FluidClass::InitializeFluid(ID3D11Device* device, int terrainWidth, int terrainHeight)
 {
 	bool result;
 
@@ -74,7 +74,7 @@ bool FluidClass::Initialize(ID3D11Device* device, char* heightMapFilename)
 	// Normalize the height of the height map.
 	NormalizeHeightMap();
 
-	// Calculate the normal's for the terrain data.
+	// Calculate the normals for the terrain data.
 	result = CalculateNormals();
 	if(!result)
 	{
@@ -120,14 +120,12 @@ bool FluidClass::GenerateHeightMap( ID3D11Device* device )
 	//the toggle is just a bool that I use to make sure this is only called ONCE when you press a key
 	//until you release the key and start again. We don t want to be generating the terrain 500
 	//times per second. 
-
 	ReleaseBuffers();
 	DiminishWater();
 	result = CalculateNormals();
 	if(!result){
 		return false;
 	}
-
 	// Initialize the vertex and index buffer that hold the geometry for the terrain.
 	result = InitializeBuffers(device);
 	if(!result){
@@ -397,16 +395,118 @@ void FluidClass::ShutdownHeightMap()
 	return;
 }
 
+bool FluidClass::InitVertex(){
+	int index;
+	int index1, index2, index3, index4;
+	HRESULT result;
+	// Create the vertex array.
+	mVertices = new VertexType[m_vertexCount];
+	if(!mVertices){
+		return false;
+	}
 
+	// Create the index array.
+	mIndices = new unsigned long[m_indexCount];
+	if(!mIndices){
+		return false;
+	}
+
+	// Initialize the index to the vertex buffer.
+	index = 0;
+	// Load the vertex and index array with the terrain data.
+	for(int j=0; j<(m_terrainHeight-1); j++){
+		for(int i=0; i<(m_terrainWidth-1); i++){
+			index1 = (m_terrainHeight * j) + i;          // Bottom left.
+			index2 = (m_terrainHeight * j) + (i+1);      // Bottom right.
+			index3 = (m_terrainHeight * (j+1)) + i;      // Upper left.
+			index4 = (m_terrainHeight * (j+1)) + (i+1);  // Upper right.
+
+			if((i%2 !=0 && j%2 ==0) || (i%2 ==0 && j%2 != 0)){
+				// Upper left.
+				mVertices[index].position = D3DXVECTOR3(m_heightMap[index3].x, m_heightMap[index3].y, m_heightMap[index3].z);
+				mVertices[index].normal = D3DXVECTOR3(m_heightMap[index3].nx, m_heightMap[index3].ny, m_heightMap[index3].nz);
+				mIndices[index] = index;
+				index++;
+
+				// Upper right.
+				mVertices[index].position = D3DXVECTOR3(m_heightMap[index4].x, m_heightMap[index4].y, m_heightMap[index4].z);
+				mVertices[index].normal = D3DXVECTOR3(m_heightMap[index4].nx, m_heightMap[index4].ny, m_heightMap[index4].nz);
+				mIndices[index] = index;
+				index++;
+
+				// Bottom right.
+				mVertices[index].position = D3DXVECTOR3(m_heightMap[index2].x, m_heightMap[index2].y, m_heightMap[index2].z);
+				mVertices[index].normal = D3DXVECTOR3(m_heightMap[index2].nx, m_heightMap[index2].ny, m_heightMap[index2].nz);
+				mIndices[index] = index;
+				index++;
+
+				// Bottom right.
+				mVertices[index].position = D3DXVECTOR3(m_heightMap[index2].x, m_heightMap[index2].y, m_heightMap[index2].z);
+				mVertices[index].normal = D3DXVECTOR3(m_heightMap[index2].nx, m_heightMap[index2].ny, m_heightMap[index2].nz);
+				mIndices[index] = index;
+				index++;
+
+				// Bottom left.
+				mVertices[index].position = D3DXVECTOR3(m_heightMap[index1].x, m_heightMap[index1].y, m_heightMap[index1].z);
+				mVertices[index].normal = D3DXVECTOR3(m_heightMap[index1].nx, m_heightMap[index1].ny, m_heightMap[index1].nz);
+				mIndices[index] = index;
+				index++;
+
+				// Upper left.
+				mVertices[index].position = D3DXVECTOR3(m_heightMap[index3].x, m_heightMap[index3].y, m_heightMap[index3].z);
+				mVertices[index].normal = D3DXVECTOR3(m_heightMap[index3].nx, m_heightMap[index3].ny, m_heightMap[index3].nz);
+				mIndices[index] = index;
+				index++;
+
+			}else{
+				// Upper left.
+				mVertices[index].position = D3DXVECTOR3(m_heightMap[index3].x, m_heightMap[index3].y, m_heightMap[index3].z);
+				mVertices[index].normal = D3DXVECTOR3(m_heightMap[index3].nx, m_heightMap[index3].ny, m_heightMap[index3].nz);
+				mIndices[index] = index;
+				index++;
+
+				// Upper right.
+				mVertices[index].position = D3DXVECTOR3(m_heightMap[index4].x, m_heightMap[index4].y, m_heightMap[index4].z);
+				mVertices[index].normal = D3DXVECTOR3(m_heightMap[index4].nx, m_heightMap[index4].ny, m_heightMap[index4].nz);
+				mIndices[index] = index;
+				index++;
+
+				// Bottom left.
+				mVertices[index].position = D3DXVECTOR3(m_heightMap[index1].x, m_heightMap[index1].y, m_heightMap[index1].z);
+				mVertices[index].normal = D3DXVECTOR3(m_heightMap[index1].nx, m_heightMap[index1].ny, m_heightMap[index1].nz);
+				mIndices[index] = index;
+				index++;
+
+				// Bottom left.
+				mVertices[index].position = D3DXVECTOR3(m_heightMap[index1].x, m_heightMap[index1].y, m_heightMap[index1].z);
+				mVertices[index].normal = D3DXVECTOR3(m_heightMap[index1].nx, m_heightMap[index1].ny, m_heightMap[index1].nz);
+				mIndices[index] = index;
+				index++;
+
+				// Upper right.
+				mVertices[index].position = D3DXVECTOR3(m_heightMap[index4].x, m_heightMap[index4].y, m_heightMap[index4].z);
+				mVertices[index].normal = D3DXVECTOR3(m_heightMap[index4].nx, m_heightMap[index4].ny, m_heightMap[index4].nz);
+				mIndices[index] = index;
+				index++;
+
+				// Bottom right.
+				mVertices[index].position = D3DXVECTOR3(m_heightMap[index2].x, m_heightMap[index2].y, m_heightMap[index2].z);
+				mVertices[index].normal = D3DXVECTOR3(m_heightMap[index2].nx, m_heightMap[index2].ny, m_heightMap[index2].nz);
+				mIndices[index] = index;
+				index++;
+			}
+		}
+	}
+}
 bool FluidClass::InitializeBuffers(ID3D11Device* device)
 {
-	VertexType* vertices;
-	unsigned long* indices;
-	int index, i, j;
+	/*VertexType* mVertices;
+	unsigned long* mIndices;*/
+	
 	D3D11_BUFFER_DESC vertexBufferDesc, indexBufferDesc;
     D3D11_SUBRESOURCE_DATA vertexData, indexData;
 	HRESULT result;
-	int index1, index2, index3, index4;
+
 
 
 	// Calculate the number of vertices's in the terrain mesh.
@@ -415,107 +515,7 @@ bool FluidClass::InitializeBuffers(ID3D11Device* device)
 	// Set the index count to the same as the vertex count.
 	m_indexCount = m_vertexCount;
 
-	// Create the vertex array.
-	vertices = new VertexType[m_vertexCount];
-	if(!vertices)
-	{
-		return false;
-	}
-
-	// Create the index array.
-	indices = new unsigned long[m_indexCount];
-	if(!indices)
-	{
-		return false;
-	}
-
-	// Initialize the index to the vertex buffer.
-	index = 0;
-
-	// Load the vertex and index array with the terrain data.
-	for(j=0; j<(m_terrainHeight-1); j++){
-		for(i=0; i<(m_terrainWidth-1); i++){
-			index1 = (m_terrainHeight * j) + i;          // Bottom left.
-			index2 = (m_terrainHeight * j) + (i+1);      // Bottom right.
-			index3 = (m_terrainHeight * (j+1)) + i;      // Upper left.
-			index4 = (m_terrainHeight * (j+1)) + (i+1);  // Upper right.
-
-			if((i%2 !=0 && j%2 ==0) || (i%2 ==0 && j%2 != 0)){
-				// Upper left.
-				vertices[index].position = D3DXVECTOR3(m_heightMap[index3].x, m_heightMap[index3].y, m_heightMap[index3].z);
-				vertices[index].normal = D3DXVECTOR3(m_heightMap[index3].nx, m_heightMap[index3].ny, m_heightMap[index3].nz);
-				indices[index] = index;
-				index++;
-
-				// Upper right.
-				vertices[index].position = D3DXVECTOR3(m_heightMap[index4].x, m_heightMap[index4].y, m_heightMap[index4].z);
-				vertices[index].normal = D3DXVECTOR3(m_heightMap[index4].nx, m_heightMap[index4].ny, m_heightMap[index4].nz);
-				indices[index] = index;
-				index++;
-
-				// Bottom right.
-				vertices[index].position = D3DXVECTOR3(m_heightMap[index2].x, m_heightMap[index2].y, m_heightMap[index2].z);
-				vertices[index].normal = D3DXVECTOR3(m_heightMap[index2].nx, m_heightMap[index2].ny, m_heightMap[index2].nz);
-				indices[index] = index;
-				index++;
-
-				// Bottom right.
-				vertices[index].position = D3DXVECTOR3(m_heightMap[index2].x, m_heightMap[index2].y, m_heightMap[index2].z);
-				vertices[index].normal = D3DXVECTOR3(m_heightMap[index2].nx, m_heightMap[index2].ny, m_heightMap[index2].nz);
-				indices[index] = index;
-				index++;
-
-				// Bottom left.
-				vertices[index].position = D3DXVECTOR3(m_heightMap[index1].x, m_heightMap[index1].y, m_heightMap[index1].z);
-				vertices[index].normal = D3DXVECTOR3(m_heightMap[index1].nx, m_heightMap[index1].ny, m_heightMap[index1].nz);
-				indices[index] = index;
-				index++;
-
-				// Upper left.
-				vertices[index].position = D3DXVECTOR3(m_heightMap[index3].x, m_heightMap[index3].y, m_heightMap[index3].z);
-				vertices[index].normal = D3DXVECTOR3(m_heightMap[index3].nx, m_heightMap[index3].ny, m_heightMap[index3].nz);
-				indices[index] = index;
-				index++;
-
-			}else{
-				// Upper left.
-				vertices[index].position = D3DXVECTOR3(m_heightMap[index3].x, m_heightMap[index3].y, m_heightMap[index3].z);
-				vertices[index].normal = D3DXVECTOR3(m_heightMap[index3].nx, m_heightMap[index3].ny, m_heightMap[index3].nz);
-				indices[index] = index;
-				index++;
-
-				// Upper right.
-				vertices[index].position = D3DXVECTOR3(m_heightMap[index4].x, m_heightMap[index4].y, m_heightMap[index4].z);
-				vertices[index].normal = D3DXVECTOR3(m_heightMap[index4].nx, m_heightMap[index4].ny, m_heightMap[index4].nz);
-				indices[index] = index;
-				index++;
-
-				// Bottom left.
-				vertices[index].position = D3DXVECTOR3(m_heightMap[index1].x, m_heightMap[index1].y, m_heightMap[index1].z);
-				vertices[index].normal = D3DXVECTOR3(m_heightMap[index1].nx, m_heightMap[index1].ny, m_heightMap[index1].nz);
-				indices[index] = index;
-				index++;
-
-				// Bottom left.
-				vertices[index].position = D3DXVECTOR3(m_heightMap[index1].x, m_heightMap[index1].y, m_heightMap[index1].z);
-				vertices[index].normal = D3DXVECTOR3(m_heightMap[index1].nx, m_heightMap[index1].ny, m_heightMap[index1].nz);
-				indices[index] = index;
-				index++;
-
-				// Upper right.
-				vertices[index].position = D3DXVECTOR3(m_heightMap[index4].x, m_heightMap[index4].y, m_heightMap[index4].z);
-				vertices[index].normal = D3DXVECTOR3(m_heightMap[index4].nx, m_heightMap[index4].ny, m_heightMap[index4].nz);
-				indices[index] = index;
-				index++;
-
-				// Bottom right.
-				vertices[index].position = D3DXVECTOR3(m_heightMap[index2].x, m_heightMap[index2].y, m_heightMap[index2].z);
-				vertices[index].normal = D3DXVECTOR3(m_heightMap[index2].nx, m_heightMap[index2].ny, m_heightMap[index2].nz);
-				indices[index] = index;
-				index++;
-			}
-		}
-	}
+	InitVertex();
 
 	// Set up the description of the static vertex buffer.
     vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
@@ -526,7 +526,7 @@ bool FluidClass::InitializeBuffers(ID3D11Device* device)
 	vertexBufferDesc.StructureByteStride = 0;
 
 	// Give the subresource structure a pointer to the vertex data.
-    vertexData.pSysMem = vertices;
+    vertexData.pSysMem = mVertices;
 	vertexData.SysMemPitch = 0;
 	vertexData.SysMemSlicePitch = 0;
 	
@@ -546,7 +546,7 @@ bool FluidClass::InitializeBuffers(ID3D11Device* device)
 	indexBufferDesc.StructureByteStride = 0;
 
 	// Give the subresource structure a pointer to the index data.
-    indexData.pSysMem = indices;
+    indexData.pSysMem = mIndices;
 	indexData.SysMemPitch = 0;
 	indexData.SysMemSlicePitch = 0;
 
@@ -558,11 +558,11 @@ bool FluidClass::InitializeBuffers(ID3D11Device* device)
 	}
 
 	// Release the arrays now that the buffers have been created and loaded.
-	delete [] vertices;
-	vertices = 0;
+	delete [] mVertices;
+	mVertices = 0;
 
-	delete [] indices;
-	indices = 0;
+	delete [] mIndices;
+	mIndices = 0;
 
 	return true;
 }

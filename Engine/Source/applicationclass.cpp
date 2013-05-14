@@ -144,7 +144,7 @@ bool ApplicationClass::Initialize(HINSTANCE hinstance, HWND hwnd, int screenWidt
 		return false;
 	}
 
-	result = mFluid->InitializeTerrain(m_Direct3D->GetDevice(), 129, 129);   //initialise the flat terrain.
+	result = mFluid->InitializeFluid(m_Direct3D->GetDevice(), 129, 129);   //initialise the flat terrain.
 	if(!result){
 		MessageBox(hwnd, L"Could not initialize the fluid object.", L"Error", MB_OK);
 		return false;

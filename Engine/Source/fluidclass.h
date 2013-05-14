@@ -44,7 +44,7 @@ public:
 	~FluidClass();
 
 	bool Initialize(ID3D11Device*, char*);
-	bool InitializeTerrain(ID3D11Device*, int terrainWidth, int terrainHeight);
+	bool InitializeFluid(ID3D11Device*, int terrainWidth, int terrainHeight);
 	void Shutdown();
 	void Render(ID3D11DeviceContext*);
 	bool GenerateHeightMap(ID3D11Device* device);
@@ -69,6 +69,7 @@ private:
 	inline signed char scrand(signed char r = 4) {return (-r + 2 * (rand() % r)); }
 	void DiminishWater();
 	bool CheckBorder(int x, int z);
+	bool InitVertex();
 private:
 	bool m_terrainGeneratedToggle;
 	int m_terrainWidth, m_terrainHeight;
@@ -78,6 +79,8 @@ private:
 	float mWave;
 	float mWaveTime;
 	float mScale;
+	VertexType* mVertices;
+	unsigned long* mIndices;
 };
 
 #endif

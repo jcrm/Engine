@@ -229,5 +229,11 @@
     <None Include="Shader\texturetotexture.vs">
       <Filter>Shader Files\Texture</Filter>
     </None>
+    <None Include="Shader\waterHeight.ps">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="Shader\waterHeight.vs">
+      <Filter>Shader Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

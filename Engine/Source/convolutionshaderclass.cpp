@@ -358,32 +358,7 @@ bool ConvolutionShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceCont
 	unsigned int bufferNumber;
 	ScreenSizeBufferType* dataPtr2;
 	ConvolutuionBufferType* dataPtr3;
-
-
-	D3DXMatrixTranspose(&projectionMatrix, &projectionMatrix);
-
-	// Lock the matrix constant buffer so it can be written to.
-	result = deviceContext->Map(m_matrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
-	if(FAILED(result))
-	{
-		return false;
-	}
-
-	// Get a pointer to the data in the constant buffer.
-	dataPtr = (MatrixBufferType*)mappedResource.pData;
-
-	// Copy the matrices into the constant buffer.
-	dataPtr->projection = projectionMatrix;
-
-	// Unlock the constant buffer.
-	deviceContext->Unmap(m_matrixBuffer, 0);
-
-	// Set the position of the constant buffer in the vertex shader.
-	bufferNumber = 0;
-
-	// Now set the constant buffer in the vertex shader with the updated values.
-	deviceContext->VSSetConstantBuffers(bufferNumber, 1, &m_matrixBuffer);
-
+	
 	// Lock the screen size constant buffer so it can be written to.
 	result = deviceContext->Map(m_screenSizeBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	if(FAILED(result))
@@ -403,7 +378,7 @@ bool ConvolutionShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceCont
 	deviceContext->Unmap(m_screenSizeBuffer, 0);
 
 	// Set the position of the constant buffer in the vertex shader.
-	bufferNumber = 1;
+	bufferNumber = 0;
 
 	// Now set the constant buffer in the vertex shader with the updated values.
 	deviceContext->VSSetConstantBuffers(bufferNumber, 1, &m_screenSizeBuffer);
@@ -418,17 +393,17 @@ bool ConvolutionShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceCont
 	dataPtr3 = (ConvolutuionBufferType*)mappedResource.pData;
 
 	// Copy the data into the constant buffer.
-	dataPtr3->weight0 = 0;
-	dataPtr3->weight1 = 0.05;
-	dataPtr3->weight2 = 0;
+	dataPtr3->weight0 = -1;
+	dataPtr3->weight1 = -1;
+	dataPtr3->weight2 = -1;
 
-	dataPtr3->weight3 = 0.05;
-	dataPtr3->weight4 = 0.8;
-	dataPtr3->weight5 = 0.05;
+	dataPtr3->weight3 = -1;
+	dataPtr3->weight4 = 8;
+	dataPtr3->weight5 = -1;
 
-	dataPtr3->weight6 = 0;
-	dataPtr3->weight7 = 0.05;
-	dataPtr3->weight8 = 0;
+	dataPtr3->weight6 = -1;
+	dataPtr3->weight7 = -1;
+	dataPtr3->weight8 = -1;
 	dataPtr3->padding = D3DXVECTOR3(0.0,0.0,0.0);
 	// Unlock the constant buffer.
 	deviceContext->Unmap(m_convolutionBuffer, 0);

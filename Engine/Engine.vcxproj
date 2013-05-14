@@ -78,6 +78,8 @@
     <None Include="Shader\texture.vs" />
     <None Include="Shader\texturetotexture.ps" />
     <None Include="Shader\texturetotexture.vs" />
+    <None Include="Shader\waterHeight.ps" />
+    <None Include="Shader\waterHeight.vs" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{CC8EB8E1-1A10-4345-88B7-C839B29AF7FB}</ProjectGuid>
