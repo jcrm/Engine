@@ -38,6 +38,7 @@ const float SCREEN_NEAR = 0.1f;
 #include "orthowindowclass.h"
 #include "convolutionshaderclass.h"
 #include "texturetotextureshaderclass .h"
+#include "mergetextureshaderclass.h"
 #include "ShaderClass.h"
 
 
@@ -62,6 +63,7 @@ private:
 	bool RenderSceneToTexture(RenderTextureClass* mWrite, float rotation);
 	bool RenderTexture(ShaderClass *mShader, RenderTextureClass *mReadTexture, RenderTextureClass *mWriteTexture, OrthoWindowClass *mWindow);
 	bool Render2DTextureScene(RenderTextureClass* mRead);
+	bool RenderMergeTexture(RenderTextureClass *readTexture, RenderTextureClass *readTexture2, RenderTextureClass *writeTexture, OrthoWindowClass *window);
 private:
 	InputClass* m_Input;
 	D3DClass* m_Direct3D;
@@ -83,11 +85,12 @@ private:
 	TextureToTextureShaderClass* m_TextureToTextureShader;
 	ConvolutionShaderClass* m_ConvolutionShader;
 	
-	RenderTextureClass *m_RenderTexture, *m_DownSampleTexure, *m_UpSampleTexure, *m_ConvolutionTexture;
+	RenderTextureClass *m_RenderTexture, *m_DownSampleTexure, *m_UpSampleTexure, *m_ConvolutionTexture, *m_MergeTexture;
 	
 	FontShaderClass* m_FontShader;
 	TerrainShaderClass* m_TerrainShader;
 	FluidShaderClass* mFluidShader;
+	MergeTextureShaderClass* mMergerShader;
 };
 
 #endif

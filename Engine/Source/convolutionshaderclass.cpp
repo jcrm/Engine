@@ -354,7 +354,6 @@ bool ConvolutionShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceCont
 {
 	HRESULT result;
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
-	MatrixBufferType* dataPtr;
 	unsigned int bufferNumber;
 	ScreenSizeBufferType* dataPtr2;
 	ConvolutuionBufferType* dataPtr3;

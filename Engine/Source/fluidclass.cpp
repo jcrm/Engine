@@ -107,6 +107,7 @@ void FluidClass::Shutdown()
 
 void FluidClass::Render(ID3D11DeviceContext* deviceContext)
 {
+
 	// Put the vertex and index buffers on the graphics pipeline to prepare them for drawing.
 	RenderBuffers(deviceContext);
 
@@ -398,7 +399,6 @@ void FluidClass::ShutdownHeightMap()
 bool FluidClass::InitVertex(){
 	int index;
 	int index1, index2, index3, index4;
-	HRESULT result;
 	// Create the vertex array.
 	mVertices = new VertexType[m_vertexCount];
 	if(!mVertices){
@@ -497,6 +497,7 @@ bool FluidClass::InitVertex(){
 			}
 		}
 	}
+	return true;
 }
 bool FluidClass::InitializeBuffers(ID3D11Device* device)
 {

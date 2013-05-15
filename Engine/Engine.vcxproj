@@ -23,6 +23,7 @@
     <ClInclude Include="Source\fpsclass.h" />
     <ClInclude Include="Source\inputclass.h" />
     <ClInclude Include="Source\lightclass.h" />
+    <ClInclude Include="Source\mergetextureshaderclass.h" />
     <ClInclude Include="Source\modelclass.h" />
     <ClInclude Include="Source\orthowindowclass.h" />
     <ClInclude Include="Source\positionclass.h" />
@@ -51,6 +52,7 @@
     <ClCompile Include="Source\inputclass.cpp" />
     <ClCompile Include="Source\lightclass.cpp" />
     <ClCompile Include="Source\main.cpp" />
+    <ClCompile Include="Source\mergetextureshaderclass.cpp" />
     <ClCompile Include="Source\modelclass.cpp" />
     <ClCompile Include="Source\orthowindowclass.cpp" />
     <ClCompile Include="Source\positionclass.cpp" />
@@ -72,6 +74,8 @@
     <None Include="Shader\fluid.vs" />
     <None Include="Shader\font.ps" />
     <None Include="Shader\font.vs" />
+    <None Include="Shader\merge.ps" />
+    <None Include="Shader\merge.vs" />
     <None Include="Shader\terrain.ps" />
     <None Include="Shader\terrain.vs" />
     <None Include="Shader\texture.ps" />

@@ -844,8 +844,7 @@ void TerrainClass::MPD(){
 		}
 	}
 }
-void TerrainClass::depositPlus( int x, int z)
-{
+void TerrainClass::depositPlus( int x, int z){
 	int j,k,kk,jj,flag;
 	
 	flag = 0;
@@ -866,8 +865,7 @@ void TerrainClass::depositPlus( int x, int z)
 		depositPlus(x+kk,z+jj);
 	}
 }
-void TerrainClass::depositMinus( int x, int z)
-{
+void TerrainClass::depositMinus( int x, int z){
 	int j,k,kk,jj,flag;
 
 	flag = 0;
@@ -954,31 +952,7 @@ void TerrainClass::smooth(float k) {
 			int index = (m_terrainWidth * j) + i;
 			m_heightMap[index].y = ValuesAroundPoint(i, j)/4;
 		}
-	}/*
-	int i,j;
-
-	for(i=0;i<m_terrainHeight;i++)
-		for(j=1;j<m_terrainWidth;j++)
-			m_heightMap[i*m_terrainWidth + j].y =
-			m_heightMap[i*m_terrainWidth + j].y * (1-k) + 
-			m_heightMap[i*m_terrainWidth + j-1].y * k;
-	for(i=1;i<m_terrainHeight;i++)
-		for(j=0;j<m_terrainWidth;j++)
-			m_heightMap[i*m_terrainWidth + j].y =
-			m_heightMap[i*m_terrainWidth + j].y * (1-k) + 
-			m_heightMap[(i-1)*m_terrainWidth + j].y * k;
-
-	for(i=0; i<m_terrainHeight; i++)
-		for(j=m_terrainWidth-1;j>-1;j--)
-			m_heightMap[i*m_terrainWidth + j].y =
-			m_heightMap[i*m_terrainWidth + j].y * (1-k) + 
-			m_heightMap[i*m_terrainWidth + j+1].y * k;
-
-	for(i=m_terrainHeight-2;i>-1;i--)
-		for(j=0;j<m_terrainWidth;j++)
-			m_heightMap[i*m_terrainWidth + j].y =
-			m_heightMap[i*m_terrainWidth + j].y * (1-k) + 
-			m_heightMap[(i+1)*m_terrainWidth + j].y * k;*/
+	}
 }
 
 void TerrainClass::GenerateSinCos(int index)

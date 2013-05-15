@@ -29,6 +29,8 @@ ApplicationClass::ApplicationClass()
 	m_FullScreenWindow = 0;
 	m_ConvolutionShader = 0;
 	m_ConvolutionTexture = 0;
+	mMergerShader = 0;
+	m_MergeTexture = 0;
 	m_Model[0] = 0;
 	m_Model[1] = 0;
 	m_Model[2] = 0;
@@ -313,6 +315,15 @@ bool ApplicationClass::Initialize(HINSTANCE hinstance, HWND hwnd, int screenWidt
 		MessageBox(hwnd, L"Could not initialize the convolution shader object.", L"Error", MB_OK);
 		return false;
 	}
+	mMergerShader = new MergeTextureShaderClass;
+	if (!mMergerShader){
+		return false;
+	}
+	result= mMergerShader->Initialize(m_Direct3D->GetDevice(),hwnd);
+	if (!result){
+		MessageBox(hwnd, L"Could not initialize the convolution shader object.", L"Error", MB_OK);
+		return false;
+	}
 	// Create the render to texture object.
 	m_RenderTexture = new RenderTextureClass;
 	if(!m_RenderTexture)
@@ -347,6 +358,15 @@ bool ApplicationClass::Initialize(HINSTANCE hinstance, HWND hwnd, int screenWidt
 		return false;
 	}
 	result = m_ConvolutionTexture->Initialize(m_Direct3D->GetDevice(), downSampleWidth, downSampleHeight, SCREEN_DEPTH, SCREEN_NEAR);
+	if (!result){
+		MessageBox(hwnd, L"Could not initialize the Convolution to texture object.", L"Error", MB_OK);		
+		return false;
+	}
+	m_MergeTexture = new RenderTextureClass;
+	if (!m_MergeTexture){
+		return false;
+	}
+	result = m_MergeTexture->Initialize(m_Direct3D->GetDevice(), screenWidth, screenHeight, SCREEN_DEPTH, SCREEN_NEAR);
 	if (!result){
 		MessageBox(hwnd, L"Could not initialize the Convolution to texture object.", L"Error", MB_OK);		
 		return false;
@@ -791,21 +811,23 @@ bool ApplicationClass::Render(float rotation)
 	result = RenderSceneToTexture(m_RenderTexture, rotation);
 	if(!result){
 		return false;
-	}
+	}/*
 	result = RenderTexture(m_TextureToTextureShader,m_RenderTexture,m_DownSampleTexure, m_SmallWindow);
 	if(!result){
 		return false;
-	}
-	result = RenderTexture(m_ConvolutionShader, m_DownSampleTexure, m_ConvolutionTexture, m_SmallWindow);
+	}*/
+	result = RenderTexture(m_ConvolutionShader, m_RenderTexture, m_ConvolutionTexture, m_SmallWindow);
 	if(!result){
 		return false;
 	}
+	result= RenderMergeTexture(m_RenderTexture,m_ConvolutionTexture,m_MergeTexture,m_SmallWindow);
+	/*
 	result = RenderTexture(m_TextureToTextureShader,m_ConvolutionTexture, m_UpSampleTexure, m_FullScreenWindow);
 	if(!result){
 		return false;
-	}
+	}*/
 	// Render the blurred up sampled render texture to the screen.
-	result = Render2DTextureScene(m_UpSampleTexure);
+	result = Render2DTextureScene(m_MergeTexture);
 	if(!result){
 		return false;
 	}
@@ -813,16 +835,16 @@ bool ApplicationClass::Render(float rotation)
 	return true;
 }
 
-bool ApplicationClass::RenderSceneToTexture(RenderTextureClass* mWrite, float rotation)
+bool ApplicationClass::RenderSceneToTexture(RenderTextureClass* write, float rotation)
 {
 	D3DXMATRIX worldMatrix, viewMatrix, projectionMatrix;
 	bool result;
 
 	
 	// Set the render target to be the render to texture.
-	mWrite->SetRenderTarget(m_Direct3D->GetDeviceContext());
+	write->SetRenderTarget(m_Direct3D->GetDeviceContext());
 	// Clear the render to texture.
-	mWrite->ClearRenderTarget(m_Direct3D->GetDeviceContext(), 0.0f, 0.0f, 0.0f, 1.0f);
+	write->ClearRenderTarget(m_Direct3D->GetDeviceContext(), 0.0f, 0.0f, 0.0f, 1.0f);
 	/*
 	m_Direct3D->SetBackBufferRenderTarget();
 	m_Direct3D->BeginScene(0.0f, 0.0f, 0.0f, 0.0f);
@@ -890,20 +912,20 @@ bool ApplicationClass::RenderSceneToTexture(RenderTextureClass* mWrite, float ro
 	return true;
 }
 
-bool ApplicationClass::RenderTexture(ShaderClass *mShader, RenderTextureClass *mReadTexture, RenderTextureClass *mWriteTexture, OrthoWindowClass *mWindow)
+bool ApplicationClass::RenderTexture(ShaderClass *shader, RenderTextureClass *readTexture, RenderTextureClass *writeTexture, OrthoWindowClass *window)
 {
 	D3DXMATRIX worldMatrix, viewMatrix, orthoMatrix;
 	float screenSizeX, screenSizeY;
 	bool result;
 
-	screenSizeY = (float)mWriteTexture->GetTextureHeight();
-	screenSizeX = (float)mWriteTexture->GetTextureWidth();
+	screenSizeY = (float)writeTexture->GetTextureHeight();
+	screenSizeX = (float)writeTexture->GetTextureWidth();
 
 	// Set the render target to be the render to texture.
-	mWriteTexture->SetRenderTarget(m_Direct3D->GetDeviceContext());
+	writeTexture->SetRenderTarget(m_Direct3D->GetDeviceContext());
 
 	// Clear the render to texture.
-	mWriteTexture->ClearRenderTarget(m_Direct3D->GetDeviceContext(), 0.0f, 0.0f, 0.0f, 1.0f);
+	writeTexture->ClearRenderTarget(m_Direct3D->GetDeviceContext(), 0.0f, 0.0f, 0.0f, 1.0f);
 
 	// Generate the view matrix based on the camera's position.
 	m_Camera->Render();
@@ -913,17 +935,17 @@ bool ApplicationClass::RenderTexture(ShaderClass *mShader, RenderTextureClass *m
 	m_Direct3D->GetWorldMatrix(worldMatrix);
 	
 	// Get the ortho matrix from the render to texture since texture has different dimensions being that it is smaller.
-	mWriteTexture->GetOrthoMatrix(orthoMatrix);
+	writeTexture->GetOrthoMatrix(orthoMatrix);
 
 	// Turn off the Z buffer to begin all 2D rendering.
 	m_Direct3D->TurnZBufferOff();
 
 	// Put the small ortho window vertex and index buffers on the graphics pipeline to prepare them for drawing.
-	mWindow->Render(m_Direct3D->GetDeviceContext());
+	window->Render(m_Direct3D->GetDeviceContext());
 
 	// Render the small ortho window using the texture shader and the render to texture of the scene as the texture resource.
-	result = mShader->Render(m_Direct3D->GetDeviceContext(), mWindow->GetIndexCount(), orthoMatrix, 
-		mReadTexture->GetShaderResourceView(),screenSizeY,screenSizeX);
+	result = shader->Render(m_Direct3D->GetDeviceContext(), window->GetIndexCount(), orthoMatrix, 
+		readTexture->GetShaderResourceView(),screenSizeY,screenSizeX);
 	if(!result){
 		return false;
 	}
@@ -938,7 +960,42 @@ bool ApplicationClass::RenderTexture(ShaderClass *mShader, RenderTextureClass *m
 	m_Direct3D->ResetViewport();
 	return true;
 }
+bool ApplicationClass::RenderMergeTexture(RenderTextureClass *readTexture, RenderTextureClass *readTexture2, RenderTextureClass *writeTexture, OrthoWindowClass *window)
+{
+	bool result;
 
+	// Set the render target to be the render to texture.
+	writeTexture->SetRenderTarget(m_Direct3D->GetDeviceContext());
+
+	// Clear the render to texture.
+	writeTexture->ClearRenderTarget(m_Direct3D->GetDeviceContext(), 0.0f, 0.0f, 0.0f, 1.0f);
+
+	// Generate the view matrix based on the camera's position.
+	m_Camera->Render();
+
+	// Turn off the Z buffer to begin all 2D rendering.
+	m_Direct3D->TurnZBufferOff();
+
+	// Put the small ortho window vertex and index buffers on the graphics pipeline to prepare them for drawing.
+	window->Render(m_Direct3D->GetDeviceContext());
+
+	// Render the small ortho window using the texture shader and the render to texture of the scene as the texture resource.
+	result = mMergerShader->Render(m_Direct3D->GetDeviceContext(), window->GetIndexCount(), readTexture->GetShaderResourceView(), 
+		readTexture2->GetShaderResourceView());
+	if(!result){
+		return false;
+	}
+
+	// Turn the Z buffer back on now that all 2D rendering has completed.
+	m_Direct3D->TurnZBufferOn();
+
+	// Reset the render target back to the original back buffer and not the render to texture anymore.
+	m_Direct3D->SetBackBufferRenderTarget();
+
+	// Reset the viewport back to the original.
+	m_Direct3D->ResetViewport();
+	return true;
+}
 bool ApplicationClass::Render2DTextureScene(RenderTextureClass* mRead)
 {
 	D3DXMATRIX worldMatrix, viewMatrix, orthoMatrix, projectionMatrix;

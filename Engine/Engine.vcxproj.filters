@@ -28,27 +28,30 @@
     <Filter Include="Shader Files\Terrain">
       <UniqueIdentifier>{bd6cba4c-742e-4117-b280-20ff4f6b4ffe}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Water files">
+    <Filter Include="Source Files\Texture Files">
+      <UniqueIdentifier>{b1f43b56-8fb1-47f8-af4e-4bd6d162f2cc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Shader Files">
+      <UniqueIdentifier>{26aa748a-cfa9-47fc-8262-95b6a34d947f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Generation files">
       <UniqueIdentifier>{db26d014-5206-432e-a6c5-af38e55bfc00}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Water Files">
+    <Filter Include="Header Files\Shader Files">
+      <UniqueIdentifier>{61dcb1a2-9871-4901-8b94-b16e1cf9b097}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Generation Files">
       <UniqueIdentifier>{a2bf4e86-0db7-4fca-844c-f24b183a1a1e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Texture Files">
+      <UniqueIdentifier>{35bd686d-b8f6-4860-b6fa-3732b9383ae3}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\systemclass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Source\terrainclass.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\terrainshaderclass.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Source\textclass.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\textureclass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\timerclass.h">
@@ -60,9 +63,6 @@
     <ClInclude Include="Source\cameraclass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Source\convolutionshaderclass.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Source\cpuclass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -70,9 +70,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\fontclass.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\fontshaderclass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\fpsclass.h">
@@ -87,29 +84,47 @@
     <ClInclude Include="Source\positionclass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Source\rendertextureclass.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Source\orthowindowclass.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\ShaderClass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\modelclass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Source\textureshaderclass.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Source\fluidclass.h">
-      <Filter>Header Files\Water Files</Filter>
+      <Filter>Header Files\Generation Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\fluidshaderclass.h">
-      <Filter>Header Files\Water Files</Filter>
+      <Filter>Header Files\Shader Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\terrainshaderclass.h">
+      <Filter>Header Files\Shader Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\fontshaderclass.h">
+      <Filter>Header Files\Shader Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\convolutionshaderclass.h">
+      <Filter>Header Files\Shader Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\texturetotextureshaderclass .h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Shader Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\textureshaderclass.h">
+      <Filter>Header Files\Shader Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ShaderClass.h">
+      <Filter>Header Files\Shader Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\terrainclass.h">
+      <Filter>Header Files\Generation Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\textureclass.h">
+      <Filter>Header Files\Texture Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\rendertextureclass.h">
+      <Filter>Header Files\Texture Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\mergetextureshaderclass.h">
+      <Filter>Header Files\Shader Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -119,9 +134,6 @@
     <ClCompile Include="Source\cameraclass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\convolutionshaderclass.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Source\cpuclass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -129,9 +141,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Source\fontclass.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\fontshaderclass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Source\fpsclass.cpp">
@@ -149,22 +158,10 @@
     <ClCompile Include="Source\positionclass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\rendertextureclass.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Source\systemclass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\terrainclass.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\terrainshaderclass.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Source\textclass.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\textureclass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Source\timerclass.cpp">
@@ -173,23 +170,44 @@
     <ClCompile Include="Source\orthowindowclass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\ShaderClass.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Source\modelclass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\textureshaderclass.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Source\fluidclass.cpp">
+      <Filter>Source Files\Generation files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\textureclass.cpp">
+      <Filter>Source Files\Texture Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\rendertextureclass.cpp">
+      <Filter>Source Files\Texture Files</Filter>
     </ClCompile>
     <ClCompile Include="Source\fluidshaderclass.cpp">
-      <Filter>Source Files\Water files</Filter>
+      <Filter>Source Files\Shader Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\fluidclass.cpp">
-      <Filter>Source Files\Water files</Filter>
+    <ClCompile Include="Source\textureshaderclass.cpp">
+      <Filter>Source Files\Shader Files</Filter>
     </ClCompile>
     <ClCompile Include="Source\texturetotextureshaderclass.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Shader Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\convolutionshaderclass.cpp">
+      <Filter>Source Files\Shader Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\fontshaderclass.cpp">
+      <Filter>Source Files\Shader Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\terrainshaderclass.cpp">
+      <Filter>Source Files\Shader Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\ShaderClass.cpp">
+      <Filter>Source Files\Shader Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\terrainclass.cpp">
+      <Filter>Source Files\Generation files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\mergetextureshaderclass.cpp">
+      <Filter>Source Files\Shader Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -229,11 +247,17 @@
     <None Include="Shader\texturetotexture.vs">
       <Filter>Shader Files\Texture</Filter>
     </None>
-    <None Include="Shader\waterHeight.ps">
-      <Filter>Shader Files</Filter>
-    </None>
     <None Include="Shader\waterHeight.vs">
-      <Filter>Shader Files</Filter>
+      <Filter>Shader Files\Fluid</Filter>
+    </None>
+    <None Include="Shader\waterHeight.ps">
+      <Filter>Shader Files\Fluid</Filter>
+    </None>
+    <None Include="Shader\merge.ps">
+      <Filter>Shader Files\Texture</Filter>
+    </None>
+    <None Include="Shader\merge.vs">
+      <Filter>Shader Files\Texture</Filter>
     </None>
   </ItemGroup>
 </Project>

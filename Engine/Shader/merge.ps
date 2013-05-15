@@ -1,0 +1,40 @@
+////////////////////////////////////////////////////////////////////////////////
+// Filename: merge.ps
+////////////////////////////////////////////////////////////////////////////////
+
+
+/////////////
+// GLOBALS //
+/////////////
+
+Texture2D texture1;
+Texture2D texture2;
+SamplerState SampleType;
+
+cbuffer MergeBuffer
+{
+	float mergeRatio;
+	float3 padding;
+};
+
+
+//////////////
+// TYPEDEFS //
+//////////////
+struct PixelInputType
+{
+    float4 position : SV_POSITION;
+    float2 tex : TEXCOORD0;
+};
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Pixel Shader
+////////////////////////////////////////////////////////////////////////////////
+float4 MergePixelShader(PixelInputType input) : SV_TARGET
+{
+	float4 color;
+    color = (texture1.Sample(SampleType, input.tex)*(1-mergeRatio))+ (texture2.Sample(SampleType, input.tex)*mergeRatio);
+	color.a = 1.0f;
+    return color;
+}
