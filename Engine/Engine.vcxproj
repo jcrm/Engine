@@ -21,6 +21,7 @@
     <ClInclude Include="Source\fontclass.h" />
     <ClInclude Include="Source\fontshaderclass.h" />
     <ClInclude Include="Source\fpsclass.h" />
+    <ClInclude Include="Source\glowshaderclass.h" />
     <ClInclude Include="Source\inputclass.h" />
     <ClInclude Include="Source\lightclass.h" />
     <ClInclude Include="Source\mergetextureshaderclass.h" />
@@ -49,6 +50,7 @@
     <ClCompile Include="Source\fontclass.cpp" />
     <ClCompile Include="Source\fontshaderclass.cpp" />
     <ClCompile Include="Source\fpsclass.cpp" />
+    <ClCompile Include="Source\glowshaderclass.cpp" />
     <ClCompile Include="Source\inputclass.cpp" />
     <ClCompile Include="Source\lightclass.cpp" />
     <ClCompile Include="Source\main.cpp" />
@@ -74,6 +76,8 @@
     <None Include="Shader\fluid.vs" />
     <None Include="Shader\font.ps" />
     <None Include="Shader\font.vs" />
+    <None Include="Shader\glow.ps" />
+    <None Include="Shader\glow.vs" />
     <None Include="Shader\merge.ps" />
     <None Include="Shader\merge.vs" />
     <None Include="Shader\terrain.ps" />

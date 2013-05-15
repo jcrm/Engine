@@ -29,6 +29,8 @@ ApplicationClass::ApplicationClass()
 	m_FullScreenWindow = 0;
 	m_ConvolutionShader = 0;
 	m_ConvolutionTexture = 0;
+	m_GlowTexture = 0;
+	mGlowShader = 0;
 	mMergerShader = 0;
 	m_MergeTexture = 0;
 	m_Model[0] = 0;
@@ -71,31 +73,27 @@ bool ApplicationClass::Initialize(HINSTANCE hinstance, HWND hwnd, int screenWidt
 
 	// Initialize the input object.
 	result = m_Input->Initialize(hinstance, hwnd, screenWidth, screenHeight);
-	if(!result)
-	{
+	if(!result){
 		MessageBox(hwnd, L"Could not initialize the input object.", L"Error", MB_OK);
 		return false;
 	}
 
 	// Create the Direct3D object.
 	m_Direct3D = new D3DClass;
-	if(!m_Direct3D)
-	{
+	if(!m_Direct3D){
 		return false;
 	}
 
 	// Initialize the Direct3D object.
 	result = m_Direct3D->Initialize(screenWidth, screenHeight, VSYNC_ENABLED, hwnd, FULL_SCREEN, SCREEN_DEPTH, SCREEN_NEAR);
-	if(!result)
-	{
+	if(!result){
 		MessageBox(hwnd, L"Could not initialize DirectX 11.", L"Error", MB_OK);
 		return false;
 	}
 
 	// Create the camera object.
 	m_Camera = new CameraClass;
-	if(!m_Camera)
-	{
+	if(!m_Camera){
 		return false;
 	}
 
@@ -110,48 +108,7 @@ bool ApplicationClass::Initialize(HINSTANCE hinstance, HWND hwnd, int screenWidt
 	cameraZ = -7.0f;
 
 	m_Camera->SetPosition(cameraX, cameraY, cameraZ);
-	for(int i = 0; i < 4; i++){
-		// Create the model object.
-		m_Model[i] = new ModelClass(float(i-2));
-		if(!m_Model)
-		{
-			return false;
-		}
-
-		// Initialize the model object.
-		result = m_Model[i]->Initialize(m_Direct3D->GetDevice(), "data/cube.txt", L"data/seafloor.dds");
-		if(!result)
-		{
-			MessageBox(hwnd, L"Could not initialize the model object.", L"Error", MB_OK);
-			return false;
-		}
-	}
-	// Create the terrain object.
-	m_Terrain = new TerrainClass;
-	if(!m_Terrain)
-	{
-		return false;
-	}
-
-	// Initialize the terrain object.
-	result = m_Terrain->InitializeTerrain(m_Direct3D->GetDevice(), 129, 129);   //initialise the flat terrain.
-	if(!result)
-	{
-		MessageBox(hwnd, L"Could not initialize the terrain object.", L"Error", MB_OK);
-		return false;
-	}
-
-	mFluid = new FluidClass;
-	if(!mFluid){
-		return false;
-	}
-
-	result = mFluid->InitializeFluid(m_Direct3D->GetDevice(), 129, 129);   //initialise the flat terrain.
-	if(!result){
-		MessageBox(hwnd, L"Could not initialize the fluid object.", L"Error", MB_OK);
-		return false;
-	}
-
+	InitObjects(hwnd);
 	// Create the timer object.
 	m_Timer = new TimerClass;
 	if(!m_Timer)
@@ -237,162 +194,24 @@ bool ApplicationClass::Initialize(HINSTANCE hinstance, HWND hwnd, int screenWidt
 		MessageBox(hwnd, L"Could not set video card info in the text object.", L"Error", MB_OK);
 		return false;
 	}
-
-	// Create the terrain shader object.
-	m_TerrainShader = new TerrainShaderClass;
-	if(!m_TerrainShader)
-	{
-		return false;
-	}
-
-	// Initialize the terrain shader object.
-	result = m_TerrainShader->Initialize(m_Direct3D->GetDevice(), hwnd);
-	if(!result)
-	{
-		MessageBox(hwnd, L"Could not initialize the terrain shader object.", L"Error", MB_OK);
-		return false;
-	}
-
-	mFluidShader = new FluidShaderClass;
-	if(!mFluidShader)
-	{
-		return false;
-	}
-
-	// Initialize the terrain shader object.
-	result = mFluidShader->Initialize(m_Direct3D->GetDevice(), hwnd);
-	if(!result)
-	{
-		MessageBox(hwnd, L"Could not initialize the fluid shader object.", L"Error", MB_OK);
-		return false;
-	}
-
+	
 	// Create the light object.
 	m_Light = new LightClass;
-	if(!m_Light)
-	{
+	if(!m_Light){
 		return false;
 	}
-
 	// Initialize the light object.
 	m_Light->SetAmbientColor(0.05f, 0.05f, 0.05f, 1.0f);
 	m_Light->SetDiffuseColor(1.0f, 1.0f, 1.0f, 1.0f);
 	m_Light->SetDirection(1.0f,0.0f, 0.0f);
-	// Create the texture shader object.
-	m_TextureToTextureShader = new TextureToTextureShaderClass;
-	if(!m_TextureToTextureShader)
-	{
-		return false;
-	}
-
-	// Initialize the texture shader object.
-	result = m_TextureToTextureShader->Initialize(m_Direct3D->GetDevice(), hwnd);
-	if(!result)
-	{
-		MessageBox(hwnd, L"Could not initialize the texture shader object.", L"Error", MB_OK);
-		return false;
-	}
-
-	m_TextureShader = new TextureShaderClass;
-	if(!m_TextureShader)
-	{
-		return false;
-	}
-
-	// Initialize the texture shader object.
-	result = m_TextureShader->Initialize(m_Direct3D->GetDevice(), hwnd);
-	if(!result)
-	{
-		MessageBox(hwnd, L"Could not initialize the texture shader object.", L"Error", MB_OK);
-		return false;
-	}
-	m_ConvolutionShader = new ConvolutionShaderClass;
-	if (!m_ConvolutionShader){
-		return false;
-	}
-	result= m_ConvolutionShader->Initialize(m_Direct3D->GetDevice(),hwnd);
-	if (!result){
-		MessageBox(hwnd, L"Could not initialize the convolution shader object.", L"Error", MB_OK);
-		return false;
-	}
-	mMergerShader = new MergeTextureShaderClass;
-	if (!mMergerShader){
-		return false;
-	}
-	result= mMergerShader->Initialize(m_Direct3D->GetDevice(),hwnd);
-	if (!result){
-		MessageBox(hwnd, L"Could not initialize the convolution shader object.", L"Error", MB_OK);
-		return false;
-	}
-	// Create the render to texture object.
-	m_RenderTexture = new RenderTextureClass;
-	if(!m_RenderTexture)
-	{
-		return false;
-	}
-
-	// Initialize the render to texture object.
-	result = m_RenderTexture->Initialize(m_Direct3D->GetDevice(), screenWidth, screenHeight, SCREEN_DEPTH, SCREEN_NEAR);
-	if(!result)
-	{
-		MessageBox(hwnd, L"Could not initialize the render to texture object.", L"Error", MB_OK);
-		return false;
-	}
-	// Create the down sample render to texture object.
-	m_DownSampleTexure = new RenderTextureClass;
-	if(!m_DownSampleTexure)
-	{
-		return false;
-	}
-
-	// Initialize the down sample render to texture object.
-	result = m_DownSampleTexure->Initialize(m_Direct3D->GetDevice(), downSampleWidth, downSampleHeight, SCREEN_DEPTH, SCREEN_NEAR);
-	if(!result)
-	{
-		MessageBox(hwnd, L"Could not initialize the down sample render to texture object.", L"Error", MB_OK);
-		return false;
-	}
-
-	m_ConvolutionTexture = new RenderTextureClass;
-	if (!m_ConvolutionTexture){
-		return false;
-	}
-	result = m_ConvolutionTexture->Initialize(m_Direct3D->GetDevice(), downSampleWidth, downSampleHeight, SCREEN_DEPTH, SCREEN_NEAR);
-	if (!result){
-		MessageBox(hwnd, L"Could not initialize the Convolution to texture object.", L"Error", MB_OK);		
-		return false;
-	}
-	m_MergeTexture = new RenderTextureClass;
-	if (!m_MergeTexture){
-		return false;
-	}
-	result = m_MergeTexture->Initialize(m_Direct3D->GetDevice(), screenWidth, screenHeight, SCREEN_DEPTH, SCREEN_NEAR);
-	if (!result){
-		MessageBox(hwnd, L"Could not initialize the Convolution to texture object.", L"Error", MB_OK);		
-		return false;
-	}
-	// Create the up sample render to texture object.
-	m_UpSampleTexure = new RenderTextureClass;
-	if(!m_UpSampleTexure)
-	{
-		return false;
-	}
-
-	// Initialize the up sample render to texture object.
-	result = m_UpSampleTexure->Initialize(m_Direct3D->GetDevice(), screenWidth, screenHeight, SCREEN_DEPTH, SCREEN_NEAR);
-	if(!result)
-	{
-		MessageBox(hwnd, L"Could not initialize the up sample render to texture object.", L"Error", MB_OK);
-		return false;
-	}
-
+	InitTextures(hwnd, screenWidth, screenHeight);
+	InitShaders(hwnd);
 	// Create the small ortho window object.
 	m_SmallWindow = new OrthoWindowClass;
 	if(!m_SmallWindow)
 	{
 		return false;
 	}
-
 	// Initialize the small ortho window object.
 	result = m_SmallWindow->Initialize(m_Direct3D->GetDevice(), downSampleWidth, downSampleHeight);
 	if(!result)
@@ -417,8 +236,184 @@ bool ApplicationClass::Initialize(HINSTANCE hinstance, HWND hwnd, int screenWidt
 	}
 	return true;
 }
+bool ApplicationClass::InitObjects(HWND hwnd){
+	bool result;
+	for(int i = 0; i < 4; i++){
+		// Create the model object.
+		m_Model[i] = new ModelClass(float(i-2));
+		if(!m_Model){
+			return false;
+		}
 
+		// Initialize the model object.
+		result = m_Model[i]->Initialize(m_Direct3D->GetDevice(), "data/cube.txt", L"data/seafloor.dds");
+		if(!result)
+		{
+			MessageBox(hwnd, L"Could not initialize the model object.", L"Error", MB_OK);
+			return false;
+		}
+	}
+	// Create the terrain object.
+	m_Terrain = new TerrainClass;
+	if(!m_Terrain){
+		return false;
+	}
+	// Initialize the terrain object.
+	result = m_Terrain->InitializeTerrain(m_Direct3D->GetDevice(), 129, 129);   //initialise the flat terrain.
+	if(!result){
+		MessageBox(hwnd, L"Could not initialize the terrain object.", L"Error", MB_OK);
+		return false;
+	}
 
+	mFluid = new FluidClass;
+	if(!mFluid){
+		return false;
+	}
+
+	result = mFluid->InitializeFluid(m_Direct3D->GetDevice(), 129, 129);   //initialise the flat terrain.
+	if(!result){
+		MessageBox(hwnd, L"Could not initialize the fluid object.", L"Error", MB_OK);
+		return false;
+	}
+	return true;
+}
+bool ApplicationClass::InitTextures(HWND hwnd, int screenWidth, int screenHeight){
+	bool result;
+	int	downSampleWidth = screenWidth / 2;
+	int downSampleHeight = screenHeight / 2;
+	// Create the render to texture object.
+	m_RenderTexture = new RenderTextureClass;
+	if(!m_RenderTexture){
+		return false;
+	}
+	// Initialize the render to texture object.
+	result = m_RenderTexture->Initialize(m_Direct3D->GetDevice(), screenWidth, screenHeight, SCREEN_DEPTH, SCREEN_NEAR);
+	if(!result){
+		MessageBox(hwnd, L"Could not initialize the render to texture object.", L"Error", MB_OK);
+		return false;
+	}
+	// Create the down sample render to texture object.
+	m_DownSampleTexure = new RenderTextureClass;
+	if(!m_DownSampleTexure){
+		return false;
+	}
+	// Initialize the down sample render to texture object.
+	result = m_DownSampleTexure->Initialize(m_Direct3D->GetDevice(), downSampleWidth, downSampleHeight, SCREEN_DEPTH, SCREEN_NEAR);
+	if(!result){
+		MessageBox(hwnd, L"Could not initialize the down sample render to texture object.", L"Error", MB_OK);
+		return false;
+	}
+	m_ConvolutionTexture = new RenderTextureClass;
+	if (!m_ConvolutionTexture){
+		return false;
+	}
+	result = m_ConvolutionTexture->Initialize(m_Direct3D->GetDevice(), downSampleWidth, downSampleHeight, SCREEN_DEPTH, SCREEN_NEAR);
+	if (!result){
+		MessageBox(hwnd, L"Could not initialize the Convolution to texture object.", L"Error", MB_OK);		
+		return false;
+	}
+	m_MergeTexture = new RenderTextureClass;
+	if (!m_MergeTexture){
+		return false;
+	}
+	result = m_MergeTexture->Initialize(m_Direct3D->GetDevice(), screenWidth, screenHeight, SCREEN_DEPTH, SCREEN_NEAR);
+	if (!result){
+		MessageBox(hwnd, L"Could not initialize the Convolution to texture object.", L"Error", MB_OK);		
+		return false;
+	}
+	// Create the up sample render to texture object.
+	m_UpSampleTexure = new RenderTextureClass;
+	if(!m_UpSampleTexure){
+		return false;
+	}
+	// Initialize the up sample render to texture object.
+	result = m_UpSampleTexure->Initialize(m_Direct3D->GetDevice(), screenWidth, screenHeight, SCREEN_DEPTH, SCREEN_NEAR);
+	if(!result){
+		MessageBox(hwnd, L"Could not initialize the up sample render to texture object.", L"Error", MB_OK);
+		return false;
+	}
+	// Create the up sample render to texture object.
+	m_UpSampleTexure = new RenderTextureClass;
+	if(!m_UpSampleTexure){
+		return false;
+	}
+	// Initialize the up sample render to texture object.
+	result = m_UpSampleTexure->Initialize(m_Direct3D->GetDevice(), screenWidth, screenHeight, SCREEN_DEPTH, SCREEN_NEAR);
+	if(!result){
+		MessageBox(hwnd, L"Could not initialize the up sample render to texture object.", L"Error", MB_OK);
+		return false;
+	}
+	return true;
+}
+bool ApplicationClass::InitShaders(HWND hwnd){
+	bool result;
+	// Create the terrain shader object.
+	m_TerrainShader = new TerrainShaderClass;
+	if(!m_TerrainShader){
+		return false;
+	}
+	// Initialize the terrain shader object.
+	result = m_TerrainShader->Initialize(m_Direct3D->GetDevice(), hwnd);
+	if(!result){
+		MessageBox(hwnd, L"Could not initialize the terrain shader object.", L"Error", MB_OK);
+		return false;
+	}
+	mFluidShader = new FluidShaderClass;
+	if(!mFluidShader){
+		return false;
+	}
+	// Initialize the terrain shader object.
+	result = mFluidShader->Initialize(m_Direct3D->GetDevice(), hwnd);
+	if(!result){
+		MessageBox(hwnd, L"Could not initialize the fluid shader object.", L"Error", MB_OK);
+		return false;
+	}
+	// Create the texture shader object.
+	m_TextureToTextureShader = new TextureToTextureShaderClass;
+	if(!m_TextureToTextureShader)
+	{
+		return false;
+	}
+
+	// Initialize the texture shader object.
+	result = m_TextureToTextureShader->Initialize(m_Direct3D->GetDevice(), hwnd);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the texture shader object.", L"Error", MB_OK);
+		return false;
+	}
+
+	m_TextureShader = new TextureShaderClass;
+	if(!m_TextureShader){
+		return false;
+	}
+
+	// Initialize the texture shader object.
+	result = m_TextureShader->Initialize(m_Direct3D->GetDevice(), hwnd);
+	if(!result){
+		MessageBox(hwnd, L"Could not initialize the texture shader object.", L"Error", MB_OK);
+		return false;
+	}
+	m_ConvolutionShader = new ConvolutionShaderClass;
+	if (!m_ConvolutionShader){
+		return false;
+	}
+	result= m_ConvolutionShader->Initialize(m_Direct3D->GetDevice(),hwnd);
+	if (!result){
+		MessageBox(hwnd, L"Could not initialize the convolution shader object.", L"Error", MB_OK);
+		return false;
+	}
+	mMergerShader = new MergeTextureShaderClass;
+	if (!mMergerShader){
+		return false;
+	}
+	result= mMergerShader->Initialize(m_Direct3D->GetDevice(),hwnd);
+	if (!result){
+		MessageBox(hwnd, L"Could not initialize the convolution shader object.", L"Error", MB_OK);
+		return false;
+	}
+	return true;
+}
 void ApplicationClass::Shutdown()
 {
 	if(m_FullScreenWindow)

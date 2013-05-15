@@ -46,6 +46,15 @@
     <Filter Include="Header Files\Texture Files">
       <UniqueIdentifier>{35bd686d-b8f6-4860-b6fa-3732b9383ae3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shader Files\Glow">
+      <UniqueIdentifier>{8e242a9e-8b58-4ff0-af8f-9d9226c15b1a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shader Files\Texture\Merge">
+      <UniqueIdentifier>{d6990cf5-f2aa-47b8-9dce-d9403fa8d194}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shader Files\Texture\Texture to texture">
+      <UniqueIdentifier>{72908436-4d8a-494c-b969-623fc64df837}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\systemclass.h">
@@ -125,6 +134,9 @@
     </ClInclude>
     <ClInclude Include="Source\mergetextureshaderclass.h">
       <Filter>Header Files\Shader Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\glowshaderclass.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -209,6 +221,9 @@
     <ClCompile Include="Source\mergetextureshaderclass.cpp">
       <Filter>Source Files\Shader Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source\glowshaderclass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shader\convolution.ps">
@@ -241,23 +256,29 @@
     <None Include="Shader\texture.vs">
       <Filter>Shader Files\Texture</Filter>
     </None>
-    <None Include="Shader\texturetotexture.ps">
-      <Filter>Shader Files\Texture</Filter>
-    </None>
-    <None Include="Shader\texturetotexture.vs">
-      <Filter>Shader Files\Texture</Filter>
-    </None>
     <None Include="Shader\waterHeight.vs">
       <Filter>Shader Files\Fluid</Filter>
     </None>
     <None Include="Shader\waterHeight.ps">
       <Filter>Shader Files\Fluid</Filter>
     </None>
-    <None Include="Shader\merge.ps">
-      <Filter>Shader Files\Texture</Filter>
+    <None Include="Shader\glow.vs">
+      <Filter>Shader Files\Glow</Filter>
+    </None>
+    <None Include="Shader\glow.ps">
+      <Filter>Shader Files\Glow</Filter>
     </None>
     <None Include="Shader\merge.vs">
-      <Filter>Shader Files\Texture</Filter>
+      <Filter>Shader Files\Texture\Merge</Filter>
+    </None>
+    <None Include="Shader\merge.ps">
+      <Filter>Shader Files\Texture\Merge</Filter>
+    </None>
+    <None Include="Shader\texturetotexture.ps">
+      <Filter>Shader Files\Texture\Texture to texture</Filter>
+    </None>
+    <None Include="Shader\texturetotexture.vs">
+      <Filter>Shader Files\Texture\Texture to texture</Filter>
     </None>
   </ItemGroup>
 </Project>
