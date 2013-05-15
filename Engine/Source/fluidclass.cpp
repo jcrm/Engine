@@ -11,7 +11,7 @@ FluidClass::FluidClass()
 	m_indexBuffer = 0;
 	m_heightMap = 0;
 	mWave = 1.0f;
-	mScale = 10.0f;
+	mScale = 0.5f;
 	mWaveTime = 1/(2 * sqrt(2.0f));
 	m_terrainGeneratedToggle = false;
 }
@@ -40,7 +40,7 @@ bool FluidClass::InitializeFluid(ID3D11Device* device, int terrainWidth, int ter
 	{
 		return false;
 	}
-
+	ResetBorders();
 	ResetWater();
 	//even though we are generating a flat terrain, we still need to normalize it. 
 	// Calculate the normals for the terrain data.
@@ -701,6 +701,19 @@ bool FluidClass::CheckBorder(int x, int z){
 	}
 	return bound;
 }
+void FluidClass::ResetBorders(){
+	int index = 0;
+	for(int j = 0; j < m_terrainWidth; j++){
+		for(int i = 0; i < m_terrainWidth; i++){
+			index = (m_terrainHeight * j) + i;
+			if(i == 0 || i == m_terrainWidth-1 || j == 0 || j == m_terrainWidth-1){
+				m_heightMap[index].border = true;;
+			}else{
+				m_heightMap[index].border = false;
+			}
+		}
+	}
+}
 void FluidClass::ResetWater(){
 	int index;
 	float height = 0.0;
@@ -709,18 +722,11 @@ void FluidClass::ResetWater(){
 		for(int i=0; i<m_terrainWidth; i++){			
 			index = (m_terrainHeight * j) + i;
 
-			m_heightMap[index].x = ((float)i)/mScale-(float(m_terrainWidth)/mScale);
-			m_heightMap[index].y = (float)height;
-			m_heightMap[index].z = ((float)j)/10;
+			m_heightMap[index].x = ((float)i)/mScale-(float(m_terrainWidth)/2);
+			m_heightMap[index].y = (float)height/mScale;
+			m_heightMap[index].z = ((float)j)/mScale-(float(m_terrainWidth)/2);
 			m_heightMap[index].nextY = 0.0f;
 			m_heightMap[index].prevY = 0.0f;
-			m_heightMap[index].border = CheckBorder(i,j);
-			/*
-			if(i<(m_terrainWidth/4) || i>3*(m_terrainWidth/4) || j<(m_terrainWidth/4) || j>3*(m_terrainWidth/4)){
-				m_heightMap[index].border = true;
-			}else{
-				m_heightMap[index].border = false;
-			}*/
 		}
 	}
 	for(int j=m_terrainHeight/2-2; j<m_terrainHeight/2+2; j++){
@@ -742,6 +748,17 @@ void FluidClass::ResetWater(){
 			index = (m_terrainHeight * j) + i;
 			m_heightMap[index].y = 1.5f/mScale;
 
+		}
+	}
+}
+void FluidClass::SetBorders(TerrainClass::HeightMapType * terrainArray,int size){
+	int index = 0;
+	for(int i = 0; i < size; i++){
+		for(int j = 0; j<size;j++){
+			index = (m_terrainHeight * i) + j;
+			if(terrainArray[index].y > 0){
+				m_heightMap[index].border = true;
+			}
 		}
 	}
 }

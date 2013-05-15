@@ -66,11 +66,9 @@ bool ApplicationClass::Initialize(HINSTANCE hinstance, HWND hwnd, int screenWidt
 
 	// Create the input object.  The input object will be used to handle reading the keyboard and mouse input from the user.
 	m_Input = new InputClass;
-	if(!m_Input)
-	{
+	if(!m_Input){
 		return false;
 	}
-
 	// Initialize the input object.
 	result = m_Input->Initialize(hinstance, hwnd, screenWidth, screenHeight);
 	if(!result){
@@ -234,6 +232,8 @@ bool ApplicationClass::Initialize(HINSTANCE hinstance, HWND hwnd, int screenWidt
 		MessageBox(hwnd, L"Could not initialize the full screen ortho window object.", L"Error", MB_OK);
 		return false;
 	}
+	m_Terrain->GenerateHeightMap(m_Direct3D->GetDevice());
+	mFluid->SetBorders(m_Terrain->getHeightMap(), m_Terrain->getHeightMapSize());
 	return true;
 }
 bool ApplicationClass::InitObjects(HWND hwnd){
@@ -669,14 +669,7 @@ bool ApplicationClass::Frame()
 	if(!result)
 	{
 		return false;
-	}/*
-	// Render the graphics.
-	result = RenderGraphics();
-	if(!result)
-	{
-		return false;
-	}*/
-
+	}
 	return result;
 }
 
@@ -700,10 +693,6 @@ bool ApplicationClass::HandleInput(float frameTime)
 	}
 	// Set the frame time for calculating the updated position.
 	m_Position->SetFrameTime(frameTime);
-
-	// Handle the input.
-	keyDown = m_Input->IsSpacePressed();
-	m_Terrain->GenerateHeightMap(m_Direct3D->GetDevice(), keyDown);
 
 	keyDown = m_Input->IsLeftPressed();
 	m_Position->TurnLeft(keyDown);
@@ -754,69 +743,7 @@ bool ApplicationClass::HandleInput(float frameTime)
 	return true;
 }
 
-
-bool ApplicationClass::RenderGraphics()
-{
-	D3DXMATRIX worldMatrix, viewMatrix, projectionMatrix, orthoMatrix;
-	bool result;
-
-
-	// Clear the scene.
-	m_Direct3D->BeginScene(0.0f, 0.0f, 0.0f, 1.0f);
-
-	// Generate the view matrix based on the camera's position.
-	m_Camera->Render();
-
-	// Get the world, view, projection, and ortho matrices from the camera and Direct3D objects.
-	m_Direct3D->GetWorldMatrix(worldMatrix);
-	m_Camera->GetViewMatrix(viewMatrix);
-	m_Direct3D->GetProjectionMatrix(projectionMatrix);
-	m_Direct3D->GetOrthoMatrix(orthoMatrix);
-	
-
-	// Render the terrain buffers.
-	m_Terrain->Render(m_Direct3D->GetDeviceContext());
-	// Render the terrain using the terrain shader.
-	result = m_TerrainShader->Render(m_Direct3D->GetDeviceContext(), m_Terrain->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, 
-									 m_Light->GetAmbientColor(), m_Light->GetDiffuseColor(), m_Light->GetDirection());
-	if(!result)
-	{
-		return false;
-	}
-	m_Direct3D->TurnZBufferOff();
-		
-	// Turn on the alpha blending before rendering the text.
-	m_Direct3D->TurnOnAlphaBlending();
-
-	mFluid->Render(m_Direct3D->GetDeviceContext());
-	result = mFluidShader->Render(m_Direct3D->GetDeviceContext(), mFluid->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, 
-		m_Light->GetAmbientColor(), m_Light->GetDiffuseColor(), m_Light->GetDirection());
-	if(!result)
-	{
-		return false;
-	}
-
-	// Render the text user interface elements.
-	result = m_Text->Render(m_Direct3D->GetDeviceContext(), m_FontShader, worldMatrix, orthoMatrix);
-	if(!result)
-	{
-		return false;
-	}
-
-	// Turn off alpha blending after rendering the text.
-	m_Direct3D->TurnOffAlphaBlending();
-
-	// Turn the Z buffer back on now that all 2D rendering has completed.
-	m_Direct3D->TurnZBufferOn();
-
-	// Present the rendered scene to the screen.
-	m_Direct3D->EndScene();
-
-	return true;
-}
-
-bool ApplicationClass::Render(float rotation)
-{
+bool ApplicationClass::Render(float rotation){
 	bool result;
 
 	// First render the scene to a render texture.
@@ -854,25 +781,19 @@ bool ApplicationClass::RenderSceneToTexture(RenderTextureClass* write, float rot
 	write->SetRenderTarget(m_Direct3D->GetDeviceContext());
 	// Clear the render to texture.
 	write->ClearRenderTarget(m_Direct3D->GetDeviceContext(), 0.0f, 0.0f, 0.0f, 1.0f);
-	/*
-	m_Direct3D->SetBackBufferRenderTarget();
-	m_Direct3D->BeginScene(0.0f, 0.0f, 0.0f, 0.0f);
-	*/
 	// Generate the view matrix based on the camera's position.
 	m_Camera->Render();
-
 	// Get the world, view, and projection matrices from the camera and d3d objects.
 	m_Direct3D->GetWorldMatrix(worldMatrix);
 	m_Camera->GetViewMatrix(viewMatrix);
-	m_Direct3D->GetProjectionMatrix(projectionMatrix);
+	m_Direct3D->GetProjectionMatrix(projectionMatrix);	
 
 	// Render the terrain buffers.
 	m_Terrain->Render(m_Direct3D->GetDeviceContext());
 	// Render the terrain using the terrain shader.
 	result = m_TerrainShader->Render(m_Direct3D->GetDeviceContext(), m_Terrain->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, 
 		m_Light->GetAmbientColor(), m_Light->GetDiffuseColor(), m_Light->GetDirection());
-	if(!result)
-	{
+	if(!result){
 		return false;
 	}
 
@@ -887,30 +808,22 @@ bool ApplicationClass::RenderSceneToTexture(RenderTextureClass* write, float rot
 		// Render the model using the texture shader.
 		result = m_TextureShader->Render(m_Direct3D->GetDeviceContext(), m_Model[i]->GetIndexCount(), modelWorldMatrix, viewMatrix, projectionMatrix, 
 			m_Model[i]->GetTexture());
-		if(!result)
-		{
+		if(!result){
 			return false;
 		}
 	}
-
-	m_Direct3D->TurnZBufferOff();
-
 	// Turn on the alpha blending before rendering the text.
 	m_Direct3D->TurnOnAlphaBlending();
 
 	mFluid->Render(m_Direct3D->GetDeviceContext());
 	result = mFluidShader->Render(m_Direct3D->GetDeviceContext(), mFluid->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, 
 		m_Light->GetAmbientColor(), m_Light->GetDiffuseColor(), m_Light->GetDirection());
-	if(!result)
-	{
+	if(!result){
 		return false;
 	}
 
 	// Turn off alpha blending after rendering the text.
 	m_Direct3D->TurnOffAlphaBlending();
-
-	// Turn the Z buffer back on now that all 2D rendering has completed.
-	m_Direct3D->TurnZBufferOn();
 	m_Direct3D->EndScene();
 	// Reset the render target back to the original back buffer and not the render to texture anymore.
 	m_Direct3D->SetBackBufferRenderTarget();
@@ -920,7 +833,6 @@ bool ApplicationClass::RenderSceneToTexture(RenderTextureClass* write, float rot
 
 	return true;
 }
-
 bool ApplicationClass::RenderTexture(ShaderClass *shader, RenderTextureClass *readTexture, RenderTextureClass *writeTexture, OrthoWindowClass *window)
 {
 	D3DXMATRIX worldMatrix, viewMatrix, orthoMatrix;
@@ -969,8 +881,7 @@ bool ApplicationClass::RenderTexture(ShaderClass *shader, RenderTextureClass *re
 	m_Direct3D->ResetViewport();
 	return true;
 }
-bool ApplicationClass::RenderMergeTexture(RenderTextureClass *readTexture, RenderTextureClass *readTexture2, RenderTextureClass *writeTexture, OrthoWindowClass *window)
-{
+bool ApplicationClass::RenderMergeTexture(RenderTextureClass *readTexture, RenderTextureClass *readTexture2, RenderTextureClass *writeTexture, OrthoWindowClass *window){
 	bool result;
 
 	// Set the render target to be the render to texture.
@@ -1005,11 +916,9 @@ bool ApplicationClass::RenderMergeTexture(RenderTextureClass *readTexture, Rende
 	m_Direct3D->ResetViewport();
 	return true;
 }
-bool ApplicationClass::Render2DTextureScene(RenderTextureClass* mRead)
-{
+bool ApplicationClass::Render2DTextureScene(RenderTextureClass* mRead){
 	D3DXMATRIX worldMatrix, viewMatrix, orthoMatrix, projectionMatrix;
 	bool result;
-
 
 	// Clear the buffers to begin the scene.
 	m_Direct3D->BeginScene(0.0f, 0.0f, 0.0f, 1.0f);
@@ -1038,8 +947,7 @@ bool ApplicationClass::Render2DTextureScene(RenderTextureClass* mRead)
 
 	// Render the text user interface elements.
 	result = m_Text->Render(m_Direct3D->GetDeviceContext(), m_FontShader, worldMatrix, orthoMatrix);
-	if(!result)
-	{
+	if(!result){
 		return false;
 	}
 
@@ -1054,7 +962,6 @@ bool ApplicationClass::Render2DTextureScene(RenderTextureClass* mRead)
 
 	return true;
 }
-
-
-
-//diff shader class for rendering text to screen quad
+void ApplicationClass::SetBorders(){
+	
+}

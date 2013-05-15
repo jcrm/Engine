@@ -330,7 +330,7 @@ bool MergeTextureShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceCon
 
 	// Get a pointer to the data in the constant buffer.
 	dataPtr = (MergeBufferType*)mappedResource.pData;
-	dataPtr->strength = 0.5f;
+	dataPtr->strength = 0.125f;
 	// Unlock the constant buffer.
 	deviceContext->Unmap(mMergeBuffer, 0);
 

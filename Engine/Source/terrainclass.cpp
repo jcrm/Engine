@@ -45,7 +45,7 @@ bool TerrainClass::InitializeTerrain(ID3D11Device* device, int terrainWidth, int
 		for(int i=0; i<m_terrainWidth; i++){			
 			index = (m_terrainHeight * j) + i;
 
-			m_heightMap[index].x = (float)(i*2);
+			m_heightMap[index].x = (float)(i*2)-(m_terrainWidth/2);
 			m_heightMap[index].y = (float)height;
 			m_heightMap[index].z = (float)(j*2)-(m_terrainWidth/2);
 		}
@@ -127,7 +127,7 @@ int TerrainClass::GetIndexCount()
 	return m_indexCount;
 }
 
-bool TerrainClass::GenerateHeightMap(ID3D11Device* device, bool keydown)
+bool TerrainClass::GenerateHeightMap(ID3D11Device* device)
 {
 
 	bool result;
@@ -135,7 +135,7 @@ bool TerrainClass::GenerateHeightMap(ID3D11Device* device, bool keydown)
 	//until you release the key and start again. We don t want to be generating the terrain 500
 	//times per second. 
 
-	if(keydown&&(!m_terrainGeneratedToggle)){
+	if(!m_terrainGeneratedToggle){
 		ShutdownBuffers();
 
 		MPD();
@@ -145,7 +145,7 @@ bool TerrainClass::GenerateHeightMap(ID3D11Device* device, bool keydown)
 		for (int i = 0; i <6; i++){
 			terrainIterateParticleDeposition(2000, false);
 		}
-		smooth(0.4f);
+		smooth();
 		
 		result = CalculateNormals();
 		if(!result){
@@ -159,9 +159,7 @@ bool TerrainClass::GenerateHeightMap(ID3D11Device* device, bool keydown)
 		}
 
 		m_terrainGeneratedToggle = true;
-	}/*else{
-		m_terrainGeneratedToggle = false;
-	}*/
+	}
 	return true;
 }
 bool TerrainClass::LoadHeightMap(char* filename)
@@ -946,7 +944,7 @@ float TerrainClass::ValuesAroundPoint(int x, int z){
 	sum += m_heightMap[(m_terrainWidth * z) + x+1].y;
 	return sum;
 }
-void TerrainClass::smooth(float k) {
+void TerrainClass::smooth() {
 	for(int i = 1; i<m_terrainWidth-1;i++){
 		for(int j = 1; j<m_terrainHeight-1; j++){
 			int index = (m_terrainWidth * j) + i;

@@ -33,8 +33,7 @@ private:
 	};
 
 public:
-	struct HeightMapType 
-	{ 
+	struct HeightMapType{ 
 		float x, y, z;
 		float nx, ny, nz;
 	};
@@ -46,11 +45,13 @@ public:
 	bool InitializeTerrain(ID3D11Device*, int terrainWidth, int terrainHeight);
 	void Shutdown();
 	void Render(ID3D11DeviceContext*);
-	bool GenerateHeightMap(ID3D11Device* device, bool keydown);
+	bool GenerateHeightMap(ID3D11Device* device);
 	void GenerateRandomHeightMap();
 	int  GetIndexCount();
 	void MidPoint(float);
 	void Particle(int index);
+	inline int getHeightMapSize() const {return m_terrainWidth;}
+	inline HeightMapType* getHeightMap() {return m_heightMap;}
 private:
 	bool LoadHeightMap(char*);
 	void NormalizeHeightMap();
@@ -63,6 +64,7 @@ private:
 	void MPD();
 	int terrainIterateParticleDeposition(int numIt, bool up);
 	void depositPlus(int x, int z);
+	void smooth();
 	void smooth(float k);
 	void depositMinus( int x, int z);
 	void GenerateSinCos(int index);

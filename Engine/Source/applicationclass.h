@@ -68,6 +68,7 @@ private:
 	bool InitObjects(HWND hwnd);
 	bool InitTextures(HWND hwnd, int screenWidth, int screenHeight);
 	bool InitShaders(HWND hwnd);
+	void SetBorders();
 private:
 	InputClass* m_Input;
 	D3DClass* m_Direct3D;

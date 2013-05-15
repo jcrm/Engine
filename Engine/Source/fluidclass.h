@@ -11,7 +11,7 @@
 #include <d3d11.h>
 #include <d3dx10math.h>
 #include <stdio.h>
-
+#include "terrainclass.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 // Class name: TerrainClass
@@ -54,6 +54,7 @@ public:
 	inline int  GetIndexCount() {return m_indexCount;}
 	void AddWater(int x, int z, float height);
 	void ResetWater();
+	void SetBorders(TerrainClass::HeightMapType * terrain_array,int size);
 private:
 	bool LoadHeightMap(char*);
 	void NormalizeHeightMap();
@@ -70,6 +71,7 @@ private:
 	void DiminishWater();
 	bool CheckBorder(int x, int z);
 	bool InitVertex();
+	void ResetBorders();
 private:
 	bool m_terrainGeneratedToggle;
 	int m_terrainWidth, m_terrainHeight;
