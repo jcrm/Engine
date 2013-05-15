@@ -45,6 +45,9 @@ void GlowShaderClass::Shutdown()
 
 	return;
 }
+bool GlowShaderClass::Render(ID3D11DeviceContext* deviceContext, int indexCount, D3DXMATRIX projectionMatrix, ID3D11ShaderResourceView* texture, float screenHeight, float screenWidth){
+	return Render(deviceContext,indexCount,texture);
+}
 bool GlowShaderClass::Render(ID3D11DeviceContext* deviceContext, int indexCount, ID3D11ShaderResourceView* texture)
 {
 	bool result;

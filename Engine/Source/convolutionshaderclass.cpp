@@ -392,17 +392,17 @@ bool ConvolutionShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceCont
 	dataPtr3 = (ConvolutuionBufferType*)mappedResource.pData;
 
 	// Copy the data into the constant buffer.
-	dataPtr3->weight0 = -1;
-	dataPtr3->weight1 = -1;
-	dataPtr3->weight2 = -1;
+	dataPtr3->weight0 = 1;
+	dataPtr3->weight1 = 1;
+	dataPtr3->weight2 = 1;
 
-	dataPtr3->weight3 = -1;
-	dataPtr3->weight4 = 8;
-	dataPtr3->weight5 = -1;
+	dataPtr3->weight3 = 1;
+	dataPtr3->weight4 = 1;
+	dataPtr3->weight5 = 1;
 
-	dataPtr3->weight6 = -1;
-	dataPtr3->weight7 = -1;
-	dataPtr3->weight8 = -1;
+	dataPtr3->weight6 = 1;
+	dataPtr3->weight7 = 1;
+	dataPtr3->weight8 = 1;
 	dataPtr3->padding = D3DXVECTOR3(0.0,0.0,0.0);
 	// Unlock the constant buffer.
 	deviceContext->Unmap(m_convolutionBuffer, 0);
@@ -487,16 +487,16 @@ bool ConvolutionShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceCont
 	dataPtr3 = (ConvolutuionBufferType*)mappedResource.pData;
 
 	// Copy the data into the constant buffer.
-	dataPtr3->weight0 = -1;
-	dataPtr3->weight1 = -2;
-	dataPtr3->weight2 = -1;
+	dataPtr3->weight0 = 1;
+	dataPtr3->weight1 = 1;
+	dataPtr3->weight2 = 1;
 
-	dataPtr3->weight3 = 0;
-	dataPtr3->weight4 = 0;
-	dataPtr3->weight5 = 0;
+	dataPtr3->weight3 = 1;
+	dataPtr3->weight4 = 1;
+	dataPtr3->weight5 = 1;
 	
 	dataPtr3->weight6 = 1;
-	dataPtr3->weight7 = 2;
+	dataPtr3->weight7 = 1;
 	dataPtr3->weight8 = 1;
 	dataPtr3->padding = D3DXVECTOR3(0.0,0.0,0.0);
 	// Unlock the constant buffer.

@@ -312,6 +312,15 @@ bool ApplicationClass::InitTextures(HWND hwnd, int screenWidth, int screenHeight
 		MessageBox(hwnd, L"Could not initialize the Convolution to texture object.", L"Error", MB_OK);		
 		return false;
 	}
+	m_GlowTexture = new RenderTextureClass;
+	if (!m_GlowTexture){
+		return false;
+	}
+	result = m_GlowTexture->Initialize(m_Direct3D->GetDevice(), screenWidth, screenHeight, SCREEN_DEPTH, SCREEN_NEAR);
+	if (!result){
+		MessageBox(hwnd, L"Could not initialize the Convolution to texture object.", L"Error", MB_OK);		
+		return false;
+	}
 	m_MergeTexture = new RenderTextureClass;
 	if (!m_MergeTexture){
 		return false;
@@ -408,6 +417,15 @@ bool ApplicationClass::InitShaders(HWND hwnd){
 		return false;
 	}
 	result= mMergerShader->Initialize(m_Direct3D->GetDevice(),hwnd);
+	if (!result){
+		MessageBox(hwnd, L"Could not initialize the convolution shader object.", L"Error", MB_OK);
+		return false;
+	}
+	mGlowShader = new GlowShaderClass;
+	if (!mGlowShader){
+		return false;
+	}
+	result= mGlowShader->Initialize(m_Direct3D->GetDevice(),hwnd);
 	if (!result){
 		MessageBox(hwnd, L"Could not initialize the convolution shader object.", L"Error", MB_OK);
 		return false;
@@ -801,27 +819,23 @@ bool ApplicationClass::Render(float rotation)
 {
 	bool result;
 
-
 	// First render the scene to a render texture.
 	result = RenderSceneToTexture(m_RenderTexture, rotation);
 	if(!result){
 		return false;
-	}/*
-	result = RenderTexture(m_TextureToTextureShader,m_RenderTexture,m_DownSampleTexure, m_SmallWindow);
-	if(!result){
-		return false;
-	}*/
-	result = RenderTexture(m_ConvolutionShader, m_RenderTexture, m_ConvolutionTexture, m_SmallWindow);
+	}
+	result = RenderTexture(mGlowShader, m_RenderTexture,m_GlowTexture,m_FullScreenWindow);
 	if(!result){
 		return false;
 	}
-	result= RenderMergeTexture(m_RenderTexture,m_ConvolutionTexture,m_MergeTexture,m_SmallWindow);
-	/*
-	result = RenderTexture(m_TextureToTextureShader,m_ConvolutionTexture, m_UpSampleTexure, m_FullScreenWindow);
+	result = RenderTexture(m_ConvolutionShader, m_GlowTexture, m_ConvolutionTexture, m_FullScreenWindow);
 	if(!result){
 		return false;
-	}*/
-	// Render the blurred up sampled render texture to the screen.
+	}
+	result= RenderMergeTexture(m_RenderTexture,m_ConvolutionTexture,m_MergeTexture,m_FullScreenWindow);
+	if(!result){
+		return false;
+	}
 	result = Render2DTextureScene(m_MergeTexture);
 	if(!result){
 		return false;
@@ -832,7 +846,7 @@ bool ApplicationClass::Render(float rotation)
 
 bool ApplicationClass::RenderSceneToTexture(RenderTextureClass* write, float rotation)
 {
-	D3DXMATRIX worldMatrix, viewMatrix, projectionMatrix;
+	D3DXMATRIX worldMatrix, modelWorldMatrix, viewMatrix, projectionMatrix;
 	bool result;
 
 	
@@ -852,7 +866,33 @@ bool ApplicationClass::RenderSceneToTexture(RenderTextureClass* write, float rot
 	m_Camera->GetViewMatrix(viewMatrix);
 	m_Direct3D->GetProjectionMatrix(projectionMatrix);
 
-	
+	// Render the terrain buffers.
+	m_Terrain->Render(m_Direct3D->GetDeviceContext());
+	// Render the terrain using the terrain shader.
+	result = m_TerrainShader->Render(m_Direct3D->GetDeviceContext(), m_Terrain->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, 
+		m_Light->GetAmbientColor(), m_Light->GetDiffuseColor(), m_Light->GetDirection());
+	if(!result)
+	{
+		return false;
+	}
+
+	modelWorldMatrix = worldMatrix;
+	// Rotate the world matrix by the rotation value so that the cube will spin.
+	D3DXMatrixRotationY(&modelWorldMatrix, rotation);
+
+	for(int i = 0; i< 4; i++){
+		// Put the model vertex and index buffers on the graphics pipeline to prepare them for drawing.
+		m_Model[i]->Render(m_Direct3D->GetDeviceContext());
+
+		// Render the model using the texture shader.
+		result = m_TextureShader->Render(m_Direct3D->GetDeviceContext(), m_Model[i]->GetIndexCount(), modelWorldMatrix, viewMatrix, projectionMatrix, 
+			m_Model[i]->GetTexture());
+		if(!result)
+		{
+			return false;
+		}
+	}
+
 	m_Direct3D->TurnZBufferOff();
 
 	// Turn on the alpha blending before rendering the text.
@@ -871,32 +911,6 @@ bool ApplicationClass::RenderSceneToTexture(RenderTextureClass* write, float rot
 
 	// Turn the Z buffer back on now that all 2D rendering has completed.
 	m_Direct3D->TurnZBufferOn();
-
-	// Render the terrain buffers.
-	m_Terrain->Render(m_Direct3D->GetDeviceContext());
-	// Render the terrain using the terrain shader.
-	result = m_TerrainShader->Render(m_Direct3D->GetDeviceContext(), m_Terrain->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, 
-		m_Light->GetAmbientColor(), m_Light->GetDiffuseColor(), m_Light->GetDirection());
-	if(!result)
-	{
-		return false;
-	}
-
-	// Rotate the world matrix by the rotation value so that the cube will spin.
-	D3DXMatrixRotationY(&worldMatrix, rotation);
-
-	for(int i = 0; i< 4; i++){
-		// Put the model vertex and index buffers on the graphics pipeline to prepare them for drawing.
-		m_Model[i]->Render(m_Direct3D->GetDeviceContext());
-
-		// Render the model using the texture shader.
-		result = m_TextureShader->Render(m_Direct3D->GetDeviceContext(), m_Model[i]->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, 
-			m_Model[i]->GetTexture());
-		if(!result)
-		{
-			return false;
-		}
-	}
 	m_Direct3D->EndScene();
 	// Reset the render target back to the original back buffer and not the render to texture anymore.
 	m_Direct3D->SetBackBufferRenderTarget();

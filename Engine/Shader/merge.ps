@@ -33,8 +33,9 @@ struct PixelInputType
 ////////////////////////////////////////////////////////////////////////////////
 float4 MergePixelShader(PixelInputType input) : SV_TARGET
 {
-	float4 color;
-    color = (texture1.Sample(SampleType, input.tex)*(1-mergeRatio))+ (texture2.Sample(SampleType, input.tex)*mergeRatio);
+	float4 color = texture1.Sample(SampleType, input.tex);
+	float4 secondTexture = texture2.Sample(SampleType, input.tex);
+	color = color + (secondTexture*mergeRatio);		
 	color.a = 1.0f;
     return color;
 }

@@ -32,13 +32,14 @@ struct PixelInputType
 ////////////////////////////////////////////////////////////////////////////////
 float4 GlowPixelShader(PixelInputType input) : SV_TARGET
 {
-	float4 color;
+	float4 color = float4(0.0f, 0.0f, 0.0f, 0.0f);
     color = texture1.Sample(SampleType, input.tex);
-	if(color.r > 0.2f && color.g > 0.2f && color.b < 0.8f){
-		color.r = 0;
-		color.g = 0;
-		color.b = 0;
+	if(color.b >= 0.2f){
+		if(color.r > 0.6f || color.g > 0.6f){
+			color = float4(0.0f, 0.0f, 0.0f, 1.0f);
+		}
+	}else{
+		color = float4(0.0f, 0.0f, 0.0f, 1.0f);
 	}
-	color.a = 1.0f;
     return color;
 }
