@@ -648,26 +648,6 @@ void TerrainClass::MidPointDisplacement (float heightScale, float h)
 	ratio = (float) pow (double(2.0),double(-h));
 	scale = heightScale * ratio;
 
-    /* Seed the first four values. For example, in a 4x4 array, we
-       would initialize the data points indicated by '*':
-
-           *   .   .   .   *
-
-           .   .   .   .   .
-
-           .   .   .   .   .
-
-           .   .   .   .   .
-
-           *   .   .   .   *
-
-       In terms of the "diamond-square" algorithm, this gives us
-       "squares".
-
-       We want the four corners of the array to have the same
-       point. This will allow us to tile the arrays next to each other
-       such that they join seemlessly. */
-
     length = noOfConnectors / 2;
     /* Now we add ever-increasing detail based on the "diamond" seeded
        values. We loop over stride, which gets cut in half at the
