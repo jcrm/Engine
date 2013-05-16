@@ -4,7 +4,6 @@
 #ifndef _MODELCLASS_H_
 #define _MODELCLASS_H_
 
-
 //////////////
 // INCLUDES //
 //////////////
@@ -13,12 +12,10 @@
 #include <fstream>
 using namespace std;
 
-
 ///////////////////////
 // MY CLASS INCLUDES //
 ///////////////////////
 #include "textureclass.h"
-
 
 ////////////////////////////////////////////////////////////////////////////////
 // Class name: ModelClass
@@ -26,14 +23,12 @@ using namespace std;
 class ModelClass
 {
 private:
-	struct VertexType
-	{
+	struct VertexType{
 		D3DXVECTOR3 position;
 	    D3DXVECTOR2 texture;
 	};
 
-	struct ModelType
-	{
+	struct ModelType{
 		float x, y, z;
 		float tu, tv;
 		float nx, ny, nz;
@@ -48,29 +43,36 @@ public:
 	void Shutdown();
 	void Render(ID3D11DeviceContext*);
 
-	int GetIndexCount();
-	ID3D11ShaderResourceView* GetTexture();
+	inline int GetIndexCount() const {return m_indexCount;}
+	inline ID3D11ShaderResourceView* GetTexture(){return m_Texture->GetTexture();}
+	//used to move and rotate independently the cubes in 3d space
 	float GetRotation();
-	D3DXMATRIX GetTranslation();
+	inline D3DXMATRIX GetTranslation() const{return mTranslation;}
 private:
+	//create, destroy, and render buffers
 	bool InitializeBuffers(ID3D11Device*);
 	void ShutdownBuffers();
 	void RenderBuffers(ID3D11DeviceContext*);
-
+	//load and release textures
 	bool LoadTexture(ID3D11Device*, WCHAR*);
 	void ReleaseTexture();
-
+	//load and release models
 	bool LoadModel(char*);
 	void ReleaseModel();
+	//rotate the cube
 	void IncrementRotation();
 private:
 	ID3D11Buffer *m_vertexBuffer, *m_indexBuffer;
 	int m_vertexCount, m_indexCount;
 	TextureClass* m_Texture;
 	ModelType* m_model;
+	//vector for how far away from rotating point the model is
 	D3DXVECTOR3 mOffset;
+	//where the model is in 3d space
 	D3DXMATRIX mTranslation;
+	//how many degrees rotated
 	float mRotation;
+	//how fast is the model rotating
 	float mRotationSpeed;
 };
 

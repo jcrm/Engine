@@ -3,13 +3,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 #include "modelclass.h"
 
-
-ModelClass::ModelClass()
+ModelClass::ModelClass(): m_vertexBuffer(0), m_indexBuffer(0), m_Texture(0), m_model(0)
 {
-	m_vertexBuffer = 0;
-	m_indexBuffer = 0;
-	m_Texture = 0;
-	m_model = 0;
 	mOffset = D3DXVECTOR3(float(rand()%50),float((rand()%5)+10),float(rand()%50));
 	mRotation = float(rand()%3600)/10;
 	mRotationSpeed = float(rand()%50)/1000;
@@ -18,63 +13,45 @@ ModelClass::ModelClass()
 	}
 	D3DXMatrixTranslation(&mTranslation, float(rand()%129), float(rand()%10), float(rand()%129));
 }
-D3DXMATRIX ModelClass::GetTranslation(){
-	return mTranslation;
-}
-void ModelClass::IncrementRotation(){
-	// Update the rotation variable each frame.
-	mRotation += (float)D3DX_PI * mRotationSpeed;
-	if(mRotation > 360.0f){
-		mRotation -= 360.0f;
+ModelClass::ModelClass(const ModelClass& other): m_vertexBuffer(0), m_indexBuffer(0), m_Texture(0), m_model(0)
+{
+	mOffset = D3DXVECTOR3(float(rand()%50),float((rand()%5)+10),float(rand()%50));
+	mRotation = float(rand()%3600)/10;
+	mRotationSpeed = float(rand()%50)/1000;
+	if(mRotationSpeed == 0){
+		mRotationSpeed = 0.0005f;
 	}
+	D3DXMatrixTranslation(&mTranslation, float(rand()%129), float(rand()%10), float(rand()%129));
 }
-float ModelClass::GetRotation(){
-	IncrementRotation();
-	return mRotation;
+ModelClass::~ModelClass(){
 }
-
-ModelClass::ModelClass(const ModelClass& other)
-{
-}
-
-
-ModelClass::~ModelClass()
-{
-}
-
-
-bool ModelClass::Initialize(ID3D11Device* device, char* modelFilename, WCHAR* textureFilename)
-{
+/*
+* Initalize takes device, the filename of the nodel data, and the name of the texture
+*/
+bool ModelClass::Initialize(ID3D11Device* device, char* modelFilename, WCHAR* textureFilename){
 	bool result;
-
 
 	// Load in the model data.
 	result = LoadModel(modelFilename);
-	if(!result)
-	{
+	if(!result){
 		return false;
 	}
 
 	// Initialize the vertex and index buffer that hold the geometry for the model.
 	result = InitializeBuffers(device);
-	if(!result)
-	{
+	if(!result){
 		return false;
 	}
 
 	// Load the texture for this model.
 	result = LoadTexture(device, textureFilename);
-	if(!result)
-	{
+	if(!result){
 		return false;
 	}
 
 	return true;
 }
-
-
-void ModelClass::Shutdown()
-{
+void ModelClass::Shutdown(){
 	// Release the model texture.
 	ReleaseTexture();
 
@@ -86,49 +63,28 @@ void ModelClass::Shutdown()
 
 	return;
 }
-
-
-void ModelClass::Render(ID3D11DeviceContext* deviceContext)
-{
+void ModelClass::Render(ID3D11DeviceContext* deviceContext){
 	// Put the vertex and index buffers on the graphics pipeline to prepare them for drawing.
 	RenderBuffers(deviceContext);
 
 	return;
 }
-
-
-int ModelClass::GetIndexCount()
-{
-	return m_indexCount;
-}
-
-
-ID3D11ShaderResourceView* ModelClass::GetTexture()
-{
-	return m_Texture->GetTexture();
-}
-
-bool ModelClass::InitializeBuffers(ID3D11Device* device)
-{
+bool ModelClass::InitializeBuffers(ID3D11Device* device){
 	VertexType* vertices;
 	unsigned long* indices;
 	D3D11_BUFFER_DESC vertexBufferDesc, indexBufferDesc;
     D3D11_SUBRESOURCE_DATA vertexData, indexData;
 	HRESULT result;
 	int i;
-
-
 	// Create the vertex array.
 	vertices = new VertexType[m_vertexCount];
-	if(!vertices)
-	{
+	if(!vertices){
 		return false;
 	}
 
 	// Create the index array.
 	indices = new unsigned long[m_indexCount];
-	if(!indices)
-	{
+	if(!indices){
 		return false;
 	}
 
@@ -155,8 +111,7 @@ bool ModelClass::InitializeBuffers(ID3D11Device* device)
 
 	// Now create the vertex buffer.
     result = device->CreateBuffer(&vertexBufferDesc, &vertexData, &m_vertexBuffer);
-	if(FAILED(result))
-	{
+	if(FAILED(result)){
 		return false;
 	}
 
@@ -175,8 +130,7 @@ bool ModelClass::InitializeBuffers(ID3D11Device* device)
 
 	// Create the index buffer.
 	result = device->CreateBuffer(&indexBufferDesc, &indexData, &m_indexBuffer);
-	if(FAILED(result))
-	{
+	if(FAILED(result)){
 		return false;
 	}
 
@@ -189,33 +143,24 @@ bool ModelClass::InitializeBuffers(ID3D11Device* device)
 
 	return true;
 }
-
-
-void ModelClass::ShutdownBuffers()
-{
+void ModelClass::ShutdownBuffers(){
 	// Release the index buffer.
-	if(m_indexBuffer)
-	{
+	if(m_indexBuffer){
 		m_indexBuffer->Release();
 		m_indexBuffer = 0;
 	}
 
 	// Release the vertex buffer.
-	if(m_vertexBuffer)
-	{
+	if(m_vertexBuffer){
 		m_vertexBuffer->Release();
 		m_vertexBuffer = 0;
 	}
 
 	return;
 }
-
-
-void ModelClass::RenderBuffers(ID3D11DeviceContext* deviceContext)
-{
+void ModelClass::RenderBuffers(ID3D11DeviceContext* deviceContext){
 	unsigned int stride;
 	unsigned int offset;
-
 
 	// Set vertex buffer stride and offset.
 	stride = sizeof(VertexType); 
@@ -232,36 +177,26 @@ void ModelClass::RenderBuffers(ID3D11DeviceContext* deviceContext)
 
 	return;
 }
-
-
-bool ModelClass::LoadTexture(ID3D11Device* device, WCHAR* filename)
-{
+bool ModelClass::LoadTexture(ID3D11Device* device, WCHAR* filename){
 	bool result;
-
 
 	// Create the texture object.
 	m_Texture = new TextureClass;
-	if(!m_Texture)
-	{
+	if(!m_Texture){
 		return false;
 	}
 
 	// Initialize the texture object.
 	result = m_Texture->Initialize(device, filename);
-	if(!result)
-	{
+	if(!result){
 		return false;
 	}
 
 	return true;
 }
-
-
-void ModelClass::ReleaseTexture()
-{
+void ModelClass::ReleaseTexture(){
 	// Release the texture object.
-	if(m_Texture)
-	{
+	if(m_Texture){
 		m_Texture->Shutdown();
 		delete m_Texture;
 		m_Texture = 0;
@@ -269,10 +204,7 @@ void ModelClass::ReleaseTexture()
 
 	return;
 }
-
-
-bool ModelClass::LoadModel(char* filename)
-{
+bool ModelClass::LoadModel(char* filename){
 	ifstream fin;
 	char input;
 	int i;
@@ -280,15 +212,13 @@ bool ModelClass::LoadModel(char* filename)
 
 	// Open the model file.  If it could not open the file then exit.
 	fin.open(filename);
-	if(fin.fail())
-	{
+	if(fin.fail()){
 		return false;
 	}
 
 	// Read up to the value of vertex count.
 	fin.get(input);
-	while(input != ':')
-	{
+	while(input != ':'){
 		fin.get(input);
 	}
 
@@ -300,23 +230,20 @@ bool ModelClass::LoadModel(char* filename)
 
 	// Create the model using the vertex count that was read in.
 	m_model = new ModelType[m_vertexCount];
-	if(!m_model)
-	{
+	if(!m_model){
 		return false;
 	}
 
 	// Read up to the beginning of the data.
 	fin.get(input);
-	while(input != ':')
-	{
+	while(input != ':'){
 		fin.get(input);
 	}
 	fin.get(input);
 	fin.get(input);
 
 	// Read in the vertex data.
-	for(i=0; i<m_vertexCount; i++)
-	{
+	for(i=0; i<m_vertexCount; i++){
 		fin >> m_model[i].x >> m_model[i].y >> m_model[i].z;
 		fin >> m_model[i].tu >> m_model[i].tv;
 		fin >> m_model[i].nx >> m_model[i].ny >> m_model[i].nz;
@@ -327,15 +254,23 @@ bool ModelClass::LoadModel(char* filename)
 
 	return true;
 }
-
-
-void ModelClass::ReleaseModel()
-{
-	if(m_model)
-	{
+void ModelClass::ReleaseModel(){
+	if(m_model){
 		delete [] m_model;
 		m_model = 0;
 	}
 
 	return;
+}
+void ModelClass::IncrementRotation(){
+	// Update the rotation variable each frame.
+	mRotation += (float)D3DX_PI * mRotationSpeed;
+	if(mRotation > 360.0f){
+		mRotation -= 360.0f;
+	}
+}
+float ModelClass::GetRotation(){
+	//update rotation then return the new value
+	IncrementRotation();
+	return mRotation;
 }
