@@ -1,34 +1,21 @@
 ////////////////////////////////////////////////////////////////////////////////
-// Filename: terrainshaderclass.cpp
+// Filename: fluidshaderclass.cpp
 ////////////////////////////////////////////////////////////////////////////////
 #include "fluidshaderclass.h"
 
-
-FluidShaderClass::FluidShaderClass()
-{
-	m_vertexShader = 0;
-	m_pixelShader = 0;
-	m_layout = 0;
-	m_sampleState = 0;
-	m_matrixBuffer = 0;
-	m_lightBuffer = 0;
-}
-
-
-FluidShaderClass::FluidShaderClass(const FluidShaderClass& other)
+FluidShaderClass::FluidShaderClass(): m_vertexShader(0), m_pixelShader(0), m_layout(0), 
+	m_sampleState(0), m_matrixBuffer(0), m_lightBuffer(0)
 {
 }
-
-
+FluidShaderClass::FluidShaderClass(const FluidShaderClass& other): m_vertexShader(0), m_pixelShader(0), m_layout(0), 
+	m_sampleState(0), m_matrixBuffer(0), m_lightBuffer(0)
+{
+}
 FluidShaderClass::~FluidShaderClass()
 {
 }
-
-
-bool FluidShaderClass::Initialize(ID3D11Device* device, HWND hwnd)
-{
+bool FluidShaderClass::Initialize(ID3D11Device* device, HWND hwnd){
 	bool result;
-
 
 	// Initialize the vertex and pixel shaders.
 	result = InitializeShader(device, hwnd, L"Shader/fluid.vs", L"Shader/fluid.ps");
@@ -39,27 +26,20 @@ bool FluidShaderClass::Initialize(ID3D11Device* device, HWND hwnd)
 
 	return true;
 }
-
-
-void FluidShaderClass::Shutdown()
-{
+void FluidShaderClass::Shutdown(){
 	// Shutdown the vertex and pixel shaders as well as the related objects.
 	ShutdownShader();
 
 	return;
 }
-
-
 bool FluidShaderClass::Render(ID3D11DeviceContext* deviceContext, int indexCount, D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix, 
 								D3DXMATRIX projectionMatrix, D3DXVECTOR4 ambientColor, D3DXVECTOR4 diffuseColor, D3DXVECTOR3 lightDirection)
 {
 	bool result;
 
-
 	// Set the shader parameters that it will use for rendering.
 	result = SetShaderParameters(deviceContext, worldMatrix, viewMatrix, projectionMatrix, ambientColor, diffuseColor, lightDirection);
-	if(!result)
-	{
+	if(!result){
 		return false;
 	}
 
@@ -68,10 +48,7 @@ bool FluidShaderClass::Render(ID3D11DeviceContext* deviceContext, int indexCount
 
 	return true;
 }
-
-
-bool FluidShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* vsFilename, WCHAR* psFilename)
-{
+bool FluidShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* vsFilename, WCHAR* psFilename){
 	HRESULT result;
 	ID3D10Blob* errorMessage;
 	ID3D10Blob* vertexShaderBuffer;
@@ -91,52 +68,38 @@ bool FluidShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* 
     // Compile the vertex shader code.
 	result = D3DX11CompileFromFile(vsFilename, NULL, NULL, "TerrainVertexShader", "vs_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, NULL, 
 								   &vertexShaderBuffer, &errorMessage, NULL);
-	if(FAILED(result))
-	{
+	if(FAILED(result)){
 		// If the shader failed to compile it should have writen something to the error message.
-		if(errorMessage)
-		{
+		if(errorMessage){
 			OutputShaderErrorMessage(errorMessage, hwnd, vsFilename);
-		}
-		// If there was nothing in the error message then it simply could not find the shader file itself.
-		else
-		{
+		}else{	// If there was nothing in the error message then it simply could not find the shader file itself.
 			MessageBox(hwnd, vsFilename, L"Missing Shader File", MB_OK);
 		}
-
 		return false;
 	}
 
     // Compile the pixel shader code.
 	result = D3DX11CompileFromFile(psFilename, NULL, NULL, "TerrainPixelShader", "ps_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, NULL, 
 								   &pixelShaderBuffer, &errorMessage, NULL);
-	if(FAILED(result))
-	{
+	if(FAILED(result)){
 		// If the shader failed to compile it should have writen something to the error message.
-		if(errorMessage)
-		{
+		if(errorMessage){
 			OutputShaderErrorMessage(errorMessage, hwnd, psFilename);
-		}
-		// If there was nothing in the error message then it simply could not find the file itself.
-		else
-		{
+		}else{// If there was nothing in the error message then it simply could not find the file itself.
 			MessageBox(hwnd, psFilename, L"Missing Shader File", MB_OK);
 		}
-
 		return false;
 	}
 
     // Create the vertex shader from the buffer.
     result = device->CreateVertexShader(vertexShaderBuffer->GetBufferPointer(), vertexShaderBuffer->GetBufferSize(), NULL, &m_vertexShader);
-	if(FAILED(result))
-	{
+	if(FAILED(result)){
 		return false;
 	}
 
     // Create the pixel shader from the buffer.
     result = device->CreatePixelShader(pixelShaderBuffer->GetBufferPointer(), pixelShaderBuffer->GetBufferSize(), NULL, &m_pixelShader);
-	if(FAILED(result))
-	{
+	if(FAILED(result)){
 		return false;
 	}
 
@@ -163,8 +126,7 @@ bool FluidShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* 
 	// Create the vertex input layout.
 	result = device->CreateInputLayout(polygonLayout, numElements, vertexShaderBuffer->GetBufferPointer(), vertexShaderBuffer->GetBufferSize(), 
 									   &m_layout);
-	if(FAILED(result))
-	{
+	if(FAILED(result)){
 		return false;
 	}
 
@@ -192,8 +154,7 @@ bool FluidShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* 
 
 	// Create the texture sampler state.
     result = device->CreateSamplerState(&samplerDesc, &m_sampleState);
-	if(FAILED(result))
-	{
+	if(FAILED(result)){
 		return false;
 	}
 
@@ -207,8 +168,7 @@ bool FluidShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* 
 
 	// Create the constant buffer pointer so we can access the vertex shader constant buffer from within this class.
 	result = device->CreateBuffer(&matrixBufferDesc, NULL, &m_matrixBuffer);
-	if(FAILED(result))
-	{
+	if(FAILED(result)){
 		return false;
 	}
 
@@ -223,65 +183,52 @@ bool FluidShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* 
 
 	// Create the constant buffer pointer so we can access the vertex shader constant buffer from within this class.
 	result = device->CreateBuffer(&lightBufferDesc, NULL, &m_lightBuffer);
-	if(FAILED(result))
-	{
+	if(FAILED(result)){
 		return false;
 	}
 
 	return true;
 }
-
-
-void FluidShaderClass::ShutdownShader()
-{
+void FluidShaderClass::ShutdownShader(){
 	// Release the light constant buffer.
-	if(m_lightBuffer)
-	{
+	if(m_lightBuffer){
 		m_lightBuffer->Release();
 		m_lightBuffer = 0;
 	}
 
 	// Release the matrix constant buffer.
-	if(m_matrixBuffer)
-	{
+	if(m_matrixBuffer){
 		m_matrixBuffer->Release();
 		m_matrixBuffer = 0;
 	}
 
 	// Release the sampler state.
-	if(m_sampleState)
-	{
+	if(m_sampleState){
 		m_sampleState->Release();
 		m_sampleState = 0;
 	}
 
 	// Release the layout.
-	if(m_layout)
-	{
+	if(m_layout){
 		m_layout->Release();
 		m_layout = 0;
 	}
 
 	// Release the pixel shader.
-	if(m_pixelShader)
-	{
+	if(m_pixelShader){
 		m_pixelShader->Release();
 		m_pixelShader = 0;
 	}
 
 	// Release the vertex shader.
-	if(m_vertexShader)
-	{
+	if(m_vertexShader){
 		m_vertexShader->Release();
 		m_vertexShader = 0;
 	}
 
 	return;
 }
-
-
-void FluidShaderClass::OutputShaderErrorMessage(ID3D10Blob* errorMessage, HWND hwnd, WCHAR* shaderFilename)
-{
+void FluidShaderClass::OutputShaderErrorMessage(ID3D10Blob* errorMessage, HWND hwnd, WCHAR* shaderFilename){
 	char* compileErrors;
 	unsigned long bufferSize, i;
 	ofstream fout;
@@ -297,8 +244,7 @@ void FluidShaderClass::OutputShaderErrorMessage(ID3D10Blob* errorMessage, HWND h
 	fout.open("shader-error.txt");
 
 	// Write out the error message.
-	for(i=0; i<bufferSize; i++)
-	{
+	for(i=0; i<bufferSize; i++){
 		fout << compileErrors[i];
 	}
 
@@ -314,7 +260,6 @@ void FluidShaderClass::OutputShaderErrorMessage(ID3D10Blob* errorMessage, HWND h
 
 	return;
 }
-
 
 bool FluidShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext, D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix, 
 											 D3DXMATRIX projectionMatrix, D3DXVECTOR4 ambientColor, D3DXVECTOR4 diffuseColor, D3DXVECTOR3 lightDirection)
@@ -333,8 +278,7 @@ bool FluidShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext, D
 
 	// Lock the constant buffer so it can be written to.
 	result = deviceContext->Map(m_matrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
-	if(FAILED(result))
-	{
+	if(FAILED(result)){
 		return false;
 	}
 
@@ -357,8 +301,7 @@ bool FluidShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext, D
 
 	// Lock the light constant buffer so it can be written to.
 	result = deviceContext->Map(m_lightBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
-	if(FAILED(result))
-	{
+	if(FAILED(result)){
 		return false;
 	}
 
@@ -382,10 +325,7 @@ bool FluidShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext, D
 
 	return true;
 }
-
-
-void FluidShaderClass::RenderShader(ID3D11DeviceContext* deviceContext, int indexCount)
-{
+void FluidShaderClass::RenderShader(ID3D11DeviceContext* deviceContext, int indexCount){
 	// Set the vertex input layout.
 	deviceContext->IASetInputLayout(m_layout);
 

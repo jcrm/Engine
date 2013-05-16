@@ -1,9 +1,8 @@
 ////////////////////////////////////////////////////////////////////////////////
-// Filename: terrainshaderclass.h
+// Filename: fluidshaderclass.h
 ////////////////////////////////////////////////////////////////////////////////
 #ifndef _FLUIDSHADERCLASS_H_
 #define _FLUIDSHADERCLASS_H_
-
 
 //////////////
 // INCLUDES //
@@ -14,22 +13,18 @@
 #include <fstream>
 using namespace std;
 
-
 ////////////////////////////////////////////////////////////////////////////////
-// Class name: TerrainShaderClass
+// Class name: FluidShaderClass
 ////////////////////////////////////////////////////////////////////////////////
 class FluidShaderClass
 {
 private:
-	struct MatrixBufferType
-	{
+	struct MatrixBufferType{
 		D3DXMATRIX world;
 		D3DXMATRIX view;
 		D3DXMATRIX projection;
 	};
-
-	struct LightBufferType
-	{
+	struct LightBufferType{
 		D3DXVECTOR4 ambientColor;
 		D3DXVECTOR4 diffuseColor;
 		D3DXVECTOR3 lightDirection;
@@ -49,10 +44,8 @@ private:
 	bool InitializeShader(ID3D11Device*, HWND, WCHAR*, WCHAR*);
 	void ShutdownShader();
 	void OutputShaderErrorMessage(ID3D10Blob*, HWND, WCHAR*);
-
 	bool SetShaderParameters(ID3D11DeviceContext*, D3DXMATRIX, D3DXMATRIX, D3DXMATRIX, D3DXVECTOR4, D3DXVECTOR4, D3DXVECTOR3);
 	void RenderShader(ID3D11DeviceContext*, int);
-
 private:
 	ID3D11VertexShader* m_vertexShader;
 	ID3D11PixelShader* m_pixelShader;
