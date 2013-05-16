@@ -1,7 +1,6 @@
 #ifndef _ShaderClass_h_
 #define _ShaderClass_h_
 
-
 //////////////
 // INCLUDES //
 //////////////
@@ -11,15 +10,13 @@
 #include <fstream>
 using namespace std;
 
-
 ////////////////////////////////////////////////////////////////////////////////
-// Class name: ShaderClass
+// Class name: ShaderClass virtual class that gets inherited by most shader classes
 ////////////////////////////////////////////////////////////////////////////////
 class ShaderClass
 {
 protected:
-	struct MatrixBufferType
-	{
+	struct MatrixBufferType{
 		D3DXMATRIX world;
 		D3DXMATRIX view;
 		D3DXMATRIX projection;
@@ -29,7 +26,6 @@ public:
 	ShaderClass(void);
 	ShaderClass(const ShaderClass&);
 	virtual ~ShaderClass(void);
-
 
 	virtual bool Initialize(ID3D11Device*, HWND);
 	virtual void Shutdown();
@@ -49,7 +45,6 @@ protected:
 	ID3D11InputLayout* m_layout;
 	ID3D11Buffer* m_matrixBuffer;
 	ID3D11SamplerState* m_sampleState;
-
 };
 
 #endif // _ShaderClass_h_

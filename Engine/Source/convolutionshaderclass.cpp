@@ -1,35 +1,20 @@
 ////////////////////////////////////////////////////////////////////////////////
-// Filename: verticalblurshaderclass.cpp
+// Filename: convolutionshaderclass.cpp
 ////////////////////////////////////////////////////////////////////////////////
 #include "convolutionshaderclass.h"
 
 
-ConvolutionShaderClass::ConvolutionShaderClass()
-{
-	m_vertexShader = 0;
-	m_pixelShader = 0;
-	m_layout = 0;
-	m_sampleState = 0;
-	m_matrixBuffer = 0;
-	m_screenSizeBuffer = 0;
-	m_convolutionBuffer = 0;
-}
-
-
-ConvolutionShaderClass::ConvolutionShaderClass(const ConvolutionShaderClass& other)
+ConvolutionShaderClass::ConvolutionShaderClass(): m_screenSizeBuffer(0), m_convolutionBuffer(0)
 {
 }
-
-
+ConvolutionShaderClass::ConvolutionShaderClass(const ConvolutionShaderClass& other): m_screenSizeBuffer(0), m_convolutionBuffer(0)
+{
+}
 ConvolutionShaderClass::~ConvolutionShaderClass()
 {
 }
-
-
-bool ConvolutionShaderClass::Initialize(ID3D11Device* device, HWND hwnd)
-{
+bool ConvolutionShaderClass::Initialize(ID3D11Device* device, HWND hwnd){
 	bool result;
-
 
 	// Initialize the vertex and pixel shaders.
 	result = InitializeShader(device, hwnd, L"Shader/convolution.vs", L"Shader/convolution.ps");
@@ -40,17 +25,15 @@ bool ConvolutionShaderClass::Initialize(ID3D11Device* device, HWND hwnd)
 
 	return true;
 }
-
-
-void ConvolutionShaderClass::Shutdown()
-{
+void ConvolutionShaderClass::Shutdown(){
 	// Shutdown the vertex and pixel shaders as well as the related objects.
 	ShutdownShader();
 
 	return;
 }
-
-
+/*
+* Render with world, view, and projection matrix
+*/
 bool ConvolutionShaderClass::Render(ID3D11DeviceContext* deviceContext, int indexCount, D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix, 
 									 D3DXMATRIX projectionMatrix, ID3D11ShaderResourceView* texture, float screenHeight, float screenWidth)
 {
@@ -68,6 +51,9 @@ bool ConvolutionShaderClass::Render(ID3D11DeviceContext* deviceContext, int inde
 
 	return true;
 }
+/*
+* Render with with no view or world matrix
+*/
 bool ConvolutionShaderClass::Render(ID3D11DeviceContext* deviceContext, int indexCount, 
 	D3DXMATRIX projectionMatrix, ID3D11ShaderResourceView* texture, float screenHeight, float screenWidth)
 {
@@ -86,9 +72,7 @@ bool ConvolutionShaderClass::Render(ID3D11DeviceContext* deviceContext, int inde
 
 	return true;
 }
-
-bool ConvolutionShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* vsFilename, WCHAR* psFilename)
-{
+bool ConvolutionShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* vsFilename, WCHAR* psFilename){
 	HRESULT result;
 	ID3D10Blob* errorMessage;
 	ID3D10Blob* vertexShaderBuffer;
@@ -109,8 +93,7 @@ bool ConvolutionShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, W
     // Compile the vertex shader code.
 	result = D3DX11CompileFromFile(vsFilename, NULL, NULL, "ConvolutionVertexShader", "vs_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, NULL, 
 								   &vertexShaderBuffer, &errorMessage, NULL);
-	if(FAILED(result))
-	{
+	if(FAILED(result)){
 		// If the shader failed to compile it should have writen something to the error message.
 		if(errorMessage)
 		{
@@ -128,33 +111,24 @@ bool ConvolutionShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, W
     // Compile the pixel shader code.
 	result = D3DX11CompileFromFile(psFilename, NULL, NULL, "ConvolutionPixelShader", "ps_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, NULL, 
 								   &pixelShaderBuffer, &errorMessage, NULL);
-	if(FAILED(result))
-	{
+	if(FAILED(result)){
 		// If the shader failed to compile it should have writen something to the error message.
-		if(errorMessage)
-		{
+		if(errorMessage){
 			OutputShaderErrorMessage(errorMessage, hwnd, psFilename);
-		}
-		// If there was  nothing in the error message then it simply could not find the file itself.
-		else
-		{
+		}else{// If there was  nothing in the error message then it simply could not find the file itself
 			MessageBox(hwnd, psFilename, L"Missing Shader File", MB_OK);
 		}
-
 		return false;
 	}
-
     // Create the vertex shader from the buffer.
     result = device->CreateVertexShader(vertexShaderBuffer->GetBufferPointer(), vertexShaderBuffer->GetBufferSize(), NULL, &m_vertexShader);
-	if(FAILED(result))
-	{
+	if(FAILED(result)){
 		return false;
 	}
 
     // Create the pixel shader from the buffer.
     result = device->CreatePixelShader(pixelShaderBuffer->GetBufferPointer(), pixelShaderBuffer->GetBufferSize(), NULL, &m_pixelShader);
-	if(FAILED(result))
-	{
+	if(FAILED(result)){
 		return false;
 	}
 
@@ -183,8 +157,7 @@ bool ConvolutionShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, W
 	// Create the vertex input layout.
 	result = device->CreateInputLayout(polygonLayout, numElements, vertexShaderBuffer->GetBufferPointer(), vertexShaderBuffer->GetBufferSize(), 
 		                               &m_layout);
-	if(FAILED(result))
-	{
+	if(FAILED(result)){
 		return false;
 	}
 
@@ -212,8 +185,7 @@ bool ConvolutionShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, W
 
 	// Create the texture sampler state.
     result = device->CreateSamplerState(&samplerDesc, &m_sampleState);
-	if(FAILED(result))
-	{
+	if(FAILED(result)){
 		return false;
 	}
 
@@ -227,8 +199,7 @@ bool ConvolutionShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, W
 
 	// Create the constant buffer pointer so we can access the vertex shader constant buffer from within this class.
 	result = device->CreateBuffer(&matrixBufferDesc, NULL, &m_matrixBuffer);
-	if(FAILED(result))
-	{
+	if(FAILED(result)){
 		return false;
 	}
 
@@ -242,12 +213,9 @@ bool ConvolutionShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, W
 
 	// Create the constant buffer pointer so we can access the vertex shader constant buffer from within this class.
 	result = device->CreateBuffer(&screenSizeBufferDesc, NULL, &m_screenSizeBuffer);
-	if(FAILED(result))
-	{
+	if(FAILED(result)){
 		return false;
 	}
-
-
 
 	convolutionBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
 	convolutionBufferDesc.ByteWidth = sizeof(ConvolutuionBufferType);
@@ -258,68 +226,54 @@ bool ConvolutionShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, W
 
 	// Create the constant buffer pointer so we can access the vertex shader constant buffer from within this class.
 	result = device->CreateBuffer(&convolutionBufferDesc, NULL, &m_convolutionBuffer);
-	if(FAILED(result))
-	{
+	if(FAILED(result)){
 		return false;
 	}
 	return true;
 }
-
-
-void ConvolutionShaderClass::ShutdownShader()
-{
+void ConvolutionShaderClass::ShutdownShader(){
 	// Release the screen size constant buffer.
-	if(m_screenSizeBuffer)
-	{
+	if(m_screenSizeBuffer){
 		m_screenSizeBuffer->Release();
 		m_screenSizeBuffer = 0;
 	}
 
 	// Release the matrix constant buffer.
-	if(m_matrixBuffer)
-	{
+	if(m_matrixBuffer){
 		m_matrixBuffer->Release();
 		m_matrixBuffer = 0;
 	}
 
 	// Release the sampler state.
-	if(m_sampleState)
-	{
+	if(m_sampleState){
 		m_sampleState->Release();
 		m_sampleState = 0;
 	}
 
 	// Release the layout.
-	if(m_layout)
-	{
+	if(m_layout){
 		m_layout->Release();
 		m_layout = 0;
 	}
 
 	// Release the pixel shader.
-	if(m_pixelShader)
-	{
+	if(m_pixelShader){
 		m_pixelShader->Release();
 		m_pixelShader = 0;
 	}
 
 	// Release the vertex shader.
-	if(m_vertexShader)
-	{
+	if(m_vertexShader){
 		m_vertexShader->Release();
 		m_vertexShader = 0;
 	}
 
 	return;
 }
-
-
-void ConvolutionShaderClass::OutputShaderErrorMessage(ID3D10Blob* errorMessage, HWND hwnd, WCHAR* shaderFilename)
-{
+void ConvolutionShaderClass::OutputShaderErrorMessage(ID3D10Blob* errorMessage, HWND hwnd, WCHAR* shaderFilename){
 	char* compileErrors;
 	unsigned long bufferSize, i;
 	ofstream fout;
-
 
 	// Get a pointer to the error message text buffer.
 	compileErrors = (char*)(errorMessage->GetBufferPointer());
@@ -331,8 +285,7 @@ void ConvolutionShaderClass::OutputShaderErrorMessage(ID3D10Blob* errorMessage, 
 	fout.open("shader-error.txt");
 
 	// Write out the error message.
-	for(i=0; i<bufferSize; i++)
-	{
+	for(i=0; i<bufferSize; i++){
 		fout << compileErrors[i];
 	}
 
@@ -359,8 +312,7 @@ bool ConvolutionShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceCont
 	
 	// Lock the screen size constant buffer so it can be written to.
 	result = deviceContext->Map(m_screenSizeBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
-	if(FAILED(result))
-	{
+	if(FAILED(result)){
 		return false;
 	}
 
@@ -382,8 +334,7 @@ bool ConvolutionShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceCont
 	deviceContext->VSSetConstantBuffers(bufferNumber, 1, &m_screenSizeBuffer);
 
 	result = deviceContext->Map(m_convolutionBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
-	if(FAILED(result))
-	{
+	if(FAILED(result)){
 		return false;
 	}
 
@@ -507,10 +458,7 @@ bool ConvolutionShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceCont
 
 	return true;
 }
-
-
-void ConvolutionShaderClass::RenderShader(ID3D11DeviceContext* deviceContext, int indexCount)
-{
+void ConvolutionShaderClass::RenderShader(ID3D11DeviceContext* deviceContext, int indexCount){
 	// Set the vertex input layout.
 	deviceContext->IASetInputLayout(m_layout);
 

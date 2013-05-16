@@ -4,7 +4,6 @@
 #ifndef _CONVOLUTIONSHADERCLASS_H_
 #define _CONVOLUTIONSHADERCLASS_H_
 
-
 //////////////
 // INCLUDES //
 //////////////
@@ -15,21 +14,18 @@
 using namespace std;
 #include "ShaderClass.h"
 
-
 ////////////////////////////////////////////////////////////////////////////////
-// Class name: VerticalBlurShaderClass
+// Class name: ConvolutionhaderClass
 ////////////////////////////////////////////////////////////////////////////////
 class ConvolutionShaderClass : public ShaderClass
 {
 private:
-	struct ScreenSizeBufferType
-	{
+	struct ScreenSizeBufferType{
 		float screenHeight;
 		float screenWidth;
 		D3DXVECTOR2 padding;
 	};
-	struct ConvolutuionBufferType
-	{
+	struct ConvolutuionBufferType{
 		float weight0;
 		float weight1;
 		float weight2;
@@ -42,7 +38,7 @@ private:
 
 		float weight8;
 		D3DXVECTOR3 padding;
-		//add padding
+		//add padding to make multiple of 16 bytes
 	};
 
 public:
