@@ -41,6 +41,7 @@ const float SCREEN_NEAR = 0.1f;
 #include "mergetextureshaderclass.h"
 #include "glowshaderclass.h"
 #include "ShaderClass.h"
+#include "verticalblurshaderclass.h"
 
 #define MODEL_NUMBER 10
 
@@ -105,6 +106,9 @@ private:
 	FluidShaderClass* mFluidShader;
 	MergeTextureShaderClass* mMergerShader;
 	GlowShaderClass* mGlowShader;
+	VerticalBlurShaderClass* mVerticalBlurShader;
+
+	bool mBlur;
 };
 
 #endif

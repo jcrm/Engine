@@ -38,6 +38,7 @@
     <ClInclude Include="Source\textureshaderclass.h" />
     <ClInclude Include="Source\texturetotextureshaderclass .h" />
     <ClInclude Include="Source\timerclass.h" />
+    <ClInclude Include="Source\verticalblurshaderclass.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\applicationclass.cpp" />
@@ -68,6 +69,7 @@
     <ClCompile Include="Source\textureshaderclass.cpp" />
     <ClCompile Include="Source\texturetotextureshaderclass.cpp" />
     <ClCompile Include="Source\timerclass.cpp" />
+    <ClCompile Include="Source\verticalblurshaderclass.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Shader\convolution.ps" />
@@ -86,8 +88,8 @@
     <None Include="Shader\texture.vs" />
     <None Include="Shader\texturetotexture.ps" />
     <None Include="Shader\texturetotexture.vs" />
-    <None Include="Shader\waterHeight.ps" />
-    <None Include="Shader\waterHeight.vs" />
+    <None Include="Shader\verticalblur.ps" />
+    <None Include="Shader\verticalblur.vs" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{CC8EB8E1-1A10-4345-88B7-C839B29AF7FB}</ProjectGuid>

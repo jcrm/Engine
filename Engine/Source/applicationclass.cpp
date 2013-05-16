@@ -36,6 +36,7 @@ ApplicationClass::ApplicationClass()
 	for(int i = 0; i < MODEL_NUMBER; i++){
 		m_Model[0] = 0;
 	}
+	mBlur = false;
 }
 
 
@@ -290,17 +291,6 @@ bool ApplicationClass::InitTextures(HWND hwnd, int screenWidth, int screenHeight
 		MessageBox(hwnd, L"Could not initialize the up sample render to texture object.", L"Error", MB_OK);
 		return false;
 	}
-	// Create the up sample render to texture object.
-	m_UpSampleTexure = new RenderTextureClass;
-	if(!m_UpSampleTexure){
-		return false;
-	}
-	// Initialize the up sample render to texture object.
-	result = m_UpSampleTexure->Initialize(m_Direct3D->GetDevice(), screenWidth, screenHeight, SCREEN_DEPTH, SCREEN_NEAR);
-	if(!result){
-		MessageBox(hwnd, L"Could not initialize the up sample render to texture object.", L"Error", MB_OK);
-		return false;
-	}
 	return true;
 }
 bool ApplicationClass::InitCamera(){
@@ -329,6 +319,7 @@ bool ApplicationClass::InitCamera(){
 
 	// Set the initial position of the viewer to the same as the initial camera position.
 	m_Position->SetPosition(cameraX, cameraY, cameraZ);
+	return true;
 }
 bool ApplicationClass::InitShaders(HWND hwnd){
 	bool result;
@@ -408,6 +399,15 @@ bool ApplicationClass::InitShaders(HWND hwnd){
 		return false;
 	}
 	result= mGlowShader->Initialize(m_Direct3D->GetDevice(),hwnd);
+	if (!result){
+		MessageBox(hwnd, L"Could not initialize the convolution shader object.", L"Error", MB_OK);
+		return false;
+	}
+	mVerticalBlurShader = new VerticalBlurShaderClass;
+	if (!mVerticalBlurShader){
+		return false;
+	}
+	result= mVerticalBlurShader->Initialize(m_Direct3D->GetDevice(),hwnd);
 	if (!result){
 		MessageBox(hwnd, L"Could not initialize the convolution shader object.", L"Error", MB_OK);
 		return false;
@@ -509,6 +509,7 @@ void ApplicationClass::ShutdownCamera(){
 }
 void ApplicationClass::ShutdownShaders(){
 	// Release the texture shader object.
+
 	if(m_TextureShader){
 		m_TextureShader->Shutdown();
 		delete m_TextureShader;
@@ -553,6 +554,11 @@ void ApplicationClass::ShutdownShaders(){
 		mGlowShader->Shutdown();
 		delete mGlowShader;
 		mGlowShader = 0;
+	}
+	if(mVerticalBlurShader){
+		mVerticalBlurShader->Shutdown();
+		delete mVerticalBlurShader;
+		mVerticalBlurShader = 0;
 	}
 }
 void ApplicationClass::Shutdown()
@@ -654,9 +660,9 @@ bool ApplicationClass::Frame()
 
 bool ApplicationClass::HandleInput(float frameTime)
 {
-	bool keyDown, result;
+	bool keyDown, result, blur;
 	float posX, posY, posZ, rotX, rotY, rotZ;
-
+	blur = false;
 	keyDown = m_Input->IsHPressed();
 	if(keyDown){
 		for(int i = 0; i <5; i++){
@@ -684,9 +690,15 @@ bool ApplicationClass::HandleInput(float frameTime)
 	m_Position->MoveBackward(keyDown);
 
 	keyDown = m_Input->IsAPressed();
+	if(keyDown){
+		blur = true;
+	}
 	m_Position->MoveUpward(keyDown);
 
 	keyDown = m_Input->IsZPressed();
+	if(keyDown){
+		blur = true;
+	}
 	m_Position->MoveDownward(keyDown);
 
 	keyDown = m_Input->IsPgUpPressed();
@@ -716,7 +728,7 @@ bool ApplicationClass::HandleInput(float frameTime)
 	{
 		return false;
 	}
-
+	mBlur = blur;
 	return true;
 }
 
@@ -732,19 +744,45 @@ bool ApplicationClass::Render(){
 	if(!result){
 		return false;
 	}
-	result = RenderTexture(m_ConvolutionShader, m_GlowTexture, m_ConvolutionTexture, m_FullScreenWindow);
+	result = RenderTexture(m_TextureToTextureShader, m_GlowTexture, m_DownSampleTexure, m_FullScreenWindow);
 	if(!result){
 		return false;
 	}
-	result= RenderMergeTexture(m_RenderTexture,m_ConvolutionTexture,m_MergeTexture,m_FullScreenWindow);
+	result = RenderTexture(m_ConvolutionShader, m_DownSampleTexure, m_ConvolutionTexture, m_FullScreenWindow);
 	if(!result){
 		return false;
 	}
-	result = Render2DTextureScene(m_MergeTexture);
+	result = RenderTexture(m_ConvolutionShader, m_ConvolutionTexture, m_DownSampleTexure, m_FullScreenWindow);
 	if(!result){
 		return false;
 	}
-	
+	result = RenderTexture(m_ConvolutionShader, m_DownSampleTexure, m_ConvolutionTexture, m_FullScreenWindow);
+	if(!result){
+		return false;
+	}
+	result = RenderTexture(m_TextureToTextureShader, m_ConvolutionTexture, m_UpSampleTexure, m_FullScreenWindow);
+	if(!result){
+		return false;
+	}
+	result= RenderMergeTexture(m_RenderTexture,m_UpSampleTexure,m_MergeTexture,m_FullScreenWindow);
+	if(!result){
+		return false;
+	}
+	if(mBlur){
+		result = RenderTexture(mVerticalBlurShader, m_MergeTexture, m_RenderTexture, m_FullScreenWindow);
+		if(!result){
+			return false;
+		}
+		result = Render2DTextureScene(m_RenderTexture);
+		if(!result){
+			return false;
+		}
+	}else{
+		result = Render2DTextureScene(m_MergeTexture);
+		if(!result){
+			return false;
+		}
+	}
 	return true;
 }
 
@@ -938,7 +976,4 @@ bool ApplicationClass::Render2DTextureScene(RenderTextureClass* mRead){
 	m_Direct3D->EndScene();
 
 	return true;
-}
-void ApplicationClass::SetBorders(){
-	
 }

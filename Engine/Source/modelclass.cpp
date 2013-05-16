@@ -13,6 +13,9 @@ ModelClass::ModelClass(D3DXVECTOR3 offset)
 	mOffset = offset;
 	mRotation = float(rand()%3600)/10;
 	mRotationSpeed = float(rand()%50)/1000;
+	if(mRotationSpeed == 0){
+		mRotationSpeed = 0.0005f;
+	}
 }
 void ModelClass::IncrementRotation(){
 	// Update the rotation variable each frame.

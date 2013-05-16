@@ -55,15 +55,18 @@
     <Filter Include="Shader Files\Texture\Texture to texture">
       <UniqueIdentifier>{72908436-4d8a-494c-b969-623fc64df837}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shader Files\Blur">
+      <UniqueIdentifier>{f100bf75-2835-4c87-8aea-2f2f8485dab3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Text Files">
+      <UniqueIdentifier>{d148fcdb-8cfd-41da-af1b-1bd736fb924a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Text Files">
+      <UniqueIdentifier>{47c89726-952a-4d04-adf0-f65bd90e8dc7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\systemclass.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\textclass.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\timerclass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\applicationclass.h">
@@ -72,16 +75,7 @@
     <ClInclude Include="Source\cameraclass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Source\cpuclass.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Source\d3dclass.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\fontclass.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\fpsclass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\inputclass.h">
@@ -135,8 +129,26 @@
     <ClInclude Include="Source\mergetextureshaderclass.h">
       <Filter>Header Files\Shader Files</Filter>
     </ClInclude>
+    <ClInclude Include="Source\verticalblurshaderclass.h">
+      <Filter>Header Files\Shader Files</Filter>
+    </ClInclude>
     <ClInclude Include="Source\glowshaderclass.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Shader Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\cpuclass.h">
+      <Filter>Header Files\Text Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\fontclass.h">
+      <Filter>Header Files\Text Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\fpsclass.h">
+      <Filter>Header Files\Text Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\textclass.h">
+      <Filter>Header Files\Text Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\timerclass.h">
+      <Filter>Header Files\Text Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -146,16 +158,7 @@
     <ClCompile Include="Source\cameraclass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\cpuclass.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Source\d3dclass.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\fontclass.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\fpsclass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Source\inputclass.cpp">
@@ -171,12 +174,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Source\systemclass.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\textclass.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\timerclass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Source\orthowindowclass.cpp">
@@ -221,8 +218,26 @@
     <ClCompile Include="Source\mergetextureshaderclass.cpp">
       <Filter>Source Files\Shader Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source\verticalblurshaderclass.cpp">
+      <Filter>Source Files\Shader Files</Filter>
+    </ClCompile>
     <ClCompile Include="Source\glowshaderclass.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Shader Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\timerclass.cpp">
+      <Filter>Source Files\Text Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\textclass.cpp">
+      <Filter>Source Files\Text Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\fpsclass.cpp">
+      <Filter>Source Files\Text Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\fontclass.cpp">
+      <Filter>Source Files\Text Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\cpuclass.cpp">
+      <Filter>Source Files\Text Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -256,12 +271,6 @@
     <None Include="Shader\texture.vs">
       <Filter>Shader Files\Texture</Filter>
     </None>
-    <None Include="Shader\waterHeight.vs">
-      <Filter>Shader Files\Fluid</Filter>
-    </None>
-    <None Include="Shader\waterHeight.ps">
-      <Filter>Shader Files\Fluid</Filter>
-    </None>
     <None Include="Shader\glow.vs">
       <Filter>Shader Files\Glow</Filter>
     </None>
@@ -279,6 +288,12 @@
     </None>
     <None Include="Shader\texturetotexture.vs">
       <Filter>Shader Files\Texture\Texture to texture</Filter>
+    </None>
+    <None Include="Shader\verticalblur.ps">
+      <Filter>Shader Files\Blur</Filter>
+    </None>
+    <None Include="Shader\verticalblur.vs">
+      <Filter>Shader Files\Blur</Filter>
     </None>
   </ItemGroup>
 </Project>

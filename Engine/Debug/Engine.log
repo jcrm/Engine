@@ -1,22 +1,17 @@
-﻿Build started 5/16/2013 1:27:09 PM.
+﻿Build started 5/16/2013 3:53:26 PM.
      1>Project "C:\Users\Jake\Documents\Visual Studio 2010\Projects\Engine\Engine\Engine.vcxproj" on node 2 (build target(s)).
      1>InitializeBuildStatus:
-         Touching "Debug\Engine.unsuccessfulbuild".
+         Creating "Debug\Engine.unsuccessfulbuild" because "AlwaysCreate" was specified.
        ClCompile:
-         c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /I"C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include" /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _WINDOWS /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc100.pdb" /Gd /TP /analyze- /errorReport:prompt Source\applicationclass.cpp Source\main.cpp Source\systemclass.cpp
-         applicationclass.cpp
-     1>c:\users\jake\documents\visual studio 2010\projects\engine\engine\source\applicationclass.cpp(193): warning C4244: 'argument' : conversion from 'int' to 'FLOAT', possible loss of data
-     1>c:\users\jake\documents\visual studio 2010\projects\engine\engine\source\applicationclass.cpp(193): warning C4244: 'argument' : conversion from 'int' to 'FLOAT', possible loss of data
-     1>c:\users\jake\documents\visual studio 2010\projects\engine\engine\source\applicationclass.cpp(193): warning C4244: 'argument' : conversion from 'int' to 'FLOAT', possible loss of data
-         Generating Code...
-     1>c:\users\jake\documents\visual studio 2010\projects\engine\engine\source\applicationclass.cpp(332): warning C4715: 'ApplicationClass::InitCamera' : not all control paths return a value
-         Compiling...
-         systemclass.cpp
+         c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /I"C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include" /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _WINDOWS /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc100.pdb" /Gd /TP /analyze- /errorReport:prompt Source\applicationclass.cpp Source\main.cpp Source\systemclass.cpp Source\verticalblurshaderclass.cpp
+         verticalblurshaderclass.cpp
          Generating Code...
          Skipping... (no relevant changes detected)
+         systemclass.cpp
          main.cpp
+         applicationclass.cpp
        ManifestResourceCompile:
-         C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\bin\rc.exe /nologo /fo"Debug\Engine.exe.embed.manifest.res" Debug\Engine_manifest.rc 
+         All outputs are up-to-date.
        Link:
          c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Jake\Documents\Visual Studio 2010\Projects\Engine\Debug\Engine.exe" /INCREMENTAL /NOLOGO /LIBPATH:"C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Lib\x86" kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /ManifestFile:"Debug\Engine.exe.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /DEBUG /PDB:"C:\Users\Jake\Documents\Visual Studio 2010\Projects\Engine\Debug\Engine.pdb" /SUBSYSTEM:WINDOWS /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\Jake\Documents\Visual Studio 2010\Projects\Engine\Debug\Engine.lib" /MACHINE:X86 Debug\Engine.exe.embed.manifest.res
          Debug\applicationclass.obj
@@ -47,39 +42,12 @@
          Debug\textureshaderclass.obj
          Debug\texturetotextureshaderclass.obj
          Debug\timerclass.obj
+         Debug\verticalblurshaderclass.obj
        Manifest:
          C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\bin\mt.exe /nologo /verbose /out:"Debug\Engine.exe.embed.manifest" /manifest Debug\Engine.exe.intermediate.manifest
-         C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\bin\rc.exe /nologo /fo"Debug\Engine.exe.embed.manifest.res" Debug\Engine_manifest.rc 
+         All outputs are up-to-date.
        LinkEmbedManifest:
-         c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Jake\Documents\Visual Studio 2010\Projects\Engine\Debug\Engine.exe" /INCREMENTAL /NOLOGO /LIBPATH:"C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Lib\x86" kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /ManifestFile:"Debug\Engine.exe.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /DEBUG /PDB:"C:\Users\Jake\Documents\Visual Studio 2010\Projects\Engine\Debug\Engine.pdb" /SUBSYSTEM:WINDOWS /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\Jake\Documents\Visual Studio 2010\Projects\Engine\Debug\Engine.lib" /MACHINE:X86 Debug\Engine.exe.embed.manifest.res
-         Debug\applicationclass.obj
-         Debug\cameraclass.obj
-         Debug\convolutionshaderclass.obj
-         Debug\cpuclass.obj
-         Debug\d3dclass.obj
-         Debug\fluidclass.obj
-         Debug\fluidshaderclass.obj
-         Debug\fontclass.obj
-         Debug\fontshaderclass.obj
-         Debug\fpsclass.obj
-         Debug\glowshaderclass.obj
-         Debug\inputclass.obj
-         Debug\lightclass.obj
-         Debug\main.obj
-         Debug\mergetextureshaderclass.obj
-         Debug\modelclass.obj
-         Debug\orthowindowclass.obj
-         Debug\positionclass.obj
-         Debug\rendertextureclass.obj
-         Debug\ShaderClass.obj
-         Debug\systemclass.obj
-         Debug\terrainclass.obj
-         Debug\terrainshaderclass.obj
-         Debug\textclass.obj
-         Debug\textureclass.obj
-         Debug\textureshaderclass.obj
-         Debug\texturetotextureshaderclass.obj
-         Debug\timerclass.obj
+         All outputs are up-to-date.
          Engine.vcxproj -> C:\Users\Jake\Documents\Visual Studio 2010\Projects\Engine\Debug\Engine.exe
        FinalizeBuildStatus:
          Deleting file "Debug\Engine.unsuccessfulbuild".
@@ -88,4 +56,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:08.30
+Time Elapsed 00:00:03.83
