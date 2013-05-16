@@ -883,59 +883,92 @@ void TerrainClass::Faulting(int passes, float displacement){
 	}
 }
 /*
-*http://www.lighthouse3d.com/opengl/appstools/tg/
+* Drops a particle of the passed in height the number of iterations passed in.
+* these particles are checked to make sure they go on the lowest level possible. 
+* this is based upon source code provided here: http://www.lighthouse3d.com/opengl/appstools/tg/
 */
 void TerrainClass::ParticleDeposition(int numIt, float height){
 	int x = rand() % m_terrainWidth;
 	int z = rand() % m_terrainHeight;
+	//if adding a positive height change the position in the array if its too large
+	//this is done using a while loop if after 30 attempts of to find a new position
+	//in the array use it any way. this stops an infinite loop from happening
 	if(height > 0){
 		int count = 0;
-		while((m_heightMap[x * m_terrainHeight + z].y > 5.0f) && count < 30){
+		while((m_heightMap[x * m_terrainHeight + z].y > 7.5f) && count < 30){
 			x = rand() % m_terrainWidth;
 			z = rand() % m_terrainHeight;
 			count++;
 		}
-	}
+		//check the direction the particle will fall
+	//if on the edge of the array wrap round to the other side.
 	for(int i=0; i < numIt; i++){
 		int dir = rand() % 4;
-		if (dir == 2){
-			if (++x >= m_terrainWidth)
-				x = 0;
-		}else if (dir == 3){
-			if (--x == -1)
-				x = m_terrainWidth-1;
-		}else if (dir == 1) {
-			if (++z >= m_terrainHeight)
-				z = 0;
-		}else if (dir == 0){
-			if (--z == -1)
+		switch(dir){
+		case 0:
+			if (--z == -1){
 				z = m_terrainHeight - 1;
+			}
+			break;
+		case 1:
+			if (++z >= m_terrainHeight){
+				z = 0;
+			}
+			break;
+		case 2:
+			if (++x >= m_terrainWidth){
+				x = 0;
+			}
+			break;
+		case 3:
+			if (--x == -1){
+				x = m_terrainWidth-1;
+			}
+			break;
 		}
 		Deposit(x,z, height);
 	}
+	}
 }
 /*
-* 
+* Checks to see if any of the points around the element are lower.
+* If not then add the value. If they are are call the function again with the newer value.
+* based upon source code provided here: http://www.lighthouse3d.com/opengl/appstools/tg/
 */
 void TerrainClass::Deposit( int x, int z, float value){
-	int kk,jj;
-	int flag = 0;
+	int deltaX = 0;
+	int deltaZ = 0;
+	bool flag = false;
+	int index = calculateIndex(m_terrainHeight, z, x);
+	float currentValue =  m_heightMap[index].y;
 
-	for (int k=-1;k<2;k++){
-		for(int j=-1;j<2;j++){
-			if (k!=0 && j!=0 && x+k>-1 && x+k<m_terrainWidth && z+j>-1 && z+j<m_terrainHeight) {
-				if (m_heightMap[(x+k) * m_terrainHeight + (z+j)].y < m_heightMap[x * m_terrainHeight + z].y) {
-					flag = 1;
-					kk = k;
-					jj = j;
+	//two for loops to check the values surrounding the point
+	for(int i = -1; i < 2; i++){
+		for(int j = -1; j < 2; j++){
+			//makes sure not check current point
+			if(i!=0 && j!=0){
+				//makes sure its inside the array
+				if(x+i > -1 && x+i < m_terrainWidth){
+					if(z+j > -1 && z+j < m_terrainWidth){
+						index = calculateIndex(m_terrainHeight, z+j, x+i);
+						//if a point around the element is smaller than set the flag and store the position in the array
+						if(m_heightMap[index].y < currentValue){
+							flag = true;
+							deltaX = i;
+							deltaZ = j;
+						}
+					}
 				}
 			}
 		}
 	}
+	//if none of the points surrounding the element is lower then add the value on
+	//else pass the position in the array of the last known lower point back to this function
+	//to find the lowest point
 	if (!flag){
 		m_heightMap[x * m_terrainHeight + z].y += value;
 	}else{
-		Deposit(x+kk,z+jj, value);
+		Deposit(x+deltaX,z+deltaZ, value);
 	}
 }
 /*
