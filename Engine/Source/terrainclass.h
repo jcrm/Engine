@@ -19,20 +19,17 @@
 class TerrainClass
 {
 private:
-	struct VertexType
-	{
+	struct VertexType{
 		D3DXVECTOR3 position;
 		D3DXVECTOR2 texture;
 		D3DXVECTOR3 normal;
 	};
-
 	struct VectorType { 
 		float x, y, z;
 	};
 
 public:
-	struct HeightMapType 
-	{ 
+	struct HeightMapType { 
 		float x, y, z;
 		float tu, tv;
 		float nx, ny, nz;
@@ -46,10 +43,12 @@ public:
 	void Shutdown();
 	void Render(ID3D11DeviceContext*);
 	bool GenerateHeightMap(ID3D11Device* device);
-	int  GetIndexCount();
+
+	inline int  GetIndexCount() const {return m_indexCount;}
 	inline int getHeightMapSize() const {return m_terrainWidth;}
+
 	inline HeightMapType* getHeightMap() {return m_heightMap;}
-	ID3D11ShaderResourceView* GetTexture();
+	inline ID3D11ShaderResourceView* GetTexture() {return m_Texture->GetTexture();}
 private:
 	bool LoadHeightMap(char*);
 	void NormalizeHeightMap();
