@@ -4,7 +4,6 @@
 #ifndef _APPLICATIONCLASS_H_
 #define _APPLICATIONCLASS_H_
 
-
 /////////////
 // GLOBALS //
 /////////////
@@ -13,7 +12,6 @@ const bool FULL_SCREEN = false;
 const bool VSYNC_ENABLED = true;
 const float SCREEN_DEPTH = 1000.0f;
 const float SCREEN_NEAR = 0.1f;
-
 
 ///////////////////////
 // MY CLASS INCLUDES //
@@ -43,7 +41,7 @@ const float SCREEN_NEAR = 0.1f;
 #include "ShaderClass.h"
 #include "verticalblurshaderclass.h"
 
-#define MODEL_NUMBER 10
+#define MODEL_NUMBER 20
 
 ////////////////////////////////////////////////////////////////////////////////
 // Class name: ApplicationClass
@@ -61,18 +59,19 @@ public:
 
 private:
 	bool HandleInput(float);
-	bool RenderGraphics();
+	//Render Functions
 	bool Render();
 	bool RenderSceneToTexture(RenderTextureClass* mWrite);
 	bool RenderTexture(ShaderClass *mShader, RenderTextureClass *mReadTexture, RenderTextureClass *mWriteTexture, OrthoWindowClass *mWindow);
-	bool Render2DTextureScene(RenderTextureClass* mRead);
 	bool RenderMergeTexture(RenderTextureClass *readTexture, RenderTextureClass *readTexture2, RenderTextureClass *writeTexture, OrthoWindowClass *window);
+	bool Render2DTextureScene(RenderTextureClass* mRead);
+	//Init functions
 	bool InitObjects(HWND hwnd);
 	bool InitTextures(HWND hwnd, int screenWidth, int screenHeight);
 	bool InitText(HWND hwnd, int screenWidth , int screenHeight);
 	bool InitShaders(HWND hwnd);
 	bool InitCamera();
-	void SetBorders();
+	//Shutdown functions
 	void ShutdownObjects();
 	void ShutdownText();
 	void ShutdownTextures();
@@ -90,24 +89,23 @@ private:
 	TextClass* m_Text;
 	LightClass* m_Light;
 	OrthoWindowClass *m_FullScreenWindow;
-	
+	//the points for the different objects
 	TerrainClass* m_Terrain;
 	ModelClass* m_Model[MODEL_NUMBER];
 	FluidClass* mFluid;
-	
+	//textures to render to
+	RenderTextureClass *m_RenderFullSizeTexture, *m_FullSizeTexure, *m_DownSampleHalfSizeTexure, *m_HalfSizeTexture, *m_MergeFullSizeTexture;
+	//the different shaders used
 	TextureShaderClass* m_TextureShader;
 	TextureToTextureShaderClass* m_TextureToTextureShader;
 	ConvolutionShaderClass* m_ConvolutionShader;
-	
-	RenderTextureClass *m_RenderFullSizeTexture, *m_FullSizeTexure, *m_DownSampleHalfSizeTexure, *m_ConvolutionHalfSizeTexture, *m_MergeFullSizeTexture;
-	
 	FontShaderClass* m_FontShader;
 	TerrainShaderClass* m_TerrainShader;
 	FluidShaderClass* mFluidShader;
 	MergeTextureShaderClass* mMergerShader;
 	GlowShaderClass* mGlowShader;
 	VerticalBlurShaderClass* mVerticalBlurShader;
-
+	//used for blurring when moving up and down
 	bool mBlur;
 };
 

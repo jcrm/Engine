@@ -4,18 +4,22 @@
 #include "modelclass.h"
 
 
-ModelClass::ModelClass(D3DXVECTOR3 offset)
+ModelClass::ModelClass()
 {
 	m_vertexBuffer = 0;
 	m_indexBuffer = 0;
 	m_Texture = 0;
 	m_model = 0;
-	mOffset = offset;
+	mOffset = D3DXVECTOR3(float(rand()%50),float((rand()%5)+10),float(rand()%50));
 	mRotation = float(rand()%3600)/10;
 	mRotationSpeed = float(rand()%50)/1000;
 	if(mRotationSpeed == 0){
 		mRotationSpeed = 0.0005f;
 	}
+	D3DXMatrixTranslation(&mTranslation, float(rand()%129), float(rand()%10), float(rand()%129));
+}
+D3DXMATRIX ModelClass::GetTranslation(){
+	return mTranslation;
 }
 void ModelClass::IncrementRotation(){
 	// Update the rotation variable each frame.
@@ -129,8 +133,7 @@ bool ModelClass::InitializeBuffers(ID3D11Device* device)
 	}
 
 	// Load the vertex array and index array with data.
-	for(i=0; i<m_vertexCount; i++)
-	{
+	for(i=0; i<m_vertexCount; i++){
 		vertices[i].position = D3DXVECTOR3(m_model[i].x+mOffset.x, m_model[i].y+mOffset.y, m_model[i].z+mOffset.z);
 		vertices[i].texture = D3DXVECTOR2(m_model[i].tu, m_model[i].tv);
 

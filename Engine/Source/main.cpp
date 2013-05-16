@@ -8,7 +8,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pScmdline,
 {
 	SystemClass* System;
 	bool result;
-	srand(time(NULL));
+	srand(unsigned int(time(NULL)));
 	
 	// Create the system object.
 	System = new SystemClass;
