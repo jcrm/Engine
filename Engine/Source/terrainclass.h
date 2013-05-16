@@ -4,7 +4,6 @@
 #ifndef _TERRAINCLASS_H_
 #define _TERRAINCLASS_H_
 
-
 //////////////
 // INCLUDES //
 //////////////
@@ -12,23 +11,19 @@
 #include <d3dx10math.h>
 #include <stdio.h>
 
-class Generation;
-
 ////////////////////////////////////////////////////////////////////////////////
 // Class name: TerrainClass
 ////////////////////////////////////////////////////////////////////////////////
 class TerrainClass
 {
 private:
-	struct VertexType
-	{
+	struct VertexType{
 		D3DXVECTOR3 position;
 	    D3DXVECTOR3 normal;
 	};
 
 
-	struct VectorType 
-	{ 
+	struct VectorType { 
 		float x, y, z;
 	};
 
@@ -46,10 +41,7 @@ public:
 	void Shutdown();
 	void Render(ID3D11DeviceContext*);
 	bool GenerateHeightMap(ID3D11Device* device);
-	void GenerateRandomHeightMap();
 	int  GetIndexCount();
-	void MidPoint(float);
-	void Particle(int index);
 	inline int getHeightMapSize() const {return m_terrainWidth;}
 	inline HeightMapType* getHeightMap() {return m_heightMap;}
 private:
@@ -61,24 +53,23 @@ private:
 	bool InitializeBuffers(ID3D11Device*);
 	void ShutdownBuffers();
 	void RenderBuffers(ID3D11DeviceContext*);
-	void MPD();
-	int terrainIterateParticleDeposition(int numIt, float height);
-	void depositPlus(int x, int z);
-	void smooth(int passes);
-	void depositMinus( int x, int z);
+
+	void GenerateRandomHeightMap();
 	void GenerateSinCos(int index);
-	inline int createIndex(int size, int i, int j){ return (size * i) + j;}
-	inline signed char scrand(signed char r = 4) {return (-r + 2 * (rand() % r)); }
-	signed char** mdp(signed char** base, unsigned base_n, signed char r);
+
+	void ParticleDeposition(int numIt, float height);
+	void Deposit( int x, int z, float value);
+
+	void MidPointDisplacement (float heightScale, float h);
+	float AvgDiamondVals (int i, int j, int stride, int size, int subSize);
+	float AvgSquareVals (int i, int j, int stride, int size);
+
+	void Faulting();
+	int CheckCrossProduct(float x1, float z1, float x2, float z2);
+	
+	void Smooth(int passes);
+	
 	float ValuesAroundPoint(int x, int z);
-	float avgDiamondVals (int i, int j, int stride, int size, int subSize);
-	float avgSquareVals (int i, int j, int stride, int size);
-	void fill2DFractArray (float heightScale, float h);
-	float randRange(float Min, float Max);
-	void deposit( int x, int z, float value);
-	int checkCrossProduct(float x1, float z1, float x2, float z2);
-	void faulting();
-	int calculateIndex(int x, int z);
 private:
 	bool m_terrainGeneratedToggle;
 	int m_terrainWidth, m_terrainHeight;

@@ -5,27 +5,26 @@
 #include <cmath>
 #include <math.h>
 
+namespace{
+	int calculateIndex(int size, int x, int z){ 
+		return (size * z) + x;
+	}
+	float randRange(float Min, float Max){
+		return ((float(rand()) / float(RAND_MAX)) * (Max - Min)) + Min;
+	}
+}
 
-TerrainClass::TerrainClass()
-{
+TerrainClass::TerrainClass(){
 	m_vertexBuffer = 0;
 	m_indexBuffer = 0;
 	m_heightMap = 0;
 	m_terrainGeneratedToggle = false;
 }
-
-
-TerrainClass::TerrainClass(const TerrainClass& other)
-{
+TerrainClass::TerrainClass(const TerrainClass& other){
 }
-
-
-TerrainClass::~TerrainClass()
-{
+TerrainClass::~TerrainClass(){
 }
-
-bool TerrainClass::InitializeTerrain(ID3D11Device* device, int terrainWidth, int terrainHeight)
-{
+bool TerrainClass::InitializeTerrain(ID3D11Device* device, int terrainWidth, int terrainHeight){
 	int index;
 	float height = 0.0;
 	bool result;
@@ -36,8 +35,7 @@ bool TerrainClass::InitializeTerrain(ID3D11Device* device, int terrainWidth, int
 
 	// Create the structure to hold the terrain data.
 	m_heightMap = new HeightMapType[m_terrainWidth * m_terrainHeight];
-	if(!m_heightMap)
-	{
+	if(!m_heightMap){
 		return false;
 	}
 
@@ -54,29 +52,23 @@ bool TerrainClass::InitializeTerrain(ID3D11Device* device, int terrainWidth, int
 	//even though we are generating a flat terrain, we still need to normalize it. 
 	// Calculate the normals for the terrain data.
 	result = CalculateNormals();
-	if(!result)
-	{
+	if(!result){
 		return false;
 	}
 
 	// Initialize the vertex and index buffer that hold the geometry for the terrain.
 	result = InitializeBuffers(device);
-	if(!result)
-	{
+	if(!result){
 		return false;
 	}
 
 	return true;
 }
-bool TerrainClass::Initialize(ID3D11Device* device, char* heightMapFilename)
-{
+bool TerrainClass::Initialize(ID3D11Device* device, char* heightMapFilename){
 	bool result;
-
-
 	// Load in the height map for the terrain.
 	result = LoadHeightMap(heightMapFilename);
-	if(!result)
-	{
+	if(!result){
 		return false;
 	}
 
@@ -85,24 +77,18 @@ bool TerrainClass::Initialize(ID3D11Device* device, char* heightMapFilename)
 
 	// Calculate the normal's for the terrain data.
 	result = CalculateNormals();
-	if(!result)
-	{
+	if(!result){
 		return false;
 	}
 
 	// Initialize the vertex and index buffer that hold the geometry for the terrain.
 	result = InitializeBuffers(device);
-	if(!result)
-	{
+	if(!result){
 		return false;
 	}
-
 	return true;
 }
-
-
-void TerrainClass::Shutdown()
-{
+void TerrainClass::Shutdown(){
 
 	// Release the vertex and index buffer.
 	ShutdownBuffers();
@@ -112,25 +98,16 @@ void TerrainClass::Shutdown()
 
 	return;
 }
-
-
-void TerrainClass::Render(ID3D11DeviceContext* deviceContext)
-{
+void TerrainClass::Render(ID3D11DeviceContext* deviceContext){
 	// Put the vertex and index buffers on the graphics pipeline to prepare them for drawing.
 	RenderBuffers(deviceContext);
 
 	return;
 }
-
-
-int TerrainClass::GetIndexCount()
-{
+int TerrainClass::GetIndexCount(){
 	return m_indexCount;
 }
-
-bool TerrainClass::GenerateHeightMap(ID3D11Device* device)
-{
-
+bool TerrainClass::GenerateHeightMap(ID3D11Device* device){
 	bool result;
 	//the toggle is just a bool that I use to make sure this is only called ONCE when you press a key
 	//until you release the key and start again. We don t want to be generating the terrain 500
@@ -141,17 +118,17 @@ bool TerrainClass::GenerateHeightMap(ID3D11Device* device)
 		ShutdownBuffers();
 		//faulting();
 		for(int i = 1; i < 5; i++){
-			fill2DFractArray(100.0f/i , 0.4f);
-		}
-		for (int i = 0; i <6; i++){
-			height = randRange(-maxHeight,0);
-			terrainIterateParticleDeposition(1500, height);
+			MidPointDisplacement(100.0f/i , 0.4f);
 		}
 		for (int i = 0; i <12; i++){
 			height = randRange(0,maxHeight);
-			terrainIterateParticleDeposition(3000, height);
+			ParticleDeposition(3000, height);
 		}
-		smooth(5);
+		for (int i = 0; i <6; i++){
+			height = randRange(-maxHeight,0);
+			ParticleDeposition(1500, height);
+		}
+		Smooth(5);
 		
 		result = CalculateNormals();
 		if(!result){
@@ -265,8 +242,6 @@ bool TerrainClass::LoadHeightMap(char* filename)
 
 	return true;
 }
-
-
 void TerrainClass::NormalizeHeightMap()
 {
 	int i, j;
@@ -282,8 +257,6 @@ void TerrainClass::NormalizeHeightMap()
 
 	return;
 }
-
-
 bool TerrainClass::CalculateNormals()
 {
 	int i, j, index1, index2, index3, index, count;
@@ -417,22 +390,15 @@ bool TerrainClass::CalculateNormals()
 
 	return true;
 }
-
-
-void TerrainClass::ShutdownHeightMap()
-{
-	if(m_heightMap)
-	{
+void TerrainClass::ShutdownHeightMap(){
+	if(m_heightMap){
 		delete [] m_heightMap;
 		m_heightMap = 0;
 	}
 
 	return;
 }
-
-
-bool TerrainClass::InitializeBuffers(ID3D11Device* device)
-{
+bool TerrainClass::InitializeBuffers(ID3D11Device* device){
 	VertexType* vertices;
 	unsigned long* indices;
 	int index, i, j;
@@ -450,15 +416,13 @@ bool TerrainClass::InitializeBuffers(ID3D11Device* device)
 
 	// Create the vertex array.
 	vertices = new VertexType[m_vertexCount];
-	if(!vertices)
-	{
+	if(!vertices){
 		return false;
 	}
 
 	// Create the index array.
 	indices = new unsigned long[m_indexCount];
-	if(!indices)
-	{
+	if(!indices){
 		return false;
 	}
 
@@ -565,8 +529,7 @@ bool TerrainClass::InitializeBuffers(ID3D11Device* device)
 	
 	// Now create the vertex buffer.
     result = device->CreateBuffer(&vertexBufferDesc, &vertexData, &m_vertexBuffer);
-	if(FAILED(result))
-	{
+	if(FAILED(result)){
 		return false;
 	}
 
@@ -585,8 +548,7 @@ bool TerrainClass::InitializeBuffers(ID3D11Device* device)
 
 	// Create the index buffer.
 	result = device->CreateBuffer(&indexBufferDesc, &indexData, &m_indexBuffer);
-	if(FAILED(result))
-	{
+	if(FAILED(result)){
 		return false;
 	}
 
@@ -599,10 +561,7 @@ bool TerrainClass::InitializeBuffers(ID3D11Device* device)
 
 	return true;
 }
-
-
-void TerrainClass::ShutdownBuffers()
-{
+void TerrainClass::ShutdownBuffers(){
 	// Release the index buffer.
 	if(m_indexBuffer)
 	{
@@ -619,10 +578,7 @@ void TerrainClass::ShutdownBuffers()
 
 	return;
 }
-
-
-void TerrainClass::RenderBuffers(ID3D11DeviceContext* deviceContext)
-{
+void TerrainClass::RenderBuffers(ID3D11DeviceContext* deviceContext){
 	unsigned int stride;
 	unsigned int offset;
 
@@ -642,8 +598,7 @@ void TerrainClass::RenderBuffers(ID3D11DeviceContext* deviceContext)
 
 	return;
 }
-void TerrainClass::GenerateRandomHeightMap()
-{
+void TerrainClass::GenerateRandomHeightMap(){
 	//the toggle is just a bool that I use to make sure this is only called ONCE when you press a key
 	//until you release the key and start again. We don t want to be generating the terrain 500
 	//times per second. 
@@ -657,7 +612,6 @@ void TerrainClass::GenerateRandomHeightMap()
 		for(int i=0; i<m_terrainWidth; i++){
 			float height = (float(rand()%200)/10)-10;
 			index = (m_terrainHeight * j) + i;
-
 			m_heightMap[index].x = (float)i;
 			m_heightMap[index].y = height;
 			m_heightMap[index].z = (float)j;
@@ -668,8 +622,7 @@ float RandF(float min, float max){
 	float randFloat  = min + float(rand()/ (float(RAND_MAX) / (max-min)));
 	return randFloat;
 }
-static float randnum (float min, float max)
-{
+static float randnum (float min, float max){
 	int r;
 	float	x;
 
@@ -677,226 +630,13 @@ static float randnum (float min, float max)
 	x = (float)(r & 0x7fff) /
 		(float)0x7fff;
 	return (x * (max - min) + min);
-} 
-void TerrainClass::MidPoint(float ranMax){
-	float h = 5.0f;
-	//side length is distance of a single square side
-	//or distance of diagonal in diamond
-	for(int sideLength = m_terrainWidth-1; sideLength >= 2; sideLength /=2, h/= 2.0){
-		//half the length of the side of a square
-		//or distance from diamond center to one corner
-		//(just to make calcs below a little clearer)
-		int halfSide = sideLength/2;
-
-		//generate the new square values
-		for(int x=0;x<m_terrainWidth-1;x+=sideLength){
-			for(int y=0;y<m_terrainWidth-1;y+=sideLength){
-				//x, y is upper left corner of square
-				//calculate average of existing corners
-				int index[4] = {(m_terrainHeight * y) + x,								//top left
-								(m_terrainHeight * y) + x + sideLength,					//top right
-								(m_terrainHeight * (y+sideLength)) + x,					//lower left
-								(m_terrainHeight * (y+sideLength)) + x+sideLength};		//lower right
-
-				float avg = m_heightMap[index[0]].y + m_heightMap[index[1]].y +
-							m_heightMap[index[2]].y + m_heightMap[index[3]].y;
-				avg /= 4.0;
-
-				m_heightMap[(m_terrainHeight * (y+halfSide)) + x+halfSide].y = avg + (randnum(0,4.0)) -h;
-				//center is average plus random offset
-			}
-		}
-
-		//generate the diamond values
-		//since the diamonds are staggered we only move x
-		//by half side
-		//NOTE: if the data shouldn't wrap then x < DATA_SIZE
-		//to generate the far edge values
-		for(int x=0;x<m_terrainWidth-1;x+=halfSide){
-			//and y is x offset by half a side, but moved by
-			//the full side length
-			//NOTE: if the data shouldn't wrap then y < DATA_SIZE
-			//to generate the far edge values
-			for(int y=(x+halfSide)%sideLength;y<m_terrainWidth-1;y+=sideLength){
-				//x, y is center of diamond
-				//note we must use mod  and add DATA_SIZE for subtraction 
-				//so that we can wrap around the array to find the corners
-
-				int index[4] = {(m_terrainHeight * y) +((x -halfSide + m_terrainHeight-1)%(m_terrainHeight-1)),		//left of centre
-								(m_terrainHeight * y) + (x+halfSide)%(m_terrainHeight-1),							//right of centre
-								(m_terrainHeight * ((y+halfSide)%(m_terrainHeight-1))) + x,							//below centre
-								(m_terrainHeight * ((y -halfSide + m_terrainHeight-1)%(m_terrainHeight-1))) + x};	//above centre
-
-				float avg = m_heightMap[index[0]].y + m_heightMap[index[1]].y +
-					m_heightMap[index[2]].y + m_heightMap[index[3]].y;
-				avg /= 4.0;
-
-				//new value = average plus random offset
-				//We calculate random value in range of 2h
-				//and then subtract h so the end value is
-				//in the range (-h, +h)
-				//update value for center of diamond
-				m_heightMap[(m_terrainHeight * y) + x].y = avg + (randnum(0,4.0)) -h;
-
-				//wrap values on the edges, remove
-				//this and adjust loop condition above
-				//for non-wrapping values.
-				if(x == 0) {
-					m_heightMap[(m_terrainHeight * m_terrainHeight)-1 + x].y = avg;
-				}
-				if(y == 0){
-					m_heightMap[(m_terrainHeight * y) + m_terrainHeight-1].y = avg;
-				}
-			}
-		}
-	}
 }
+void TerrainClass::Deposit( int x, int z, float value){
+	int kk,jj;
+	int flag = 0;
 
-
-signed char** TerrainClass::mdp(signed char** base, unsigned base_n, signed char r) {
-	size_t n = (2 * base_n) - 1;
-
-	signed char** map = new signed char*[n];
-	for (unsigned i = 0; i < n; ++i) map[i] = new signed char[n];
-
-	// Resize
-	// 1 0 1
-	// 0 0 0
-	// 1 0 1
-	for (size_t i = 0; i < n; i += 2) {
-		for (size_t j = !(i % 2 == 0); j < n; j += 2) {
-			map[i][j] = base[i / 2][j / 2];
-		}
-	}
-
-	// Diamond algorithm
-	// 0 0 0
-	// 0 X 0
-	// 0 0 0
-	for (size_t i = 1; i < n; i += 2) {
-		for (size_t j = 1; j < n; j += 2) {
-			signed char& map_ij = map[i][j];
-
-			signed char a = map[i - 1][j - 1];
-			signed char b = map[i - 1][j + 1];
-			signed char c = map[i + 1][j - 1];
-			signed char d = map[i + 1][j + 1];
-			map_ij = (a + b + c + d) / 4;
-
-			int rv = scrand(r);
-			if (map_ij + rv > 32 )
-				map_ij = 32;
-			else if(map_ij + rv < -8)
-				map_ij = -8;
-			else
-				map_ij += rv;
-		}
-	}
-
-	// Square algorithm
-	// 0 1 0
-	// 1 0 1
-	// 0 1 0
-	for (size_t i = 0; i < n; ++i){
-		for (size_t j = (i % 2 == 0); j < n; j += 2){
-			signed char& map_ij = map[i][j];
-
-			// get surrounding values
-			signed char a = 0, b = a, c = a, d = a;
-			if (i != 0) a = map[i - 1][j];
-			if (j != 0) b = map[i][j - 1];
-			if (j + 1 != n) c = map[i][j + 1];
-			if (i + 1 != n) d = map[i + 1][j];
-
-			// average calculation
-			if (i == 0) map_ij = (b + c + d) / 3;
-			else if (j == 0) map_ij = (a + c + d) / 3;
-			else if (j + 1 == n) map_ij = (a + b + d) / 3;
-			else if (i + 1 == n) map_ij = (a + b + c) / 3;
-			else map_ij = (a + b + c + d) / 4;
-
-			int rv = scrand(r);
-			if (map_ij + rv > 32 )
-				map_ij = 32;
-			else if(map_ij + rv < -8)
-				map_ij = -8;
-			else
-				map_ij += rv;
-		}
-
-	}
-
-	return map;
-}
-void TerrainClass::MPD(){
-	const unsigned n = 130;
-	
-	signed char** final = new signed char*[n];
-	for (unsigned i = 0;i < n; ++i) {
-		final[i] = new signed char[n];
-		for (unsigned j = 0; j < n; ++j){
-			final[i][j] = scrand();
-		}
-	}
-
-	for(unsigned i = 1; i < 8; ++i){ 
-		final = mdp(final, n,  16/ i);
-	}
-	for(size_t i = 0; i < n-1; ++i) {
-		for (size_t j = 0; j < n-1; ++j) {
-			m_heightMap[(i * (n-1)) + j].y = final[i][j];
-		}
-	}
-}
-void TerrainClass::depositPlus( int x, int z){
-	int j,k,kk,jj,flag;
-	
-	flag = 0;
-	for (k=-1;k<2;k++){
-		for(j=-1;j<2;j++){
-			if (k!=0 && j!=0 && x+k>-1 && x+k<m_terrainWidth && z+j>-1 && z+j<m_terrainHeight) {
-				if (m_heightMap[(x+k) * m_terrainHeight + (z+j)].y < m_heightMap[x * m_terrainHeight + z].y) {
-					flag = 1;
-					kk = k;
-					jj = j;
-				}
-			}
-		}
-	}
-	if (!flag){
-		m_heightMap[x * m_terrainHeight + z].y += (rand()%40)/10 + (rand()%40)/10;
-	}else{
-		depositPlus(x+kk,z+jj);
-	}
-}
-void TerrainClass::depositMinus( int x, int z){
-	int j,k,kk,jj,flag;
-
-	flag = 0;
-	for (k=-1;k<2;k++){
-		for(j=-1;j<2;j++){
-			if (k!=0 && j!=0 && x+k>-1 && x+k<m_terrainWidth && z+j>-1 && z+j<m_terrainHeight){
-				if (m_heightMap[(x+k) * m_terrainHeight + (z+j)].y > m_heightMap[x * m_terrainHeight + z].y) {
-					flag = 1;
-					kk = k;
-					jj = j;
-				}
-			}
-		}
-	}
-
-	if (!flag){
-		m_heightMap[x * m_terrainHeight + z].y -= (rand()%40)/10 + (rand()%40)/10;
-	}else{
-		depositMinus(x+kk,z+jj);
-	}
-}
-void TerrainClass::deposit( int x, int z, float value){
-	int j,k,kk,jj,flag;
-
-	flag = 0;
-	for (k=-1;k<2;k++){
-		for(j=-1;j<2;j++){
+	for (int k=-1;k<2;k++){
+		for(int j=-1;j<2;j++){
 			if (k!=0 && j!=0 && x+k>-1 && x+k<m_terrainWidth && z+j>-1 && z+j<m_terrainHeight) {
 				if (m_heightMap[(x+k) * m_terrainHeight + (z+j)].y < m_heightMap[x * m_terrainHeight + z].y) {
 					flag = 1;
@@ -909,18 +649,12 @@ void TerrainClass::deposit( int x, int z, float value){
 	if (!flag){
 		m_heightMap[x * m_terrainHeight + z].y += value;
 	}else{
-		deposit(x+kk,z+jj, value);
+		Deposit(x+kk,z+jj, value);
 	}
 }
-int TerrainClass::terrainIterateParticleDeposition(int numIt, float height)
-{
-	int x,z, dir;
-
-	if(m_heightMap == NULL){
-		return 0;
-	}
-	x = rand() % m_terrainWidth;
-	z = rand() % m_terrainHeight;
+void TerrainClass::ParticleDeposition(int numIt, float height){
+	int x = rand() % m_terrainWidth;
+	int z = rand() % m_terrainHeight;
 	if(height > 0){
 		int count = 0;
 		while((m_heightMap[x * m_terrainHeight + z].y > 5.0f) && count < 30){
@@ -930,8 +664,7 @@ int TerrainClass::terrainIterateParticleDeposition(int numIt, float height)
 		}
 	}
 	for(int i=0; i < numIt; i++){
-		dir = rand() % 4;
-
+		int dir = rand() % 4;
 		if (dir == 2){
 			if (++x >= m_terrainWidth)
 				x = 0;
@@ -945,34 +678,11 @@ int TerrainClass::terrainIterateParticleDeposition(int numIt, float height)
 			if (--z == -1)
 				z = m_terrainHeight - 1;
 		}
-		deposit(x,z, height);
-		/*
-		int sticky = rand()%5;
-		if(up == true){
-			if(sticky == 0){
-				m_heightMap[x * m_terrainHeight + z].y += (rand()%40)/10 + (rand()%80)/10;
-			}else{
-				depositPlus(x,z);
-			}
-		}else{
-			if(sticky ==0){
-				m_heightMap[x * m_terrainHeight + z].y -= (rand()%40)/10 + (rand()%80)/10;
-			}else{
-				depositMinus(x,z);
-			}
-		}*/
+		Deposit(x,z, height);
 	}
-	return 1;
-}
-float TerrainClass::ValuesAroundPoint(int x, int z){
-	float sum = m_heightMap[(m_terrainWidth * (z-1) ) + x].y;
-	sum += m_heightMap[(m_terrainWidth * (z+1) ) + x].y;
-	sum += m_heightMap[(m_terrainWidth * z) + x-1].y;
-	sum += m_heightMap[(m_terrainWidth * z) + x+1].y;
-	return sum;
 }
 
-void TerrainClass::smooth(int passes) {
+void TerrainClass::Smooth(int passes) {
 	float *smoothHeightMap;
 	int index = 0;
 	while(passes > 0){
@@ -982,64 +692,60 @@ void TerrainClass::smooth(int passes) {
 			for(int i = 0; i<m_terrainHeight; i++){
 				int noPointsAround = 0;
 				float totalValuePointsAround = 0.0f;
-
 				if(i-1 > 0){
-					index = calculateIndex(i-1, j);
+					index = calculateIndex(m_terrainHeight, i-1, j);
 					totalValuePointsAround += m_heightMap[index].y;
 					noPointsAround++;
 					if(j-1 > 0){
-						index = calculateIndex(i-1, j-1);
+						index = calculateIndex(m_terrainHeight, i-1, j-1);
 						totalValuePointsAround += m_heightMap[index].y;
 						noPointsAround++;
 					}
 					if(j+1<m_terrainHeight){
-						index = calculateIndex(i-1, j+1);
+						index = calculateIndex(m_terrainHeight, i-1, j+1);
 						totalValuePointsAround += m_heightMap[index].y;
 						noPointsAround++;
 					}
 				}
 				if(i+1 < m_terrainWidth){
-					index = calculateIndex(i+1, j);
+					index = calculateIndex(m_terrainHeight, i+1, j);
 					totalValuePointsAround += m_heightMap[index].y;
 					noPointsAround++;
 					if(j-1 > 0){
-						index = calculateIndex(i+1, j-1);
+						index = calculateIndex(m_terrainHeight, i+1, j-1);
 						totalValuePointsAround += m_heightMap[index].y;
 						noPointsAround++;
 					}
 					if(j+1<m_terrainHeight){
-						index = calculateIndex(i+1, j+1);
+						index = calculateIndex(m_terrainHeight, i+1, j+1);
 						totalValuePointsAround += m_heightMap[index].y;
 						noPointsAround++;
 					}
 				}
 				if(j-1 > 0){
-					index = calculateIndex(i, j-1);
+					index = calculateIndex(m_terrainHeight, i, j-1);
 					totalValuePointsAround += m_heightMap[index].y;
 					noPointsAround++;
 				}
 				if(j+1<m_terrainHeight){
-					index = calculateIndex(i, j+1);
+					index = calculateIndex(m_terrainHeight, i, j+1);
 					totalValuePointsAround += m_heightMap[index].y;
 					noPointsAround++;
 				}
-				index = calculateIndex(i, j);
+				index = calculateIndex(m_terrainHeight, i, j);
 				smoothHeightMap[index] = (m_heightMap[index].y + float(totalValuePointsAround / noPointsAround))*0.5f;
 			}
 		}
 		for(int i = 0; i<m_terrainHeight; i++){
 			for(int j = 0; j < m_terrainHeight; j++){
-				index = calculateIndex(i, j);
+				index = calculateIndex(m_terrainHeight, i, j);
 				m_heightMap[index].y = smoothHeightMap[index];
 			}
 		}
 	}
 }
-int TerrainClass::calculateIndex(int x, int z){
-	return (m_terrainWidth * z) + x;
-}
-void TerrainClass::GenerateSinCos(int index)
-{
+
+void TerrainClass::GenerateSinCos(int index){
 	//loop through the terrain and set the heights how we want. This is where we generate the terrain
 	//in this case I will run a sin-wave through the terrain in one axis.
 	float sinValue = float(rand()%12)+1;
@@ -1068,9 +774,6 @@ void TerrainClass::GenerateSinCos(int index)
 		}
 	}
 }
-
-
-
 /*
  * avgDiamondVals - Given the i,j location as the center of a diamond,
  * average the data values at the four corners of the diamond and
@@ -1079,7 +782,7 @@ void TerrainClass::GenerateSinCos(int index)
  *
  * Called by fill2DFractArray.
  */
-float TerrainClass::avgDiamondVals (int i, int j, int stride,
+float TerrainClass::AvgDiamondVals (int i, int j, int stride,
 			     int size, int subSize)
 {
     /* In this diagram, our input stride is 1, the i,j location is
@@ -1125,8 +828,6 @@ float TerrainClass::avgDiamondVals (int i, int j, int stride,
 			 m_heightMap[(i*size) + j-stride].y +
 			 m_heightMap[(i*size) + j+stride].y) * .25f);
 }
-
-
 /*
  * avgSquareVals - Given the i,j location as the center of a square,
  * average the data values at the four corners of the square and return
@@ -1134,7 +835,7 @@ float TerrainClass::avgDiamondVals (int i, int j, int stride,
  *
  * Called by fill2DFractArray.
  */
-float TerrainClass::avgSquareVals (int i, int j, int stride, int size)
+float TerrainClass::AvgSquareVals (int i, int j, int stride, int size)
 {
     /* In this diagram, our input stride is 1, the i,j location is
        indicated by "*", and the four value we want to average are
@@ -1150,12 +851,11 @@ float TerrainClass::avgSquareVals (int i, int j, int stride, int size)
 		     m_heightMap[((i+stride)*size) + j-stride].y +
 		     m_heightMap[((i+stride)*size) + j+stride].y) * .25f);
 }
-
 /*
  * fill2DFractArray - Use the diamond-square algorithm to tessalate a
  * grid of float values into a fractal height map.
  */
-void TerrainClass::fill2DFractArray (float heightScale, float h)
+void TerrainClass::MidPointDisplacement (float heightScale, float h)
 {
     int	i, j;
     int	length;
@@ -1231,7 +931,7 @@ void TerrainClass::fill2DFractArray (float heightScale, float h)
 			for (j=length; j<noOfConnectors; j+=length) {
 				m_heightMap[(i * noOfVectors) + j].y =
 					scale * randRange(-0.5f, 0.5f) +
-					avgSquareVals (i, j, length, noOfVectors);
+					AvgSquareVals (i, j, length, noOfVectors);
 				j += length;
 			}
 			i += length;
@@ -1267,7 +967,7 @@ void TerrainClass::fill2DFractArray (float heightScale, float h)
 				   surrounding diamond data points. */
 				m_heightMap[(i * noOfVectors) + j].y = 
 					scale * randRange(-0.5f, 0.5f) +
-					avgDiamondVals (i, j, length, noOfVectors, noOfConnectors);
+					AvgDiamondVals (i, j, length, noOfVectors, noOfConnectors);
 
 				/* To wrap edges seamlessly, copy edge values around
 				   to other side of array */
@@ -1286,10 +986,8 @@ void TerrainClass::fill2DFractArray (float heightScale, float h)
 		length >>= 1;
     }
 }
-float TerrainClass::randRange(float Min, float Max){
-	return ((float(rand()) / float(RAND_MAX)) * (Max - Min)) + Min;
-}
-void TerrainClass::faulting(){
+
+void TerrainClass::Faulting(){
 	D3DXVECTOR3 faultLine;
 	//float height = randRange(-5,5); 
 	float height = -2.0f; 
@@ -1300,7 +998,7 @@ void TerrainClass::faulting(){
 		for(int j = 0; j < m_terrainWidth; j++){
 			for(int i = 0; i < m_terrainWidth; i++){
 				index = (m_terrainHeight * j) + i;
-				if(checkCrossProduct(faultLine.x, faultLine.z, m_heightMap[index].x, m_heightMap[index].z)==0){
+				if(CheckCrossProduct(faultLine.x, faultLine.z, m_heightMap[index].x, m_heightMap[index].z)==0){
 					m_heightMap[index].y += height;
 				}else{
 					m_heightMap[index].y -= height;
@@ -1310,10 +1008,18 @@ void TerrainClass::faulting(){
 		height += float(rand()%10)/10;
 	}
 }
-int TerrainClass::checkCrossProduct(float x1, float z1, float x2, float z2){
+int TerrainClass::CheckCrossProduct(float x1, float z1, float x2, float z2){
 	if((x1*z2)-(z1*z2) < 0){
 		return 0;
 	}else{
 		return 1;
 	}
+}
+
+float TerrainClass::ValuesAroundPoint(int x, int z){
+	float sum = m_heightMap[(m_terrainWidth * (z-1) ) + x].y;
+	sum += m_heightMap[(m_terrainWidth * (z+1) ) + x].y;
+	sum += m_heightMap[(m_terrainWidth * z) + x-1].y;
+	sum += m_heightMap[(m_terrainWidth * z) + x+1].y;
+	return sum;
 }
