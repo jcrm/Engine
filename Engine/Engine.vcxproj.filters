@@ -13,9 +13,6 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Shader Files\Convolution">
-      <UniqueIdentifier>{6cc81bd1-0509-4f0a-bb6a-7c0b74e222b6}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Shader Files\Fluid">
       <UniqueIdentifier>{68dd6257-dff9-42d0-9f7b-62e8e50584b0}</UniqueIdentifier>
     </Filter>
@@ -31,18 +28,6 @@
     <Filter Include="Source Files\Texture Files">
       <UniqueIdentifier>{b1f43b56-8fb1-47f8-af4e-4bd6d162f2cc}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Shader Files">
-      <UniqueIdentifier>{26aa748a-cfa9-47fc-8262-95b6a34d947f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Generation files">
-      <UniqueIdentifier>{db26d014-5206-432e-a6c5-af38e55bfc00}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Shader Files">
-      <UniqueIdentifier>{61dcb1a2-9871-4901-8b94-b16e1cf9b097}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Generation Files">
-      <UniqueIdentifier>{a2bf4e86-0db7-4fca-844c-f24b183a1a1e}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\Texture Files">
       <UniqueIdentifier>{35bd686d-b8f6-4860-b6fa-3732b9383ae3}</UniqueIdentifier>
     </Filter>
@@ -55,14 +40,29 @@
     <Filter Include="Shader Files\Texture\Texture to texture">
       <UniqueIdentifier>{72908436-4d8a-494c-b969-623fc64df837}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Shader Files\Blur">
-      <UniqueIdentifier>{f100bf75-2835-4c87-8aea-2f2f8485dab3}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\Text Files">
       <UniqueIdentifier>{d148fcdb-8cfd-41da-af1b-1bd736fb924a}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\Text Files">
       <UniqueIdentifier>{47c89726-952a-4d04-adf0-f65bd90e8dc7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Object files">
+      <UniqueIdentifier>{db26d014-5206-432e-a6c5-af38e55bfc00}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Object Files">
+      <UniqueIdentifier>{a2bf4e86-0db7-4fca-844c-f24b183a1a1e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Shader Files">
+      <UniqueIdentifier>{26aa748a-cfa9-47fc-8262-95b6a34d947f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shader Files\Convolution">
+      <UniqueIdentifier>{6cc81bd1-0509-4f0a-bb6a-7c0b74e222b6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shader Files\Blur">
+      <UniqueIdentifier>{f100bf75-2835-4c87-8aea-2f2f8485dab3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Shader Files">
+      <UniqueIdentifier>{61dcb1a2-9871-4901-8b94-b16e1cf9b097}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -90,11 +90,8 @@
     <ClInclude Include="Source\orthowindowclass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Source\modelclass.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Source\fluidclass.h">
-      <Filter>Header Files\Generation Files</Filter>
+      <Filter>Header Files\Object Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\fluidshaderclass.h">
       <Filter>Header Files\Shader Files</Filter>
@@ -118,7 +115,7 @@
       <Filter>Header Files\Shader Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\terrainclass.h">
-      <Filter>Header Files\Generation Files</Filter>
+      <Filter>Header Files\Object Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\textureclass.h">
       <Filter>Header Files\Texture Files</Filter>
@@ -150,6 +147,9 @@
     <ClInclude Include="Source\timerclass.h">
       <Filter>Header Files\Text Files</Filter>
     </ClInclude>
+    <ClInclude Include="Source\modelclass.h">
+      <Filter>Header Files\Object Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\applicationclass.cpp">
@@ -179,11 +179,8 @@
     <ClCompile Include="Source\orthowindowclass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\modelclass.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Source\fluidclass.cpp">
-      <Filter>Source Files\Generation files</Filter>
+      <Filter>Source Files\Object files</Filter>
     </ClCompile>
     <ClCompile Include="Source\textureclass.cpp">
       <Filter>Source Files\Texture Files</Filter>
@@ -213,7 +210,7 @@
       <Filter>Source Files\Shader Files</Filter>
     </ClCompile>
     <ClCompile Include="Source\terrainclass.cpp">
-      <Filter>Source Files\Generation files</Filter>
+      <Filter>Source Files\Object files</Filter>
     </ClCompile>
     <ClCompile Include="Source\mergetextureshaderclass.cpp">
       <Filter>Source Files\Shader Files</Filter>
@@ -238,6 +235,9 @@
     </ClCompile>
     <ClCompile Include="Source\cpuclass.cpp">
       <Filter>Source Files\Text Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\modelclass.cpp">
+      <Filter>Source Files\Object files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

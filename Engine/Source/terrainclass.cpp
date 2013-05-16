@@ -24,7 +24,7 @@ TerrainClass::TerrainClass(const TerrainClass& other){
 }
 TerrainClass::~TerrainClass(){
 }
-bool TerrainClass::InitializeTerrain(ID3D11Device* device, int terrainWidth, int terrainHeight){
+bool TerrainClass::InitializeTerrain(ID3D11Device* device, int terrainWidth, int terrainHeight, WCHAR* textureFilename){
 	int index;
 	float height = 0.0;
 	bool result;
@@ -52,6 +52,12 @@ bool TerrainClass::InitializeTerrain(ID3D11Device* device, int terrainWidth, int
 	//even though we are generating a flat terrain, we still need to normalize it. 
 	// Calculate the normals for the terrain data.
 	result = CalculateNormals();
+	if(!result){
+		return false;
+	}
+
+	CalculateTextureCoordinates();
+	result = LoadTexture(device, textureFilename);
 	if(!result){
 		return false;
 	}
@@ -89,7 +95,7 @@ bool TerrainClass::Initialize(ID3D11Device* device, char* heightMapFilename){
 	return true;
 }
 void TerrainClass::Shutdown(){
-
+	ReleaseTexture();
 	// Release the vertex and index buffer.
 	ShutdownBuffers();
 
@@ -106,6 +112,9 @@ void TerrainClass::Render(ID3D11DeviceContext* deviceContext){
 }
 int TerrainClass::GetIndexCount(){
 	return m_indexCount;
+}
+ID3D11ShaderResourceView* TerrainClass::GetTexture(){
+	return m_Texture->GetTexture();
 }
 bool TerrainClass::GenerateHeightMap(ID3D11Device* device){
 	bool result;
@@ -394,6 +403,101 @@ void TerrainClass::ShutdownHeightMap(){
 
 	return;
 }
+
+
+void TerrainClass::CalculateTextureCoordinates()
+{
+	int incrementCount, i, j, tuCount, tvCount;
+	float incrementValue, tuCoordinate, tvCoordinate;
+
+
+	// Calculate how much to increment the texture coordinates by.
+	incrementValue = (float)TEXTURE_REPEAT / (float)m_terrainWidth;
+
+	// Calculate how many times to repeat the texture.
+	incrementCount = m_terrainWidth / TEXTURE_REPEAT;
+
+	// Initialize the tu and tv coordinate values.
+	tuCoordinate = 0.0f;
+	tvCoordinate = 1.0f;
+
+	// Initialize the tu and tv coordinate indexes.
+	tuCount = 0;
+	tvCount = 0;
+
+	// Loop through the entire height map and calculate the tu and tv texture coordinates for each vertex.
+	for(j=0; j<m_terrainHeight; j++)
+	{
+		for(i=0; i<m_terrainWidth; i++)
+		{
+			// Store the texture coordinate in the height map.
+			m_heightMap[(m_terrainHeight * j) + i].tu = tuCoordinate;
+			m_heightMap[(m_terrainHeight * j) + i].tv = tvCoordinate;
+
+			// Increment the tu texture coordinate by the increment value and increment the index by one.
+			tuCoordinate += incrementValue;
+			tuCount++;
+
+			// Check if at the far right end of the texture and if so then start at the beginning again.
+			if(tuCount == incrementCount)
+			{
+				tuCoordinate = 0.0f;
+				tuCount = 0;
+			}
+		}
+
+		// Increment the tv texture coordinate by the increment value and increment the index by one.
+		tvCoordinate -= incrementValue;
+		tvCount++;
+
+		// Check if at the top of the texture and if so then start at the bottom again.
+		if(tvCount == incrementCount)
+		{
+			tvCoordinate = 1.0f;
+			tvCount = 0;
+		}
+	}
+
+	return;
+}
+
+
+bool TerrainClass::LoadTexture(ID3D11Device* device, WCHAR* filename)
+{
+	bool result;
+
+
+	// Create the texture object.
+	m_Texture = new TextureClass;
+	if(!m_Texture)
+	{
+		return false;
+	}
+
+	// Initialize the texture object.
+	result = m_Texture->Initialize(device, filename);
+	if(!result)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+
+void TerrainClass::ReleaseTexture()
+{
+	// Release the texture object.
+	if(m_Texture)
+	{
+		m_Texture->Shutdown();
+		delete m_Texture;
+		m_Texture = 0;
+	}
+
+	return;
+}
+
 bool TerrainClass::InitializeBuffers(ID3D11Device* device){
 	VertexType* vertices;
 	unsigned long* indices;
@@ -402,7 +506,7 @@ bool TerrainClass::InitializeBuffers(ID3D11Device* device){
     D3D11_SUBRESOURCE_DATA vertexData, indexData;
 	HRESULT result;
 	int index1, index2, index3, index4;
-
+	float tu, tv;
 
 	// Calculate the number of vertices's in the terrain mesh.
 	m_vertexCount = (m_terrainWidth - 1) * (m_terrainHeight - 1) * 6;
@@ -433,76 +537,132 @@ bool TerrainClass::InitializeBuffers(ID3D11Device* device){
 			index3 = (m_terrainHeight * (j+1)) + i;      // Upper left.
 			index4 = (m_terrainHeight * (j+1)) + (i+1);  // Upper right.
 
+
 			if((i%2 !=0 && j%2 ==0) || (i%2 ==0 && j%2 != 0)){
+				tv = m_heightMap[index3].tv;
+				if(tv == 1.0f){
+					tv = 0.0f;
+				}
 				// Upper left.
 				vertices[index].position = D3DXVECTOR3(m_heightMap[index3].x, m_heightMap[index3].y, m_heightMap[index3].z);
+				vertices[index].texture = D3DXVECTOR2(m_heightMap[index3].tu,tv);
 				vertices[index].normal = D3DXVECTOR3(m_heightMap[index3].nx, m_heightMap[index3].ny, m_heightMap[index3].nz);
 				indices[index] = index;
 				index++;
 
+				tu = m_heightMap[index4].tu;
+				tv = m_heightMap[index4].tv;
+				if(tv == 1.0f){
+					tv = 0.0f;
+				}
+				if(tu == 0.0f){
+					tu = 1.0f;
+				}
 				// Upper right.
 				vertices[index].position = D3DXVECTOR3(m_heightMap[index4].x, m_heightMap[index4].y, m_heightMap[index4].z);
+				vertices[index].texture = D3DXVECTOR2(tu,tv);
 				vertices[index].normal = D3DXVECTOR3(m_heightMap[index4].nx, m_heightMap[index4].ny, m_heightMap[index4].nz);
 				indices[index] = index;
 				index++;
-
+				tu = m_heightMap[index2].tu;
+				if(tu == 1.0f){
+					tu = 0.0f;
+				}
 				// Bottom right.
 				vertices[index].position = D3DXVECTOR3(m_heightMap[index2].x, m_heightMap[index2].y, m_heightMap[index2].z);
+				vertices[index].texture = D3DXVECTOR2(tu,m_heightMap[index2].tv);
 				vertices[index].normal = D3DXVECTOR3(m_heightMap[index2].nx, m_heightMap[index2].ny, m_heightMap[index2].nz);
 				indices[index] = index;
 				index++;
-
+				tu = m_heightMap[index2].tu;
+				if(tu == 1.0f){
+					tu = 0.0f;
+				}
 				// Bottom right.
 				vertices[index].position = D3DXVECTOR3(m_heightMap[index2].x, m_heightMap[index2].y, m_heightMap[index2].z);
+				vertices[index].texture = D3DXVECTOR2(tu,m_heightMap[index2].tv);
 				vertices[index].normal = D3DXVECTOR3(m_heightMap[index2].nx, m_heightMap[index2].ny, m_heightMap[index2].nz);
 				indices[index] = index;
 				index++;
 
 				// Bottom left.
 				vertices[index].position = D3DXVECTOR3(m_heightMap[index1].x, m_heightMap[index1].y, m_heightMap[index1].z);
+				vertices[index].texture = D3DXVECTOR2(m_heightMap[index1].tu,m_heightMap[index1].tv);
 				vertices[index].normal = D3DXVECTOR3(m_heightMap[index1].nx, m_heightMap[index1].ny, m_heightMap[index1].nz);
 				indices[index] = index;
 				index++;
-
+				tv = m_heightMap[index3].tv;
+				if(tv == 1.0f){
+					tv = 0.0f;
+				}
 				// Upper left.
 				vertices[index].position = D3DXVECTOR3(m_heightMap[index3].x, m_heightMap[index3].y, m_heightMap[index3].z);
+				vertices[index].texture = D3DXVECTOR2(m_heightMap[index3].tu,tv);
 				vertices[index].normal = D3DXVECTOR3(m_heightMap[index3].nx, m_heightMap[index3].ny, m_heightMap[index3].nz);
 				indices[index] = index;
 				index++;
 
 			}else{
+				tv = m_heightMap[index3].tv;
+				if(tv == 1.0f){
+					tv = 0.0f;
+				}
 				// Upper left.
 				vertices[index].position = D3DXVECTOR3(m_heightMap[index3].x, m_heightMap[index3].y, m_heightMap[index3].z);
+				vertices[index].texture = D3DXVECTOR2(m_heightMap[index3].tu,tv);
 				vertices[index].normal = D3DXVECTOR3(m_heightMap[index3].nx, m_heightMap[index3].ny, m_heightMap[index3].nz);
 				indices[index] = index;
 				index++;
-
+				tu = m_heightMap[index4].tu;
+				tv = m_heightMap[index4].tv;
+				if(tv == 1.0f){
+					tv = 0.0f;
+				}
+				if(tu == 0.0f){
+					tu = 1.0f;
+				}
 				// Upper right.
 				vertices[index].position = D3DXVECTOR3(m_heightMap[index4].x, m_heightMap[index4].y, m_heightMap[index4].z);
+				vertices[index].texture = D3DXVECTOR2(tu,tv);
 				vertices[index].normal = D3DXVECTOR3(m_heightMap[index4].nx, m_heightMap[index4].ny, m_heightMap[index4].nz);
 				indices[index] = index;
 				index++;
 
 				// Bottom left.
 				vertices[index].position = D3DXVECTOR3(m_heightMap[index1].x, m_heightMap[index1].y, m_heightMap[index1].z);
+				vertices[index].texture = D3DXVECTOR2(m_heightMap[index1].tu,m_heightMap[index1].tv);
 				vertices[index].normal = D3DXVECTOR3(m_heightMap[index1].nx, m_heightMap[index1].ny, m_heightMap[index1].nz);
 				indices[index] = index;
 				index++;
 
 				// Bottom left.
 				vertices[index].position = D3DXVECTOR3(m_heightMap[index1].x, m_heightMap[index1].y, m_heightMap[index1].z);
+				vertices[index].texture = D3DXVECTOR2(m_heightMap[index1].tu,m_heightMap[index1].tv);
 				vertices[index].normal = D3DXVECTOR3(m_heightMap[index1].nx, m_heightMap[index1].ny, m_heightMap[index1].nz);
 				indices[index] = index;
 				index++;
 
+				tu = m_heightMap[index4].tu;
+				tv = m_heightMap[index4].tv;
+				if(tv == 1.0f){
+					tv = 0.0f;
+				}
+				if(tu == 0.0f){
+					tu = 1.0f;
+				}
 				// Upper right.
 				vertices[index].position = D3DXVECTOR3(m_heightMap[index4].x, m_heightMap[index4].y, m_heightMap[index4].z);
+				vertices[index].texture = D3DXVECTOR2(tu,tv);
 				vertices[index].normal = D3DXVECTOR3(m_heightMap[index4].nx, m_heightMap[index4].ny, m_heightMap[index4].nz);
 				indices[index] = index;
 				index++;
-
+				tu = m_heightMap[index2].tu;
+				if(tu == 1.0f){
+					tu = 0.0f;
+				}
 				// Bottom right.
 				vertices[index].position = D3DXVECTOR3(m_heightMap[index2].x, m_heightMap[index2].y, m_heightMap[index2].z);
+				vertices[index].texture = D3DXVECTOR2(tu,m_heightMap[index2].tv);
 				vertices[index].normal = D3DXVECTOR3(m_heightMap[index2].nx, m_heightMap[index2].ny, m_heightMap[index2].nz);
 				indices[index] = index;
 				index++;

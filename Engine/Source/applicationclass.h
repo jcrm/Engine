@@ -89,7 +89,7 @@ private:
 	CpuClass* m_Cpu;
 	TextClass* m_Text;
 	LightClass* m_Light;
-	OrthoWindowClass *m_SmallWindow, *m_FullScreenWindow;
+	OrthoWindowClass *m_FullScreenWindow;
 	
 	TerrainClass* m_Terrain;
 	ModelClass* m_Model[MODEL_NUMBER];
@@ -99,7 +99,7 @@ private:
 	TextureToTextureShaderClass* m_TextureToTextureShader;
 	ConvolutionShaderClass* m_ConvolutionShader;
 	
-	RenderTextureClass *m_RenderTexture, *m_DownSampleTexure, *m_UpSampleTexure, *m_ConvolutionTexture, *m_MergeTexture, *m_GlowTexture;
+	RenderTextureClass *m_RenderFullSizeTexture, *m_FullSizeTexure, *m_DownSampleHalfSizeTexure, *m_ConvolutionHalfSizeTexture, *m_MergeFullSizeTexture;
 	
 	FontShaderClass* m_FontShader;
 	TerrainShaderClass* m_TerrainShader;

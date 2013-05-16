@@ -10,26 +10,31 @@
 #include <d3d11.h>
 #include <d3dx10math.h>
 #include <stdio.h>
+#include "textureclass.h"
 
+#define TEXTURE_REPEAT 8
 ////////////////////////////////////////////////////////////////////////////////
 // Class name: TerrainClass
 ////////////////////////////////////////////////////////////////////////////////
 class TerrainClass
 {
 private:
-	struct VertexType{
+	struct VertexType
+	{
 		D3DXVECTOR3 position;
-	    D3DXVECTOR3 normal;
+		D3DXVECTOR2 texture;
+		D3DXVECTOR3 normal;
 	};
-
 
 	struct VectorType { 
 		float x, y, z;
 	};
 
 public:
-	struct HeightMapType{ 
+	struct HeightMapType 
+	{ 
 		float x, y, z;
+		float tu, tv;
 		float nx, ny, nz;
 	};
 	TerrainClass();
@@ -37,13 +42,14 @@ public:
 	~TerrainClass();
 
 	bool Initialize(ID3D11Device*, char*);
-	bool InitializeTerrain(ID3D11Device*, int terrainWidth, int terrainHeight);
+	bool InitializeTerrain(ID3D11Device* device, int terrainWidth, int terrainHeight, WCHAR* textureFilename);
 	void Shutdown();
 	void Render(ID3D11DeviceContext*);
 	bool GenerateHeightMap(ID3D11Device* device);
 	int  GetIndexCount();
 	inline int getHeightMapSize() const {return m_terrainWidth;}
 	inline HeightMapType* getHeightMap() {return m_heightMap;}
+	ID3D11ShaderResourceView* GetTexture();
 private:
 	bool LoadHeightMap(char*);
 	void NormalizeHeightMap();
@@ -70,12 +76,16 @@ private:
 	void Smooth(int passes);
 	
 	float ValuesAroundPoint(int x, int z);
+	void ReleaseTexture();
+	bool LoadTexture(ID3D11Device* device, WCHAR* filename);
+	void CalculateTextureCoordinates();
 private:
 	bool m_terrainGeneratedToggle;
 	int m_terrainWidth, m_terrainHeight;
 	int m_vertexCount, m_indexCount;
 	ID3D11Buffer *m_vertexBuffer, *m_indexBuffer;
 	HeightMapType* m_heightMap;
+	TextureClass* m_Texture;
 };
 
 #endif

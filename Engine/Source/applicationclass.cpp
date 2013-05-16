@@ -22,17 +22,15 @@ ApplicationClass::ApplicationClass()
 	m_Light = 0;
 	m_TextureShader = 0;
 	m_TextureToTextureShader = 0;
-	m_RenderTexture = 0;
-	m_DownSampleTexure = 0;
-	m_UpSampleTexure = 0;
-	m_SmallWindow = 0;
+	m_RenderFullSizeTexture = 0;
+	m_DownSampleHalfSizeTexure = 0;
+	m_FullSizeTexure = 0;
 	m_FullScreenWindow = 0;
 	m_ConvolutionShader = 0;
-	m_ConvolutionTexture = 0;
-	m_GlowTexture = 0;
+	m_ConvolutionHalfSizeTexture = 0;
 	mGlowShader = 0;
 	mMergerShader = 0;
-	m_MergeTexture = 0;
+	m_MergeFullSizeTexture = 0;
 	for(int i = 0; i < MODEL_NUMBER; i++){
 		m_Model[0] = 0;
 	}
@@ -97,20 +95,6 @@ bool ApplicationClass::Initialize(HINSTANCE hinstance, HWND hwnd, int screenWidt
 	m_Light->SetDirection(1.0f,0.0f, 0.0f);
 	InitTextures(hwnd, screenWidth, screenHeight);
 	InitShaders(hwnd);
-	// Create the small ortho window object.
-	m_SmallWindow = new OrthoWindowClass;
-	if(!m_SmallWindow)
-	{
-		return false;
-	}
-	// Initialize the small ortho window object.
-	result = m_SmallWindow->Initialize(m_Direct3D->GetDevice(), downSampleWidth, downSampleHeight);
-	if(!result)
-	{
-		MessageBox(hwnd, L"Could not initialize the small ortho window object.", L"Error", MB_OK);
-		return false;
-	}
-
 	// Create the full screen ortho window object.
 	m_FullScreenWindow = new OrthoWindowClass;
 	if(!m_FullScreenWindow){
@@ -209,7 +193,7 @@ bool ApplicationClass::InitObjects(HWND hwnd){
 		return false;
 	}
 	// Initialize the terrain object.
-	result = m_Terrain->InitializeTerrain(m_Direct3D->GetDevice(), 129, 129);   //initialise the flat terrain.
+	result = m_Terrain->InitializeTerrain(m_Direct3D->GetDevice(), 129, 129, L"data/ground.dds");   //initialise the flat terrain.
 	if(!result){
 		MessageBox(hwnd, L"Could not initialize the terrain object.", L"Error", MB_OK);
 		return false;
@@ -232,61 +216,52 @@ bool ApplicationClass::InitTextures(HWND hwnd, int screenWidth, int screenHeight
 	int	downSampleWidth = screenWidth / 2;
 	int downSampleHeight = screenHeight / 2;
 	// Create the render to texture object.
-	m_RenderTexture = new RenderTextureClass;
-	if(!m_RenderTexture){
+	m_RenderFullSizeTexture = new RenderTextureClass;
+	if(!m_RenderFullSizeTexture){
 		return false;
 	}
 	// Initialize the render to texture object.
-	result = m_RenderTexture->Initialize(m_Direct3D->GetDevice(), screenWidth, screenHeight, SCREEN_DEPTH, SCREEN_NEAR);
+	result = m_RenderFullSizeTexture->Initialize(m_Direct3D->GetDevice(), screenWidth, screenHeight, SCREEN_DEPTH, SCREEN_NEAR);
 	if(!result){
 		MessageBox(hwnd, L"Could not initialize the render to texture object.", L"Error", MB_OK);
 		return false;
 	}
 	// Create the down sample render to texture object.
-	m_DownSampleTexure = new RenderTextureClass;
-	if(!m_DownSampleTexure){
+	m_DownSampleHalfSizeTexure = new RenderTextureClass;
+	if(!m_DownSampleHalfSizeTexure){
 		return false;
 	}
 	// Initialize the down sample render to texture object.
-	result = m_DownSampleTexure->Initialize(m_Direct3D->GetDevice(), downSampleWidth, downSampleHeight, SCREEN_DEPTH, SCREEN_NEAR);
+	result = m_DownSampleHalfSizeTexure->Initialize(m_Direct3D->GetDevice(), downSampleWidth, downSampleHeight, SCREEN_DEPTH, SCREEN_NEAR);
 	if(!result){
 		MessageBox(hwnd, L"Could not initialize the down sample render to texture object.", L"Error", MB_OK);
 		return false;
 	}
-	m_ConvolutionTexture = new RenderTextureClass;
-	if (!m_ConvolutionTexture){
+	m_ConvolutionHalfSizeTexture = new RenderTextureClass;
+	if (!m_ConvolutionHalfSizeTexture){
 		return false;
 	}
-	result = m_ConvolutionTexture->Initialize(m_Direct3D->GetDevice(), downSampleWidth, downSampleHeight, SCREEN_DEPTH, SCREEN_NEAR);
+	result = m_ConvolutionHalfSizeTexture->Initialize(m_Direct3D->GetDevice(), downSampleWidth, downSampleHeight, SCREEN_DEPTH, SCREEN_NEAR);
 	if (!result){
 		MessageBox(hwnd, L"Could not initialize the Convolution to texture object.", L"Error", MB_OK);		
 		return false;
 	}
-	m_GlowTexture = new RenderTextureClass;
-	if (!m_GlowTexture){
+	m_MergeFullSizeTexture = new RenderTextureClass;
+	if (!m_MergeFullSizeTexture){
 		return false;
 	}
-	result = m_GlowTexture->Initialize(m_Direct3D->GetDevice(), screenWidth, screenHeight, SCREEN_DEPTH, SCREEN_NEAR);
-	if (!result){
-		MessageBox(hwnd, L"Could not initialize the Convolution to texture object.", L"Error", MB_OK);		
-		return false;
-	}
-	m_MergeTexture = new RenderTextureClass;
-	if (!m_MergeTexture){
-		return false;
-	}
-	result = m_MergeTexture->Initialize(m_Direct3D->GetDevice(), screenWidth, screenHeight, SCREEN_DEPTH, SCREEN_NEAR);
+	result = m_MergeFullSizeTexture->Initialize(m_Direct3D->GetDevice(), screenWidth, screenHeight, SCREEN_DEPTH, SCREEN_NEAR);
 	if (!result){
 		MessageBox(hwnd, L"Could not initialize the Convolution to texture object.", L"Error", MB_OK);		
 		return false;
 	}
 	// Create the up sample render to texture object.
-	m_UpSampleTexure = new RenderTextureClass;
-	if(!m_UpSampleTexure){
+	m_FullSizeTexure = new RenderTextureClass;
+	if(!m_FullSizeTexure){
 		return false;
 	}
 	// Initialize the up sample render to texture object.
-	result = m_UpSampleTexure->Initialize(m_Direct3D->GetDevice(), screenWidth, screenHeight, SCREEN_DEPTH, SCREEN_NEAR);
+	result = m_FullSizeTexure->Initialize(m_Direct3D->GetDevice(), screenWidth, screenHeight, SCREEN_DEPTH, SCREEN_NEAR);
 	if(!result){
 		MessageBox(hwnd, L"Could not initialize the up sample render to texture object.", L"Error", MB_OK);
 		return false;
@@ -462,38 +437,33 @@ void ApplicationClass::ShutdownObjects(){
 }
 void ApplicationClass::ShutdownTextures(){
 	// Release the up sample render to texture object.
-	if(m_UpSampleTexure){
-		m_UpSampleTexure->Shutdown();
-		delete m_UpSampleTexure;
-		m_UpSampleTexure = 0;
+	if(m_FullSizeTexure){
+		m_FullSizeTexure->Shutdown();
+		delete m_FullSizeTexure;
+		m_FullSizeTexure = 0;
 	}
 	// Release the down sample render to texture object.
-	if(m_DownSampleTexure){
-		m_DownSampleTexure->Shutdown();
-		delete m_DownSampleTexure;
-		m_DownSampleTexure = 0;
+	if(m_DownSampleHalfSizeTexure){
+		m_DownSampleHalfSizeTexure->Shutdown();
+		delete m_DownSampleHalfSizeTexure;
+		m_DownSampleHalfSizeTexure = 0;
 	}
 
 	// Release the render to texture object.
-	if(m_RenderTexture){
-		m_RenderTexture->Shutdown();
-		delete m_RenderTexture;
-		m_RenderTexture = 0;
+	if(m_RenderFullSizeTexture){
+		m_RenderFullSizeTexture->Shutdown();
+		delete m_RenderFullSizeTexture;
+		m_RenderFullSizeTexture = 0;
 	}
-	if (m_ConvolutionTexture){
-		m_ConvolutionTexture->Shutdown();
-		delete m_ConvolutionTexture;
-		m_ConvolutionTexture = 0;
+	if (m_ConvolutionHalfSizeTexture){
+		m_ConvolutionHalfSizeTexture->Shutdown();
+		delete m_ConvolutionHalfSizeTexture;
+		m_ConvolutionHalfSizeTexture = 0;
 	}
-	if (m_GlowTexture){
-		m_GlowTexture->Shutdown();
-		delete m_GlowTexture;
-		m_GlowTexture = 0;
-	}
-	if (m_MergeTexture){
-		m_MergeTexture->Shutdown();
-		delete m_MergeTexture;
-		m_MergeTexture = 0;
+	if (m_MergeFullSizeTexture){
+		m_MergeFullSizeTexture->Shutdown();
+		delete m_MergeFullSizeTexture;
+		m_MergeFullSizeTexture = 0;
 	}
 }
 void ApplicationClass::ShutdownCamera(){
@@ -568,13 +538,6 @@ void ApplicationClass::Shutdown()
 		delete m_FullScreenWindow;
 		m_FullScreenWindow = 0;
 	}
-
-	// Release the small ortho window object.
-	if(m_SmallWindow){
-		m_SmallWindow->Shutdown();
-		delete m_SmallWindow;
-		m_SmallWindow = 0;
-	}
 	// Release the light object.
 	if(m_Light){
 		delete m_Light;
@@ -607,18 +570,21 @@ void ApplicationClass::Shutdown()
 bool ApplicationClass::Frame()
 {
 	bool result;
-
-
+	static int waterCounter = 0;
+	static int maxWaterCounter = 10;
 	// Read the user input.
 	result = m_Input->Frame();
-	if(!result)
-	{
+	if(!result){
 		return false;
 	}
-	
+	if(waterCounter++ > maxWaterCounter){
+		waterCounter = 0;
+		for(int i = 0; i <5; i++){
+			mFluid->AddWater(rand()%120+1,rand()%120+1, float(rand()%20)/10);
+		}
+	}
 	// Check if the user pressed escape and wants to exit the application.
-	if(m_Input->IsEscapePressed() == true)
-	{
+	if(m_Input->IsEscapePressed() == true){
 		return false;
 	}
 
@@ -629,26 +595,23 @@ bool ApplicationClass::Frame()
 
 	// Update the FPS value in the text object.
 	result = m_Text->SetFps(m_Fps->GetFps(), m_Direct3D->GetDeviceContext());
-	if(!result)
-	{
+	if(!result){
 		return false;
 	}
 	
 	// Update the CPU usage value in the text object.
 	result = m_Text->SetCpu(m_Cpu->GetCpuPercentage(), m_Direct3D->GetDeviceContext());
-	if(!result)
-	{
+	if(!result){
 		return false;
 	}
 
 	// Do the frame input processing.
 	result = HandleInput(m_Timer->GetTime());
-	if(!result)
-	{
+	if(!result){
 		return false;
 	}
-	mFluid->GenerateHeightMap(m_Direct3D->GetDevice());
 
+	mFluid->GenerateHeightMap(m_Direct3D->GetDevice());
 	// Render the graphics scene.
 	result = Render();
 	if(!result){
@@ -658,11 +621,11 @@ bool ApplicationClass::Frame()
 }
 
 
-bool ApplicationClass::HandleInput(float frameTime)
-{
+bool ApplicationClass::HandleInput(float frameTime){
 	bool keyDown, result, blur;
 	float posX, posY, posZ, rotX, rotY, rotZ;
 	blur = false;
+
 	keyDown = m_Input->IsHPressed();
 	if(keyDown){
 		for(int i = 0; i <5; i++){
@@ -717,15 +680,12 @@ bool ApplicationClass::HandleInput(float frameTime)
 
 	// Update the position values in the text object.
 	result = m_Text->SetCameraPosition(posX, posY, posZ, m_Direct3D->GetDeviceContext());
-	if(!result)
-	{
+	if(!result){
 		return false;
 	}
-
 	// Update the rotation values in the text object.
 	result = m_Text->SetCameraRotation(rotX, rotY, rotZ, m_Direct3D->GetDeviceContext());
-	if(!result)
-	{
+	if(!result){
 		return false;
 	}
 	mBlur = blur;
@@ -736,49 +696,49 @@ bool ApplicationClass::Render(){
 	bool result;
 
 	// First render the scene to a render texture.
-	result = RenderSceneToTexture(m_RenderTexture);
+	result = RenderSceneToTexture(m_RenderFullSizeTexture);
 	if(!result){
 		return false;
 	}
-	result = RenderTexture(mGlowShader, m_RenderTexture,m_GlowTexture,m_FullScreenWindow);
+	result = RenderTexture(mGlowShader, m_RenderFullSizeTexture, m_FullSizeTexure, m_FullScreenWindow);
 	if(!result){
 		return false;
 	}
-	result = RenderTexture(m_TextureToTextureShader, m_GlowTexture, m_DownSampleTexure, m_FullScreenWindow);
+	result = RenderTexture(m_TextureToTextureShader, m_FullSizeTexure, m_DownSampleHalfSizeTexure, m_FullScreenWindow);
 	if(!result){
 		return false;
 	}
-	result = RenderTexture(m_ConvolutionShader, m_DownSampleTexure, m_ConvolutionTexture, m_FullScreenWindow);
+	result = RenderTexture(m_ConvolutionShader, m_DownSampleHalfSizeTexure, m_ConvolutionHalfSizeTexture, m_FullScreenWindow);
 	if(!result){
 		return false;
 	}
-	result = RenderTexture(m_ConvolutionShader, m_ConvolutionTexture, m_DownSampleTexure, m_FullScreenWindow);
+	result = RenderTexture(m_ConvolutionShader, m_ConvolutionHalfSizeTexture, m_DownSampleHalfSizeTexure, m_FullScreenWindow);
 	if(!result){
 		return false;
 	}
-	result = RenderTexture(m_ConvolutionShader, m_DownSampleTexure, m_ConvolutionTexture, m_FullScreenWindow);
+	result = RenderTexture(m_ConvolutionShader, m_DownSampleHalfSizeTexure, m_ConvolutionHalfSizeTexture, m_FullScreenWindow);
 	if(!result){
 		return false;
 	}
-	result = RenderTexture(m_TextureToTextureShader, m_ConvolutionTexture, m_UpSampleTexure, m_FullScreenWindow);
+	result = RenderTexture(m_TextureToTextureShader, m_ConvolutionHalfSizeTexture, m_FullSizeTexure, m_FullScreenWindow);
 	if(!result){
 		return false;
 	}
-	result= RenderMergeTexture(m_RenderTexture,m_UpSampleTexure,m_MergeTexture,m_FullScreenWindow);
+	result= RenderMergeTexture(m_RenderFullSizeTexture,m_FullSizeTexure,m_MergeFullSizeTexture,m_FullScreenWindow);
 	if(!result){
 		return false;
 	}
 	if(mBlur){
-		result = RenderTexture(mVerticalBlurShader, m_MergeTexture, m_RenderTexture, m_FullScreenWindow);
+		result = RenderTexture(mVerticalBlurShader, m_MergeFullSizeTexture, m_RenderFullSizeTexture, m_FullScreenWindow);
 		if(!result){
 			return false;
 		}
-		result = Render2DTextureScene(m_RenderTexture);
+		result = Render2DTextureScene(m_RenderFullSizeTexture);
 		if(!result){
 			return false;
 		}
 	}else{
-		result = Render2DTextureScene(m_MergeTexture);
+		result = Render2DTextureScene(m_MergeFullSizeTexture);
 		if(!result){
 			return false;
 		}
@@ -807,7 +767,7 @@ bool ApplicationClass::RenderSceneToTexture(RenderTextureClass* write)
 	m_Terrain->Render(m_Direct3D->GetDeviceContext());
 	// Render the terrain using the terrain shader.
 	result = m_TerrainShader->Render(m_Direct3D->GetDeviceContext(), m_Terrain->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, 
-		m_Light->GetAmbientColor(), m_Light->GetDiffuseColor(), m_Light->GetDirection());
+		m_Light->GetAmbientColor(), m_Light->GetDiffuseColor(), m_Light->GetDirection(), m_Terrain->GetTexture());
 	if(!result){
 		return false;
 	}
