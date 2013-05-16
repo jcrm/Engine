@@ -42,11 +42,11 @@ public:
 	bool InitializeTerrain(ID3D11Device* device, int terrainWidth, int terrainHeight, WCHAR* textureFilename);
 	void Shutdown();
 	void Render(ID3D11DeviceContext*);
+	//generate height map
 	bool GenerateHeightMap(ID3D11Device* device);
-
+	//getters
 	inline int  GetIndexCount() const {return m_indexCount;}
 	inline int getHeightMapSize() const {return m_terrainWidth;}
-
 	inline HeightMapType* getHeightMap() {return m_heightMap;}
 	inline ID3D11ShaderResourceView* GetTexture() {return m_Texture->GetTexture();}
 private:
@@ -54,27 +54,24 @@ private:
 	void NormalizeHeightMap();
 	bool CalculateNormals();
 	void ShutdownHeightMap();
-
+	//buffer functions
 	bool InitializeBuffers(ID3D11Device*);
 	void ShutdownBuffers();
 	void RenderBuffers(ID3D11DeviceContext*);
-
-	void GenerateRandomHeightMap();
-	void GenerateSinCos(int index);
-
+	//Particle Deposition based on code from http://www.lighthouse3d.com/opengl/appstools/tg/
 	void ParticleDeposition(int numIt, float height);
 	void Deposit( int x, int z, float value);
-
+	//Mid-Point Displacement based upon http://gameprogrammer.com/fractal.html
 	void MidPointDisplacement (float heightScale, float h);
 	float AvgDiamondVals (int i, int j, int stride, int size, int subSize);
 	float AvgSquareVals (int i, int j, int stride, int size);
-
+	//Faulting based upon code found at http://www.lighthouse3d.com/opengl/terrain/index.php?impdetails
 	void Faulting(int passes, float displacement);
-	int CheckCrossProduct(float x1, float z1, float x2, float z2);
-	
 	void Smooth(int passes);
-	
-	float ValuesAroundPoint(int x, int z);
+	//random height maps
+	void GenerateRandomHeightMap();
+	void GenerateSinCos(int index);
+	//texture functions 
 	void ReleaseTexture();
 	bool LoadTexture(ID3D11Device* device, WCHAR* filename);
 	void CalculateTextureCoordinates();

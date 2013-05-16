@@ -619,260 +619,8 @@ void TerrainClass::RenderBuffers(ID3D11DeviceContext* deviceContext){
 
 	return;
 }
-void TerrainClass::GenerateRandomHeightMap(){
-	int index;
-	float height = (float(rand()%200)/10)-10;
 
-	//loop through the terrain and set the heights between -10 and 10. 
-	for(int j=0; j<m_terrainHeight; j++){
-		for(int i=0; i<m_terrainWidth; i++){
-			float height = (float(rand()%200)/10)-10;
-			index = (m_terrainHeight * j) + i;
-			m_heightMap[index].x = (float)i;
-			m_heightMap[index].y = height;
-			m_heightMap[index].z = (float)j;
-		}
-	}
-}
-void TerrainClass::Deposit( int x, int z, float value){
-	int kk,jj;
-	int flag = 0;
-
-	for (int k=-1;k<2;k++){
-		for(int j=-1;j<2;j++){
-			if (k!=0 && j!=0 && x+k>-1 && x+k<m_terrainWidth && z+j>-1 && z+j<m_terrainHeight) {
-				if (m_heightMap[(x+k) * m_terrainHeight + (z+j)].y < m_heightMap[x * m_terrainHeight + z].y) {
-					flag = 1;
-					kk = k;
-					jj = j;
-				}
-			}
-		}
-	}
-	if (!flag){
-		m_heightMap[x * m_terrainHeight + z].y += value;
-	}else{
-		Deposit(x+kk,z+jj, value);
-	}
-}
-void TerrainClass::ParticleDeposition(int numIt, float height){
-	int x = rand() % m_terrainWidth;
-	int z = rand() % m_terrainHeight;
-	if(height > 0){
-		int count = 0;
-		while((m_heightMap[x * m_terrainHeight + z].y > 5.0f) && count < 30){
-			x = rand() % m_terrainWidth;
-			z = rand() % m_terrainHeight;
-			count++;
-		}
-	}
-	for(int i=0; i < numIt; i++){
-		int dir = rand() % 4;
-		if (dir == 2){
-			if (++x >= m_terrainWidth)
-				x = 0;
-		}else if (dir == 3){
-			if (--x == -1)
-				x = m_terrainWidth-1;
-		}else if (dir == 1) {
-			if (++z >= m_terrainHeight)
-				z = 0;
-		}else if (dir == 0){
-			if (--z == -1)
-				z = m_terrainHeight - 1;
-		}
-		Deposit(x,z, height);
-	}
-}
-/*
-* Creates another array where the smooth values are kept until updating the height map.
-* Works by averaging all the values around the vertex. 
-* based upon algroithm at this site: http://nfostergames.com/lessons/TerrainSmoothing.htm
-*/
-void TerrainClass::Smooth(int passes) {
-	float *smoothHeightMap;
-	int index = 0;
-	while(passes > 0){
-		passes--;
-		smoothHeightMap = new float[m_terrainWidth*m_terrainWidth];
-		for(int j = 0; j<m_terrainWidth;j++){
-			for(int i = 0; i<m_terrainHeight; i++){
-				int noPointsAround = 0;
-				float totalValuePointsAround = 0.0f;
-				//checks that the left value is not outside the scope of the array
-				//if not then add the value of the element and increment the number of points calculated
-				if(i-1 > 0){
-					index = calculateIndex(m_terrainHeight, i-1, j);
-					totalValuePointsAround += m_heightMap[index].y;
-					noPointsAround++;
-					//check if the up to the left point is still in the array
-					//if it is same as before add the value and increment the number of points
-					if(j-1 > 0){
-						index = calculateIndex(m_terrainHeight, i-1, j-1);
-						totalValuePointsAround += m_heightMap[index].y;
-						noPointsAround++;
-					}
-					//check to see if down and to the left is in the array
-					if(j+1<m_terrainHeight){
-						index = calculateIndex(m_terrainHeight, i-1, j+1);
-						totalValuePointsAround += m_heightMap[index].y;
-						noPointsAround++;
-					}
-				}
-				//check to see if the right value is in the array
-				if(i+1 < m_terrainWidth){
-					index = calculateIndex(m_terrainHeight, i+1, j);
-					totalValuePointsAround += m_heightMap[index].y;
-					noPointsAround++;
-					//check to see if top right is in array scope
-					if(j-1 > 0){
-						index = calculateIndex(m_terrainHeight, i+1, j-1);
-						totalValuePointsAround += m_heightMap[index].y;
-						noPointsAround++;
-					}
-					//check to see if bottom right is in array
-					if(j+1<m_terrainHeight){
-						index = calculateIndex(m_terrainHeight, i+1, j+1);
-						totalValuePointsAround += m_heightMap[index].y;
-						noPointsAround++;
-					}
-				}
-				//check to see if above is valid
-				if(j-1 > 0){
-					index = calculateIndex(m_terrainHeight, i, j-1);
-					totalValuePointsAround += m_heightMap[index].y;
-					noPointsAround++;
-				}
-				//lastly check below for being in the array
-				if(j+1<m_terrainHeight){
-					index = calculateIndex(m_terrainHeight, i, j+1);
-					totalValuePointsAround += m_heightMap[index].y;
-					noPointsAround++;
-				}
-				index = calculateIndex(m_terrainHeight, i, j);
-				//add all multiple of the values to the smooth array
-				smoothHeightMap[index] = (m_heightMap[index].y + float(totalValuePointsAround / noPointsAround))*0.5f;
-			}
-		}
-		//once finished creating new array set the y value of the height mapt equal to it.
-		for(int i = 0; i<m_terrainHeight; i++){
-			for(int j = 0; j < m_terrainHeight; j++){
-				index = calculateIndex(m_terrainHeight, i, j);
-				m_heightMap[index].y = smoothHeightMap[index];
-			}
-		}
-	}
-}
-
-void TerrainClass::GenerateSinCos(int index){
-	//loop through the terrain and set the heights how we want. This is where we generate the terrain
-	//in this case I will run a sin-wave through the terrain in one axis.
-	float sinValue = float(rand()%12)+1;
-	float cosValue = (((float(rand()%200))/10)-10);
-	float sinMulti = (((float(rand()%100))/10)-5);
-	float cosMulti = float(((float(rand()%50))/10)-2.5);
-	if(cosValue == 0)	cosValue = 1;
- 	for(int j=0; j<m_terrainHeight; j++){
-		for(int i=0; i<m_terrainWidth; i++){			
-			index = (m_terrainHeight * j) + i;
-			//do sine and cosine wave calculations
-			m_heightMap[index].x = (float)i;
-			m_heightMap[index].y+= (float)((sin((float)i/(m_terrainWidth/sinValue))*sinMulti) + (cos((float)j/cosValue)*cosMulti));
-			m_heightMap[index].z = (float)j;
-		}
-	}
-	//do cosine wave calculations
-	for(int i=0; i<m_terrainWidth; i++){	
-		cosValue = (((float(rand()%200))/10)-10);
-		for(int j=0; j<m_terrainHeight; j++){	
-			index = (m_terrainWidth * i) + j;
-
-			m_heightMap[index].x = (float)j;
-			m_heightMap[index].y+= (cos((float)j/cosValue)*cosMulti);
-			m_heightMap[index].z = (float)i;
-		}
-	}
-}
 //http://gameprogrammer.com/fractal.html
-/*
- * avgDiamondVals - Given the i,j location as the center of a diamond,
- * average the data values at the four corners of the diamond and
- * return it. "Stride" represents the distance from the diamond center
- * to a diamond corner.
- *
- * Called by fill2DFractArray.
- */
-float TerrainClass::AvgDiamondVals (int i, int j, int stride, int size, int subSize){
-    /* In this diagram, our input stride is 1, the i,j location is
-       indicated by "X", and the four value we want to average are
-       "*"s:
-           .   *   .
-
-           *   X   *
-
-           .   *   .
-       */
-
-    /* In order to support tiled surfaces which meet seamless at the
-       edges (that is, they "wrap"), We need to be careful how we
-       calculate averages when the i,j diamond center lies on an edge
-       of the array. The first four 'if' clauses handle these
-       cases. The final 'else' clause handles the general case (in
-       which i,j is not on an edge).
-     */
-	float value = 0.0f; 
-    if(i == 0){
-		value = m_heightMap[(i*size) + j-stride].y +
-			m_heightMap[(i*size) + j+stride].y +
-			m_heightMap[((subSize-stride)*size) + j].y +
-			m_heightMap[((i+stride)*size) + j].y;
-	}else if (i == size-1){
-		value = m_heightMap[(i*size) + j-stride].y +
-			 m_heightMap[(i*size) + j+stride].y +
-			 m_heightMap[((i-stride)*size) + j].y +
-			 m_heightMap[((0+stride)*size) + j].y;
-	}else if (j == 0){
-		value = m_heightMap[((i-stride)*size) + j].y +
-			 m_heightMap[((i+stride)*size) + j].y +
-			 m_heightMap[(i*size) + j+stride].y +
-			 m_heightMap[(i*size) + subSize-stride].y;
-	}else if (j == size-1){
-		value = m_heightMap[((i-stride)*size) + j].y +
-			 m_heightMap[((i+stride)*size) + j].y +
-			 m_heightMap[(i*size) + j-stride].y +
-			 m_heightMap[(i*size) + 0+stride].y;
-	}else{
-		value = m_heightMap[((i-stride)*size) + j].y +
-			 m_heightMap[((i+stride)*size) + j].y +
-			 m_heightMap[(i*size) + j-stride].y +
-			 m_heightMap[(i*size) + j+stride].y;
-	}
-	value*= 0.25f;
-	return value;
-}
-/*
- * avgSquareVals - Given the i,j location as the center of a square,
- * average the data values at the four corners of the square and return
- * it. "Stride" represents half the length of one side of the square.
- *
- * Called by fill2DFractArray.
- */
-float TerrainClass::AvgSquareVals (int i, int j, int stride, int size)
-{
-    /* In this diagram, our input stride is 1, the i,j location is
-       indicated by "*", and the four value we want to average are
-       "X"s:
-           X   .   X
-
-           .   *   .
-
-           X   .   X
-       */
-    return ((float) (m_heightMap[((i-stride)*size) + j-stride].y +
-		     m_heightMap[((i-stride)*size) + j+stride].y +
-		     m_heightMap[((i+stride)*size) + j-stride].y +
-		     m_heightMap[((i+stride)*size) + j+stride].y) * .25f);
-}
 /*
  * fill2DFractArray - Use the diamond-square algorithm to tessalate a
  * grid of float values into a fractal height map.
@@ -1003,23 +751,109 @@ void TerrainClass::MidPointDisplacement (float heightScale, float h)
 		length >>= 1;
     }
 }
+/*
+ * avgSquareVals - Given the i,j location as the center of a square,
+ * average the data values at the four corners of the square and return
+ * it. "Stride" represents half the length of one side of the square.
+ *
+ * Called by fill2DFractArray.
+ */
+float TerrainClass::AvgSquareVals (int i, int j, int stride, int size)
+{
+    /* In this diagram, our input stride is 1, the i,j location is
+       indicated by "*", and the four value we want to average are
+       "X"s:
+           X   .   X
 
+           .   *   .
+
+           X   .   X
+       */
+    return ((float) (m_heightMap[((i-stride)*size) + j-stride].y +
+		     m_heightMap[((i-stride)*size) + j+stride].y +
+		     m_heightMap[((i+stride)*size) + j-stride].y +
+		     m_heightMap[((i+stride)*size) + j+stride].y) * .25f);
+}
+/*
+ * avgDiamondVals - Given the i,j location as the center of a diamond,
+ * average the data values at the four corners of the diamond and
+ * return it. "Stride" represents the distance from the diamond center
+ * to a diamond corner.
+ *
+ * Called by fill2DFractArray.
+ */
+float TerrainClass::AvgDiamondVals (int i, int j, int stride, int size, int subSize){
+    /* In this diagram, our input stride is 1, the i,j location is
+       indicated by "X", and the four value we want to average are
+       "*"s:
+           .   *   .
+
+           *   X   *
+
+           .   *   .
+       */
+
+    /* In order to support tiled surfaces which meet seamless at the
+       edges (that is, they "wrap"), We need to be careful how we
+       calculate averages when the i,j diamond center lies on an edge
+       of the array. The first four 'if' clauses handle these
+       cases. The final 'else' clause handles the general case (in
+       which i,j is not on an edge).
+     */
+	float value = 0.0f; 
+    if(i == 0){
+		value = m_heightMap[(i*size) + j-stride].y +
+			m_heightMap[(i*size) + j+stride].y +
+			m_heightMap[((subSize-stride)*size) + j].y +
+			m_heightMap[((i+stride)*size) + j].y;
+	}else if (i == size-1){
+		value = m_heightMap[(i*size) + j-stride].y +
+			 m_heightMap[(i*size) + j+stride].y +
+			 m_heightMap[((i-stride)*size) + j].y +
+			 m_heightMap[((0+stride)*size) + j].y;
+	}else if (j == 0){
+		value = m_heightMap[((i-stride)*size) + j].y +
+			 m_heightMap[((i+stride)*size) + j].y +
+			 m_heightMap[(i*size) + j+stride].y +
+			 m_heightMap[(i*size) + subSize-stride].y;
+	}else if (j == size-1){
+		value = m_heightMap[((i-stride)*size) + j].y +
+			 m_heightMap[((i+stride)*size) + j].y +
+			 m_heightMap[(i*size) + j-stride].y +
+			 m_heightMap[(i*size) + 0+stride].y;
+	}else{
+		value = m_heightMap[((i-stride)*size) + j].y +
+			 m_heightMap[((i+stride)*size) + j].y +
+			 m_heightMap[(i*size) + j-stride].y +
+			 m_heightMap[(i*size) + j+stride].y;
+	}
+	value*= 0.25f;
+	return value;
+}
+/*
+* Faulting uses vectors to create a separating line between two sections of the terrain.
+* the algorithm for this is based on pseudo code provided at this link
+* http://www.lighthouse3d.com/opengl/terrain/index.php?impdetails
+*/
 void TerrainClass::Faulting(int passes, float displacement){
+	//loop until no more passes
 	while(passes > 0){
 		passes--;
+		//create an index for a vector based upon points in the terrain
 		int x1Index = 0;
 		int z1Index = 0;
 		int x2Index = 0;
 		int z2Index = 0;
+		//the variables for the x and z components of the vectors
 		float x1, z1, x2, z2 = 0.0f;
-
+		//change the indexes if they are the same
 		while((x1Index == x2Index) && (z1Index == z2Index)){
 			x1Index = rand()%m_terrainHeight;
 			z1Index = rand()%m_terrainHeight;
 			x2Index = rand()%m_terrainHeight;
 			z2Index = rand()%m_terrainHeight;
 		}
-
+		//set the values of the x and z components of the vector
 		int index = calculateIndex(m_terrainHeight,x1Index, z1Index);
 		x1 = m_heightMap[index].x;
 		z1 = m_heightMap[index].z;
@@ -1027,32 +861,206 @@ void TerrainClass::Faulting(int passes, float displacement){
 		index = calculateIndex(m_terrainHeight,x2Index, z2Index);
 		x2 = m_heightMap[index].x;
 		z2 = m_heightMap[index].z;
-
+		//create the vector
 		D3DXVECTOR2 faultLine = D3DXVECTOR2(x2-x1, z2-z1);
-
+		//loop through the array
 		for(int i = 0; i < m_terrainHeight; i++){
 			for(int j = 0; j < m_terrainWidth; j++){
 				index = calculateIndex(m_terrainHeight,j, i);
+				//retrieve the values of the element from the array
 				float px = m_heightMap[index].x;
 				float pz = m_heightMap[index].z;
+				//create a new vector from the element in the array
 				D3DXVECTOR2 posVector = D3DXVECTOR2(px-x1, pz-z1);
-
+				//if the cross product is bigger than zero displace
 				if(((faultLine.x *posVector.y) - (faultLine.y*posVector.x)) > 0){
 					m_heightMap[index].y += displacement;
 				}
 			}
 		}
+		//decrease the size of the displacement
 		displacement *= 0.9f;
 	}
 }
-float TerrainClass::ValuesAroundPoint(int x, int z){
-	float sum = m_heightMap[(m_terrainWidth * (z-1) ) + x].y;
-	sum += m_heightMap[(m_terrainWidth * (z+1) ) + x].y;
-	sum += m_heightMap[(m_terrainWidth * z) + x-1].y;
-	sum += m_heightMap[(m_terrainWidth * z) + x+1].y;
-	return sum;
+/*
+*http://www.lighthouse3d.com/opengl/appstools/tg/
+*/
+void TerrainClass::ParticleDeposition(int numIt, float height){
+	int x = rand() % m_terrainWidth;
+	int z = rand() % m_terrainHeight;
+	if(height > 0){
+		int count = 0;
+		while((m_heightMap[x * m_terrainHeight + z].y > 5.0f) && count < 30){
+			x = rand() % m_terrainWidth;
+			z = rand() % m_terrainHeight;
+			count++;
+		}
+	}
+	for(int i=0; i < numIt; i++){
+		int dir = rand() % 4;
+		if (dir == 2){
+			if (++x >= m_terrainWidth)
+				x = 0;
+		}else if (dir == 3){
+			if (--x == -1)
+				x = m_terrainWidth-1;
+		}else if (dir == 1) {
+			if (++z >= m_terrainHeight)
+				z = 0;
+		}else if (dir == 0){
+			if (--z == -1)
+				z = m_terrainHeight - 1;
+		}
+		Deposit(x,z, height);
+	}
 }
+/*
+* 
+*/
+void TerrainClass::Deposit( int x, int z, float value){
+	int kk,jj;
+	int flag = 0;
 
+	for (int k=-1;k<2;k++){
+		for(int j=-1;j<2;j++){
+			if (k!=0 && j!=0 && x+k>-1 && x+k<m_terrainWidth && z+j>-1 && z+j<m_terrainHeight) {
+				if (m_heightMap[(x+k) * m_terrainHeight + (z+j)].y < m_heightMap[x * m_terrainHeight + z].y) {
+					flag = 1;
+					kk = k;
+					jj = j;
+				}
+			}
+		}
+	}
+	if (!flag){
+		m_heightMap[x * m_terrainHeight + z].y += value;
+	}else{
+		Deposit(x+kk,z+jj, value);
+	}
+}
+/*
+* Creates another array where the smooth values are kept until updating the height map.
+* Works by averaging all the values around the vertex. 
+* based upon algorithm at this site: http://nfostergames.com/lessons/TerrainSmoothing.htm
+*/
+void TerrainClass::Smooth(int passes) {
+	float *smoothHeightMap;
+	int index = 0;
+	while(passes > 0){
+		passes--;
+		smoothHeightMap = new float[m_terrainWidth*m_terrainWidth];
+		for(int j = 0; j<m_terrainWidth;j++){
+			for(int i = 0; i<m_terrainHeight; i++){
+				int noPointsAround = 0;
+				float totalValuePointsAround = 0.0f;
+				//checks that the left value is not outside the scope of the array
+				//if not then add the value of the element and increment the number of points calculated
+				if(i-1 > 0){
+					index = calculateIndex(m_terrainHeight, i-1, j);
+					totalValuePointsAround += m_heightMap[index].y;
+					noPointsAround++;
+					//check if the up to the left point is still in the array
+					//if it is same as before add the value and increment the number of points
+					if(j-1 > 0){
+						index = calculateIndex(m_terrainHeight, i-1, j-1);
+						totalValuePointsAround += m_heightMap[index].y;
+						noPointsAround++;
+					}
+					//check to see if down and to the left is in the array
+					if(j+1<m_terrainHeight){
+						index = calculateIndex(m_terrainHeight, i-1, j+1);
+						totalValuePointsAround += m_heightMap[index].y;
+						noPointsAround++;
+					}
+				}
+				//check to see if the right value is in the array
+				if(i+1 < m_terrainWidth){
+					index = calculateIndex(m_terrainHeight, i+1, j);
+					totalValuePointsAround += m_heightMap[index].y;
+					noPointsAround++;
+					//check to see if top right is in array scope
+					if(j-1 > 0){
+						index = calculateIndex(m_terrainHeight, i+1, j-1);
+						totalValuePointsAround += m_heightMap[index].y;
+						noPointsAround++;
+					}
+					//check to see if bottom right is in array
+					if(j+1<m_terrainHeight){
+						index = calculateIndex(m_terrainHeight, i+1, j+1);
+						totalValuePointsAround += m_heightMap[index].y;
+						noPointsAround++;
+					}
+				}
+				//check to see if above is valid
+				if(j-1 > 0){
+					index = calculateIndex(m_terrainHeight, i, j-1);
+					totalValuePointsAround += m_heightMap[index].y;
+					noPointsAround++;
+				}
+				//lastly check below for being in the array
+				if(j+1<m_terrainHeight){
+					index = calculateIndex(m_terrainHeight, i, j+1);
+					totalValuePointsAround += m_heightMap[index].y;
+					noPointsAround++;
+				}
+				index = calculateIndex(m_terrainHeight, i, j);
+				//add all multiple of the values to the smooth array
+				smoothHeightMap[index] = (m_heightMap[index].y + float(totalValuePointsAround / noPointsAround))*0.5f;
+			}
+		}
+		//once finished creating new array set the y value of the height mapt equal to it.
+		for(int i = 0; i<m_terrainHeight; i++){
+			for(int j = 0; j < m_terrainHeight; j++){
+				index = calculateIndex(m_terrainHeight, i, j);
+				m_heightMap[index].y = smoothHeightMap[index];
+			}
+		}
+	}
+}
+void TerrainClass::GenerateRandomHeightMap(){
+	int index;
+	float height = (float(rand()%200)/10)-10;
+
+	//loop through the terrain and set the heights between -10 and 10. 
+	for(int j=0; j<m_terrainHeight; j++){
+		for(int i=0; i<m_terrainWidth; i++){
+			float height = (float(rand()%200)/10)-10;
+			index = (m_terrainHeight * j) + i;
+			m_heightMap[index].x = (float)i;
+			m_heightMap[index].y = height;
+			m_heightMap[index].z = (float)j;
+		}
+	}
+}
+void TerrainClass::GenerateSinCos(int index){
+	//loop through the terrain and set the heights how we want. This is where we generate the terrain
+	//in this case I will run a sin-wave through the terrain in one axis.
+	float sinValue = float(rand()%12)+1;
+	float cosValue = (((float(rand()%200))/10)-10);
+	float sinMulti = (((float(rand()%100))/10)-5);
+	float cosMulti = float(((float(rand()%50))/10)-2.5);
+	if(cosValue == 0)	cosValue = 1;
+	for(int j=0; j<m_terrainHeight; j++){
+		for(int i=0; i<m_terrainWidth; i++){			
+			index = (m_terrainHeight * j) + i;
+			//do sine and cosine wave calculations
+			m_heightMap[index].x = (float)i;
+			m_heightMap[index].y+= (float)((sin((float)i/(m_terrainWidth/sinValue))*sinMulti) + (cos((float)j/cosValue)*cosMulti));
+			m_heightMap[index].z = (float)j;
+		}
+	}
+	//do cosine wave calculations
+	for(int i=0; i<m_terrainWidth; i++){	
+		cosValue = (((float(rand()%200))/10)-10);
+		for(int j=0; j<m_terrainHeight; j++){	
+			index = (m_terrainWidth * i) + j;
+
+			m_heightMap[index].x = (float)j;
+			m_heightMap[index].y+= (cos((float)j/cosValue)*cosMulti);
+			m_heightMap[index].z = (float)i;
+		}
+	}
+}
 bool TerrainClass::LoadHeightMap(char* filename){
 	FILE* filePtr;
 	int error;
