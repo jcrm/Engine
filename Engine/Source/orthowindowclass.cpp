@@ -70,7 +70,11 @@ bool OrthoWindowClass::InitializeBuffers(ID3D11Device* device, int windowWidth, 
     D3D11_SUBRESOURCE_DATA vertexData, indexData;
 	HRESULT result;
 	int i;
-
+	/*
+		Changed from using windowWidth and windowHeight to using +-1.
+		This is because when adding convolution shader the projection,
+		and view matrices caused problems with displaying textures to the screen.
+	*/
 	/*
 	// Calculate the screen coordinates of the left side of the window.
 	left = (float)((windowWidth / 2) * -1);

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////
-// Filename: textureshaderclass.h
+// Filename: mergetextureshaderclass.h
 ////////////////////////////////////////////////////////////////////////////////
 #ifndef _MERGETEXTURESHADERCLASS_H_
 #define _MERGETEXTURESHADERCLASS_H_
@@ -17,7 +17,7 @@ using namespace std;
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// Class name: TextureShaderClass
+// Class name: MergeTextureShaderClass
 ////////////////////////////////////////////////////////////////////////////////
 class MergeTextureShaderClass : public ShaderClass
 {
@@ -33,6 +33,7 @@ public:
 
 	bool Initialize(ID3D11Device* device, HWND hwnd);
 	void Shutdown();
+	//takes two texture and merges them to make a third
 	bool Render(ID3D11DeviceContext* deviceContext, int indexCount, ID3D11ShaderResourceView* texture, ID3D11ShaderResourceView* texture2);
 protected:
 	bool InitializeShader(ID3D11Device*, HWND, WCHAR*, WCHAR*);

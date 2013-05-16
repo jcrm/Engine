@@ -4,25 +4,12 @@
 #include "textureshaderclass.h"
 
 
-TextureShaderClass::TextureShaderClass()
-{
-	m_vertexShader = 0;
-	m_pixelShader = 0;
-	m_layout = 0;
-	m_matrixBuffer = 0;
-	m_sampleState = 0;
+TextureShaderClass::TextureShaderClass(){
 }
-
-
-TextureShaderClass::TextureShaderClass(const TextureShaderClass& other)
-{
+TextureShaderClass::TextureShaderClass(const TextureShaderClass& other){
 }
-
-
-TextureShaderClass::~TextureShaderClass()
-{
+TextureShaderClass::~TextureShaderClass(){
 }
-
 
 bool TextureShaderClass::Initialize(ID3D11Device* device, HWND hwnd)
 {

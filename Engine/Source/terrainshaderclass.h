@@ -21,15 +21,13 @@ using namespace std;
 class TerrainShaderClass
 {
 private:
-	struct MatrixBufferType
-	{
+	struct MatrixBufferType{
 		D3DXMATRIX world;
 		D3DXMATRIX view;
 		D3DXMATRIX projection;
 	};
 
-	struct LightBufferType
-	{
+	struct LightBufferType{
 		D3DXVECTOR4 ambientColor;
 		D3DXVECTOR4 diffuseColor;
 		D3DXVECTOR3 lightDirection;

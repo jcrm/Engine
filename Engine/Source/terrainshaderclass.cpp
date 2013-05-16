@@ -4,29 +4,17 @@
 #include "terrainshaderclass.h"
 
 
-TerrainShaderClass::TerrainShaderClass()
+TerrainShaderClass::TerrainShaderClass(): m_lightBuffer(0)
 {
-	m_vertexShader = 0;
-	m_pixelShader = 0;
-	m_layout = 0;
-	m_sampleState = 0;
-	m_matrixBuffer = 0;
-	m_lightBuffer = 0;
 }
-
-
-TerrainShaderClass::TerrainShaderClass(const TerrainShaderClass& other)
+TerrainShaderClass::TerrainShaderClass(const TerrainShaderClass& other): m_lightBuffer(0)
 {
 }
 
-
-TerrainShaderClass::~TerrainShaderClass()
-{
+TerrainShaderClass::~TerrainShaderClass(){
 }
 
-
-bool TerrainShaderClass::Initialize(ID3D11Device* device, HWND hwnd)
-{
+bool TerrainShaderClass::Initialize(ID3D11Device* device, HWND hwnd){
 	bool result;
 
 

@@ -226,6 +226,10 @@ bool D3DClass::Initialize(int screenWidth, int screenHeight, bool vsync, HWND hw
         D3D_DRIVER_TYPE_WARP,
         D3D_DRIVER_TYPE_REFERENCE,
     };
+	/*
+		Added the below code because my laptop couldn't initializes DirectX 11 with driver type hardware.
+		This piece of code loops through the other driver types until it finds one that can be used.
+	*/
 	UINT numDriverTypes = ARRAYSIZE( driverTypes );
 	for( UINT driverTypeIndex = 0; driverTypeIndex < numDriverTypes; driverTypeIndex++ )
     {

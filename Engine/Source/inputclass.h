@@ -50,6 +50,7 @@ public:
 	bool IsZPressed();
 	bool IsPgUpPressed();
 	bool IsPgDownPressed();
+	//added extra key presses for different functionality 
 	bool IsHPressed();
 	bool IsRPressed();
 	bool IsWPressed();

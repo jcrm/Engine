@@ -1,28 +1,15 @@
 ////////////////////////////////////////////////////////////////////////////////
-// Filename: textureshaderclass.cpp
+// Filename: texturetotextureshaderclass.cpp
 ////////////////////////////////////////////////////////////////////////////////
 #include "texturetotextureshaderclass .h"
 
 
-TextureToTextureShaderClass::TextureToTextureShaderClass()
-{
-	m_vertexShader = 0;
-	m_pixelShader = 0;
-	m_layout = 0;
-	m_matrixBuffer = 0;
-	m_sampleState = 0;
+TextureToTextureShaderClass::TextureToTextureShaderClass(){
 }
-
-
-TextureToTextureShaderClass::TextureToTextureShaderClass(const TextureToTextureShaderClass& other)
-{
+TextureToTextureShaderClass::TextureToTextureShaderClass(const TextureToTextureShaderClass& other){
 }
-
-
-TextureToTextureShaderClass::~TextureToTextureShaderClass()
-{
+TextureToTextureShaderClass::~TextureToTextureShaderClass(){
 }
-
 
 bool TextureToTextureShaderClass::Initialize(ID3D11Device* device, HWND hwnd)
 {

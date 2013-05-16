@@ -4,25 +4,12 @@
 #include "verticalblurshaderclass.h"
 
 
-VerticalBlurShaderClass::VerticalBlurShaderClass()
-{
-	m_vertexShader = 0;
-	m_pixelShader = 0;
-	m_layout = 0;
-	m_sampleState = 0;
-	m_screenSizeBuffer = 0;
+VerticalBlurShaderClass::VerticalBlurShaderClass(){
 }
-
-
-VerticalBlurShaderClass::VerticalBlurShaderClass(const VerticalBlurShaderClass& other)
-{
+VerticalBlurShaderClass::VerticalBlurShaderClass(const VerticalBlurShaderClass& other){
 }
-
-
-VerticalBlurShaderClass::~VerticalBlurShaderClass()
-{
+VerticalBlurShaderClass::~VerticalBlurShaderClass(){
 }
-
 
 bool VerticalBlurShaderClass::Initialize(ID3D11Device* device, HWND hwnd)
 {
