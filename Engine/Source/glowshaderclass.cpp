@@ -1,62 +1,47 @@
 ////////////////////////////////////////////////////////////////////////////////
-// Filename: textureshaderclass.cpp
+// Filename: glowshaderclass.cpp
 ////////////////////////////////////////////////////////////////////////////////
 #include "glowshaderclass.h"
 
-
-GlowShaderClass::GlowShaderClass()
-{
-	m_vertexShader = 0;
-	m_pixelShader = 0;
-	m_layout = 0;
-	m_matrixBuffer = 0;
-	m_sampleState = 0;
+GlowShaderClass::GlowShaderClass(){
 }
-
-
-GlowShaderClass::GlowShaderClass(const GlowShaderClass& other)
-{
+GlowShaderClass::GlowShaderClass(const GlowShaderClass& other){
 }
-
-
-GlowShaderClass::~GlowShaderClass()
-{
+GlowShaderClass::~GlowShaderClass(){
 }
-
-
-bool GlowShaderClass::Initialize(ID3D11Device* device, HWND hwnd)
-{
+bool GlowShaderClass::Initialize(ID3D11Device* device, HWND hwnd){
 	bool result;
-
 
 	// Initialize the vertex and pixel shaders.
 	result = InitializeShader(device, hwnd, L"Shader/glow.vs", L"Shader/glow.ps");
-	if(!result)
-	{
+	if(!result){
 		return false;
 	}
 
 	return true;
 }
-void GlowShaderClass::Shutdown()
-{
+void GlowShaderClass::Shutdown(){
 	// Shutdown the vertex and pixel shaders as well as the related objects.
 	ShutdownShader();
 
 	return;
 }
+/*
+* Application class calls this function in return this function calls the other render function.
+*/
 bool GlowShaderClass::Render(ID3D11DeviceContext* deviceContext, int indexCount, D3DXMATRIX projectionMatrix, ID3D11ShaderResourceView* texture, float screenHeight, float screenWidth){
 	return Render(deviceContext,indexCount,texture);
 }
-bool GlowShaderClass::Render(ID3D11DeviceContext* deviceContext, int indexCount, ID3D11ShaderResourceView* texture)
-{
+/*
+* Only needs device context, index count, and the texture to render the texture
+*/
+bool GlowShaderClass::Render(ID3D11DeviceContext* deviceContext, int indexCount, ID3D11ShaderResourceView* texture){
 	bool result;
 
 
 	// Set the shader parameters that it will use for rendering.
 	result = SetShaderParameters(deviceContext, texture);
-	if(!result)
-	{
+	if(!result){
 		return false;
 	}
 
@@ -65,9 +50,7 @@ bool GlowShaderClass::Render(ID3D11DeviceContext* deviceContext, int indexCount,
 
 	return true;
 }
-
-bool GlowShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* vsFilename, WCHAR* psFilename)
-{
+bool GlowShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* vsFilename, WCHAR* psFilename){
 	HRESULT result;
 	ID3D10Blob* errorMessage;
 	ID3D10Blob* vertexShaderBuffer;
@@ -249,44 +232,6 @@ void GlowShaderClass::ShutdownShader()
 
 	return;
 }
-
-
-void GlowShaderClass::OutputShaderErrorMessage(ID3D10Blob* errorMessage, HWND hwnd, WCHAR* shaderFilename)
-{
-	char* compileErrors;
-	unsigned long bufferSize, i;
-	ofstream fout;
-
-
-	// Get a pointer to the error message text buffer.
-	compileErrors = (char*)(errorMessage->GetBufferPointer());
-
-	// Get the length of the message.
-	bufferSize = errorMessage->GetBufferSize();
-
-	// Open a file to write the error message to.
-	fout.open("shader-error.txt");
-
-	// Write out the error message.
-	for(i=0; i<bufferSize; i++)
-	{
-		fout << compileErrors[i];
-	}
-
-	// Close the file.
-	fout.close();
-
-	// Release the error message.
-	errorMessage->Release();
-	errorMessage = 0;
-
-	// Pop a message up on the screen to notify the user to check the text file for compile errors.
-	MessageBox(hwnd, L"Error compiling shader.  Check shader-error.txt for message.", shaderFilename, MB_OK);
-
-	return;
-}
-
-
 void GlowShaderClass::RenderShader(ID3D11DeviceContext* deviceContext, int indexCount)
 {
 	// Set the vertex input layout.

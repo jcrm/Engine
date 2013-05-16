@@ -8,7 +8,7 @@ ApplicationClass::ApplicationClass(): m_Input(0), m_Direct3D(0), m_Camera(0), m_
 	mFluid(0), m_Timer(0), m_Position(0), m_Fps(0), m_Cpu(0), m_FontShader(0), m_Text(0),
 	m_TerrainShader(0), mFluidShader(0), m_Light(0), m_TextureShader(0), m_TextureToTextureShader(0),
 	m_RenderFullSizeTexture(0), m_DownSampleHalfSizeTexure(0), m_FullSizeTexure(0), m_FullScreenWindow(0),
-	m_ConvolutionShader(0), m_HalfSizeTexture(0), mGlowShader(0), mMergerShader(0), 
+	m_ConvolutionShader(0), m_HalfSizeTexture(0), mGlowShader(0), mMergerShader(0), mVerticalBlurShader(0), 
 	m_MergeFullSizeTexture(0), mBlur(false)
 {
 	for(int i = 0; i < MODEL_NUMBER; i++){
@@ -20,7 +20,7 @@ ApplicationClass::ApplicationClass(const ApplicationClass& other): m_Input(0), m
 	mFluid(0), m_Timer(0), m_Position(0), m_Fps(0), m_Cpu(0), m_FontShader(0), m_Text(0),
 	m_TerrainShader(0), mFluidShader(0), m_Light(0), m_TextureShader(0), m_TextureToTextureShader(0),
 	m_RenderFullSizeTexture(0), m_DownSampleHalfSizeTexure(0), m_FullSizeTexure(0), m_FullScreenWindow(0),
-	m_ConvolutionShader(0), m_HalfSizeTexture(0), mGlowShader(0), mMergerShader(0), 
+	m_ConvolutionShader(0), m_HalfSizeTexture(0), mGlowShader(0), mMergerShader(0), mVerticalBlurShader(0),
 	m_MergeFullSizeTexture(0), mBlur(false)
 {
 	for(int i = 0; i < MODEL_NUMBER; i++){
