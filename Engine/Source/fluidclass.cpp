@@ -1,100 +1,52 @@
 ////////////////////////////////////////////////////////////////////////////////
-// Filename: terrainclass.cpp
+// Filename: fluidclass.cpp
 ////////////////////////////////////////////////////////////////////////////////
 #include "fluidclass.h"
 #include <cmath>
 
-
-FluidClass::FluidClass()
+FluidClass::FluidClass(): m_vertexBuffer(0), m_indexBuffer(0), 
+	m_heightMap(0), mScale(0.5f), mWave(1.0f)
 {
-	m_vertexBuffer = 0;
-	m_indexBuffer = 0;
-	m_heightMap = 0;
-	mWave = 1.0f;
-	mScale = 0.5f;
 	mWaveTime = 1/(2 * sqrt(2.0f));
-	m_terrainGeneratedToggle = false;
 }
-
-
-FluidClass::FluidClass(const FluidClass& other)
+FluidClass::FluidClass(const FluidClass& other): m_vertexBuffer(0), m_indexBuffer(0), 
+	m_heightMap(0), mScale(0.5f), mWave(1.0f)
 {
+	mWaveTime = 1/(2 * sqrt(2.0f));
 }
-
-
 FluidClass::~FluidClass()
 {
 }
-
 bool FluidClass::InitializeFluid(ID3D11Device* device, int terrainWidth, int terrainHeight)
 {
 	bool result;
-
 	// Save the dimensions of the terrain.
-	m_terrainWidth = terrainWidth;
-	m_terrainHeight = terrainHeight;
+	m_fluidWidth = terrainWidth;
+	m_fluidHeight = terrainHeight;
 
 	// Create the structure to hold the terrain data.
-	m_heightMap = new HeightMapType[m_terrainWidth * m_terrainHeight];
-	if(!m_heightMap)
-	{
+	m_heightMap = new HeightMapType[m_fluidWidth * m_fluidHeight];
+	if(!m_heightMap){
 		return false;
 	}
+	//set the borders to be the edges of the array only
 	ResetBorders();
+	//set all values to be zero
 	ResetWater();
-	//even though we are generating a flat terrain, we still need to normalize it. 
 	// Calculate the normals for the terrain data.
 	result = CalculateNormals();
-	if(!result)
-	{
+	if(!result){
 		return false;
 	}
-
 	// Initialize the vertex and index buffer that hold the geometry for the terrain.
 	result = InitializeBuffers(device);
-	if(!result)
-	{
+	if(!result){
 		return false;
 	}
 
 	return true;
 }
-bool FluidClass::Initialize(ID3D11Device* device, char* heightMapFilename)
-{
-	bool result;
-
-
-	// Load in the height map for the terrain.
-	result = LoadHeightMap(heightMapFilename);
-	if(!result)
-	{
-		return false;
-	}
-
-	// Normalize the height of the height map.
-	NormalizeHeightMap();
-
-	// Calculate the normals for the terrain data.
-	result = CalculateNormals();
-	if(!result)
-	{
-		return false;
-	}
-
-	// Initialize the vertex and index buffer that hold the geometry for the terrain.
-	result = InitializeBuffers(device);
-	if(!result)
-	{
-		return false;
-	}
-
-	return true;
-}
-
-
-void FluidClass::Shutdown()
-{
-
+void FluidClass::Shutdown(){
 	// Release the vertex and index buffer.
 	ReleaseBuffers();
 
@@ -103,26 +55,19 @@ void FluidClass::Shutdown()
 
 	return;
 }
-
-
-void FluidClass::Render(ID3D11DeviceContext* deviceContext)
-{
-
+void FluidClass::Render(ID3D11DeviceContext* deviceContext){
 	// Put the vertex and index buffers on the graphics pipeline to prepare them for drawing.
 	RenderBuffers(deviceContext);
 
 	return;
 }
-
-bool FluidClass::GenerateHeightMap( ID3D11Device* device )
-{
-
+bool FluidClass::GenerateHeightMap( ID3D11Device* device ){
 	bool result;
-	//the toggle is just a bool that I use to make sure this is only called ONCE when you press a key
-	//until you release the key and start again. We don t want to be generating the terrain 500
-	//times per second. 
+	//release the buffers so the new vertices's can be added to the buffer
 	ReleaseBuffers();
+	//calculate the new vertices's
 	DiminishWater();
+	//calculate new normals
 	result = CalculateNormals();
 	if(!result){
 		return false;
@@ -134,142 +79,23 @@ bool FluidClass::GenerateHeightMap( ID3D11Device* device )
 	}
 	return true;
 }
-bool FluidClass::LoadHeightMap(char* filename)
-{
-	FILE* filePtr;
-	int error;
-	unsigned int count;
-	BITMAPFILEHEADER bitmapFileHeader;
-	BITMAPINFOHEADER bitmapInfoHeader;
-	int imageSize, i, j, k, index;
-	unsigned char* bitmapImage;
-	unsigned char height;
-
-
-	// Open the height map file in binary.
-	error = fopen_s(&filePtr, filename, "rb");
-	if(error != 0)
-	{
-		return false;
-	}
-
-	// Read in the file header.
-	count = fread(&bitmapFileHeader, sizeof(BITMAPFILEHEADER), 1, filePtr);
-	if(count != 1)
-	{
-		return false;
-	}
-
-	// Read in the bitmap info header.
-	count = fread(&bitmapInfoHeader, sizeof(BITMAPINFOHEADER), 1, filePtr);
-	if(count != 1)
-	{
-		return false;
-	}
-
-	// Save the dimensions of the terrain.
-	m_terrainWidth = bitmapInfoHeader.biWidth;
-	m_terrainHeight = bitmapInfoHeader.biHeight;
-
-	// Calculate the size of the bitmap image data.
-	imageSize = m_terrainWidth * m_terrainHeight * 3;
-
-	// Allocate memory for the bitmap image data.
-	bitmapImage = new unsigned char[imageSize];
-	if(!bitmapImage)
-	{
-		return false;
-	}
-
-	// Move to the beginning of the bitmap data.
-	fseek(filePtr, bitmapFileHeader.bfOffBits, SEEK_SET);
-
-	// Read in the bitmap image data.
-	count = fread(bitmapImage, 1, imageSize, filePtr);
-	if(count != imageSize)
-	{
-		return false;
-	}
-
-	// Close the file.
-	error = fclose(filePtr);
-	if(error != 0)
-	{
-		return false;
-	}
-
-	// Create the structure to hold the height map data.
-	m_heightMap = new HeightMapType[m_terrainWidth * m_terrainHeight];
-	if(!m_heightMap)
-	{
-		return false;
-	}
-
-	// Initialize the position in the image data buffer.
-	k=0;
-
-	// Read the image data into the height map.
-	for(j=0; j<m_terrainHeight; j++)
-	{
-		for(i=0; i<m_terrainWidth; i++)
-		{
-			height = bitmapImage[k];
-			
-			index = (m_terrainHeight * j) + i;
-
-			m_heightMap[index].x = (float)i;
-			m_heightMap[index].y = (float)height;
-			m_heightMap[index].z = (float)j;
-
-			k+=3;
-		}
-	}
-
-	// Release the bitmap image data.
-	delete [] bitmapImage;
-	bitmapImage = 0;
-
-	return true;
-}
-
-
-void FluidClass::NormalizeHeightMap()
-{
-	int i, j;
-
-
-	for(j=0; j<m_terrainHeight; j++)
-	{
-		for(i=0; i<m_terrainWidth; i++)
-		{
-			m_heightMap[(m_terrainHeight * j) + i].y /= 15.0f;
-		}
-	}
-
-	return;
-}
-
-
-bool FluidClass::CalculateNormals()
-{
+bool FluidClass::CalculateNormals(){
 	int i, j, index1, index2, index3, index, count;
 	float vertex1[3], vertex2[3], vertex3[3], vector1[3], vector2[3], sum[3], length;
 	VectorType* normals;
 
-
 	// Create a temporary array to hold the un-normalized normal vectors.
-	normals = new VectorType[(m_terrainHeight-1) * (m_terrainWidth-1)];
-	if(!normals)
-	{
+	normals = new VectorType[(m_fluidHeight-1) * (m_fluidWidth-1)];
+	if(!normals){
 		return false;
 	}
 
 	// Go through all the faces in the mesh and calculate their normals.
-	for(j=0; j<(m_terrainHeight-1); j++){
-		for(i=0; i<(m_terrainWidth-1); i++){
-			index1 = (j * m_terrainHeight) + i;
-			index2 = (j * m_terrainHeight) + (i+1);
-			index3 = ((j+1) * m_terrainHeight) + i;
+	for(j=0; j<(m_fluidHeight-1); j++){
+		for(i=0; i<(m_fluidWidth-1); i++){
+			index1 = (j * m_fluidHeight) + i;
+			index2 = (j * m_fluidHeight) + (i+1);
+			index3 = ((j+1) * m_fluidHeight) + i;
 
 			// Get three vertices's from the face.
 			vertex1[0] = m_heightMap[index1].x;
@@ -292,7 +118,7 @@ bool FluidClass::CalculateNormals()
 			vector2[1] = vertex3[1] - vertex2[1];
 			vector2[2] = vertex3[2] - vertex2[2];
 
-			index = (j * (m_terrainHeight-1)) + i;
+			index = (j * (m_fluidHeight-1)) + i;
 
 			// Calculate the cross product of those two vectors to get the un-normalized value for this face normal.
 			normals[index].x = (vector1[1] * vector2[2]) - (vector1[2] * vector2[1]);
@@ -303,10 +129,8 @@ bool FluidClass::CalculateNormals()
 
 	// Now go through all the vertices's and take an average of each face normal 	
 	// that the vertex touches to get the averaged normal for that vertex.
-	for(j=0; j<m_terrainHeight; j++)
-	{
-		for(i=0; i<m_terrainWidth; i++)
-		{
+	for(j=0; j<m_fluidHeight; j++){
+		for(i=0; i<m_fluidWidth; i++){
 			// Initialize the sum.
 			sum[0] = 0.0f;
 			sum[1] = 0.0f;
@@ -316,9 +140,8 @@ bool FluidClass::CalculateNormals()
 			count = 0;
 
 			// Bottom left face.
-			if(((i-1) >= 0) && ((j-1) >= 0))
-			{
-				index = ((j-1) * (m_terrainHeight-1)) + (i-1);
+			if(((i-1) >= 0) && ((j-1) >= 0)){
+				index = ((j-1) * (m_fluidHeight-1)) + (i-1);
 
 				sum[0] += normals[index].x;
 				sum[1] += normals[index].y;
@@ -327,9 +150,8 @@ bool FluidClass::CalculateNormals()
 			}
 
 			// Bottom right face.
-			if((i < (m_terrainWidth-1)) && ((j-1) >= 0))
-			{
-				index = ((j-1) * (m_terrainHeight-1)) + i;
+			if((i < (m_fluidWidth-1)) && ((j-1) >= 0)){
+				index = ((j-1) * (m_fluidHeight-1)) + i;
 
 				sum[0] += normals[index].x;
 				sum[1] += normals[index].y;
@@ -338,9 +160,8 @@ bool FluidClass::CalculateNormals()
 			}
 
 			// Upper left face.
-			if(((i-1) >= 0) && (j < (m_terrainHeight-1)))
-			{
-				index = (j * (m_terrainHeight-1)) + (i-1);
+			if(((i-1) >= 0) && (j < (m_fluidHeight-1))){
+				index = (j * (m_fluidHeight-1)) + (i-1);
 
 				sum[0] += normals[index].x;
 				sum[1] += normals[index].y;
@@ -349,9 +170,8 @@ bool FluidClass::CalculateNormals()
 			}
 
 			// Upper right face.
-			if((i < (m_terrainWidth-1)) && (j < (m_terrainHeight-1)))
-			{
-				index = (j * (m_terrainHeight-1)) + i;
+			if((i < (m_fluidWidth-1)) && (j < (m_fluidHeight-1))){
+				index = (j * (m_fluidHeight-1)) + i;
 
 				sum[0] += normals[index].x;
 				sum[1] += normals[index].y;
@@ -368,7 +188,7 @@ bool FluidClass::CalculateNormals()
 			length = sqrt((sum[0] * sum[0]) + (sum[1] * sum[1]) + (sum[2] * sum[2]));
 			
 			// Get an index to the vertex location in the height map array.
-			index = (j * m_terrainHeight) + i;
+			index = (j * m_fluidHeight) + i;
 
 			// Normalize the final shared normal for this vertex and store it in the height map array.
 			m_heightMap[index].nx = (sum[0] / length);
@@ -383,19 +203,17 @@ bool FluidClass::CalculateNormals()
 
 	return true;
 }
-
-
-void FluidClass::ShutdownHeightMap()
-{
-	if(m_heightMap)
-	{
+void FluidClass::ShutdownHeightMap(){
+	if(m_heightMap){
 		delete [] m_heightMap;
 		m_heightMap = 0;
 	}
 
 	return;
 }
-
+/*
+* Create new vertices's, that use the quilt method for arrangement rather than square
+*/
 bool FluidClass::InitVertex(){
 	int index;
 	int index1, index2, index3, index4;
@@ -414,12 +232,12 @@ bool FluidClass::InitVertex(){
 	// Initialize the index to the vertex buffer.
 	index = 0;
 	// Load the vertex and index array with the terrain data.
-	for(int j=0; j<(m_terrainHeight-1); j++){
-		for(int i=0; i<(m_terrainWidth-1); i++){
-			index1 = (m_terrainHeight * j) + i;          // Bottom left.
-			index2 = (m_terrainHeight * j) + (i+1);      // Bottom right.
-			index3 = (m_terrainHeight * (j+1)) + i;      // Upper left.
-			index4 = (m_terrainHeight * (j+1)) + (i+1);  // Upper right.
+	for(int j=0; j<(m_fluidHeight-1); j++){
+		for(int i=0; i<(m_fluidWidth-1); i++){
+			index1 = (m_fluidHeight * j) + i;          // Bottom left.
+			index2 = (m_fluidHeight * j) + (i+1);      // Bottom right.
+			index3 = (m_fluidHeight * (j+1)) + i;      // Upper left.
+			index4 = (m_fluidHeight * (j+1)) + (i+1);  // Upper right.
 
 			if((i%2 !=0 && j%2 ==0) || (i%2 ==0 && j%2 != 0)){
 				// Upper left.
@@ -499,23 +317,17 @@ bool FluidClass::InitVertex(){
 	}
 	return true;
 }
-bool FluidClass::InitializeBuffers(ID3D11Device* device)
-{
-	/*VertexType* mVertices;
-	unsigned long* mIndices;*/
-	
+bool FluidClass::InitializeBuffers(ID3D11Device* device){
 	D3D11_BUFFER_DESC vertexBufferDesc, indexBufferDesc;
     D3D11_SUBRESOURCE_DATA vertexData, indexData;
 	HRESULT result;
 
-
-
 	// Calculate the number of vertices's in the terrain mesh.
-	m_vertexCount = (m_terrainWidth - 1) * (m_terrainHeight - 1) * 6;
+	m_vertexCount = (m_fluidWidth - 1) * (m_fluidHeight - 1) * 6;
 
 	// Set the index count to the same as the vertex count.
 	m_indexCount = m_vertexCount;
-
+	//create the verticies
 	InitVertex();
 
 	// Set up the description of the static vertex buffer.
@@ -533,8 +345,7 @@ bool FluidClass::InitializeBuffers(ID3D11Device* device)
 	
 	// Now create the vertex buffer.
     result = device->CreateBuffer(&vertexBufferDesc, &vertexData, &m_vertexBuffer);
-	if(FAILED(result))
-	{
+	if(FAILED(result)){
 		return false;
 	}
 
@@ -553,8 +364,7 @@ bool FluidClass::InitializeBuffers(ID3D11Device* device)
 
 	// Create the index buffer.
 	result = device->CreateBuffer(&indexBufferDesc, &indexData, &m_indexBuffer);
-	if(FAILED(result))
-	{
+	if(FAILED(result)){
 		return false;
 	}
 
@@ -567,33 +377,22 @@ bool FluidClass::InitializeBuffers(ID3D11Device* device)
 
 	return true;
 }
-
-
-void FluidClass::ReleaseBuffers()
-{
+void FluidClass::ReleaseBuffers(){
 	// Release the index buffer.
-	if(m_indexBuffer)
-	{
+	if(m_indexBuffer)	{
 		m_indexBuffer->Release();
 		m_indexBuffer = 0;
 	}
-
 	// Release the vertex buffer.
-	if(m_vertexBuffer)
-	{
+	if(m_vertexBuffer){
 		m_vertexBuffer->Release();
 		m_vertexBuffer = 0;
 	}
-
 	return;
 }
-
-
-void FluidClass::RenderBuffers(ID3D11DeviceContext* deviceContext)
-{
+void FluidClass::RenderBuffers(ID3D11DeviceContext* deviceContext){
 	unsigned int stride;
 	unsigned int offset;
-
 
 	// Set vertex buffer stride and offset.
 	stride = sizeof(VertexType); 
@@ -610,73 +409,73 @@ void FluidClass::RenderBuffers(ID3D11DeviceContext* deviceContext)
 
 	return;
 }
-void FluidClass::GenerateRandomHeightMap()
-{
-	//the toggle is just a bool that I use to make sure this is only called ONCE when you press a key
-	//until you release the key and start again. We don t want to be generating the terrain 500
-	//times per second. 
-	int index;
-	float height = (float(rand()%200)/10)-10;
-
-	//loop through the terrain and set the heights how we want. This is where we generate the terrain
-	//in this case I will run a sin-wave through the terrain in one axis.
-
-	for(int j=0; j<m_terrainHeight; j++){
-		for(int i=0; i<m_terrainWidth; i++){
-			float height = (float(rand()%200)/10)-10;
-			index = (m_terrainHeight * j) + i;
-
-			m_heightMap[index].x = (float)i;
-			m_heightMap[index].y = height;
-			m_heightMap[index].z = (float)j;
-		}
-	}
-}
+/*
+* A basic water algorithm that doesnt dimish over time.
+*/
 void FluidClass::Water(){
+	//constant multiplication of water and time
 	static const float WaveAndTime = mWave*mWave*mWaveTime*mWaveTime;
+	//constant multiplication for the current wave and time
 	static const float CurrentWaveAndTime = 2-(4*WaveAndTime);
-	for(int i = 1; i<m_terrainWidth-1; i++){
-		for(int j = 1; j<m_terrainWidth-1; j++){
-			int index = (m_terrainWidth * j) + i;
+	//goes through array updating the nexty value based upon current values and previous values
+	//of the current element and the elements above, below, left and right of it
+	for(int i = 1; i<m_fluidWidth-1; i++){
+		for(int j = 1; j<m_fluidWidth-1; j++){
+			//the current element in the array
+			int index = (m_fluidWidth * j) + i;
+			//the first calculation to get based upon a multiplication of the current element
 			float newVal = CurrentWaveAndTime*m_heightMap[index].y;
+			//next minus previous value
 			newVal-= m_heightMap[index].prevY;
+			//then add a multiplication of the values around the element
 			float sum = ValuesAroundPoint(i,j);
 			newVal+= WaveAndTime*sum;
 			m_heightMap[index].nextY = newVal;
 		}
 	}
+	//update the array values so that the next is now current and the current is now old
 	UpdateWaterValues();
 }
 void FluidClass::UpdateWaterValues(){
-	for(int i = 0; i <m_terrainWidth; i++){
-		for(int j = 0; j <m_terrainWidth; j++){
-			int index = (m_terrainWidth * j) + i;
+	for(int i = 0; i <m_fluidWidth; i++){
+		for(int j = 0; j <m_fluidWidth; j++){
+			int index = (m_fluidWidth * j) + i;
+			//set previous equal to current value
 			m_heightMap[index].prevY = m_heightMap[index].y;
+			//set current value equal to next value
 			m_heightMap[index].y = m_heightMap[index].nextY;
 		}
 	}
 }
 float FluidClass::ValuesAroundPoint(int x, int z){
-	float sum = m_heightMap[(m_terrainWidth * (z-1) ) + x].y;
-	sum += m_heightMap[(m_terrainWidth * (z+1) ) + x].y;
-	sum += m_heightMap[(m_terrainWidth * z) + x-1].y;
-	sum += m_heightMap[(m_terrainWidth * z) + x+1].y;
+	//add together the values from around the array
+	float sum = m_heightMap[(m_fluidWidth * (z-1) ) + x].y;
+	sum += m_heightMap[(m_fluidWidth * (z+1) ) + x].y;
+	sum += m_heightMap[(m_fluidWidth * z) + x-1].y;
+	sum += m_heightMap[(m_fluidWidth * z) + x+1].y;
 	return sum;
 }
-/*generate texture and do calculations*/
-/*then generate new texture based upon old data*/
-
+/*
+* uses a coefficent to diminish water over time
+*/
 void FluidClass::DiminishWater(){
+	//0.05f is the coefficient that diminishes the water
 	static const float UDeltaTime = mWaveTime * 0.05f;
+	//constant multipliers
 	static const float WaveAndTime = mWave*mWave*mWaveTime*mWaveTime;
 	static const float CurrentWaveAndTime = ((4-(8*WaveAndTime))/(UDeltaTime+2));
 	static const float PrevTime = ((UDeltaTime-2)/(UDeltaTime+2));
-	for(int i = 1; i<m_terrainWidth-1; i++){
-		for(int j = 1; j<m_terrainWidth-1; j++){
-			int index = (m_terrainWidth * j) + i;
+	//iterate through the array
+	for(int i = 1; i<m_fluidWidth-1; i++){
+		for(int j = 1; j<m_fluidWidth-1; j++){
+			int index = (m_fluidWidth * j) + i;
+			//if not a border then do calculations
 			if(m_heightMap[index].border == false){
+				//workout first part of algorithm based upon current element and a multiplier
 				float newVal = CurrentWaveAndTime*m_heightMap[index].y;
+				//add previous values times a multiplier
 				newVal+= PrevTime*m_heightMap[index].prevY;
+				//now add the values around the element
 				float sum = ValuesAroundPoint(i,j);
 				newVal+= ((2*WaveAndTime)/(UDeltaTime+2))*sum;
 				m_heightMap[index].nextY = newVal;
@@ -685,12 +484,19 @@ void FluidClass::DiminishWater(){
 	}
 	UpdateWaterValues();
 }
+/*
+*	Randomly add water drops to the array at various heights based upon scale.
+*/
 void FluidClass::AddWater(int x, int z){
-	if(m_heightMap[(m_terrainWidth * x) + z].border == false){
-		m_heightMap[(m_terrainWidth * x) + z].y+=(float(rand()%20)/10/mScale);
+	if(m_heightMap[(m_fluidWidth * x) + z].border == false){
+		m_heightMap[(m_fluidWidth * x) + z].y+=(float(rand()%20)/10/mScale);
 	}
 }
-bool FluidClass::CheckBorder(int x, int z){
+/*
+* Add a circular border to the water.
+* Not used in example
+*/
+bool FluidClass::AddBorder(int x, int z){
 	int numOfCircle = 3;
 	float CircleX[3] = {64,84,31};
 	float CircleZ[3] = {64,28,90};
@@ -703,12 +509,16 @@ bool FluidClass::CheckBorder(int x, int z){
 	}
 	return bound;
 }
+/*
+*	Reset the borders to be false unless the edges of the array
+*/
 void FluidClass::ResetBorders(){
 	int index = 0;
-	for(int j = 0; j < m_terrainWidth; j++){
-		for(int i = 0; i < m_terrainWidth; i++){
-			index = (m_terrainHeight * j) + i;
-			if(i == 0 || i == m_terrainWidth-1 || j == 0 || j == m_terrainWidth-1){
+	for(int j = 0; j < m_fluidWidth; j++){
+		for(int i = 0; i < m_fluidWidth; i++){
+			index = (m_fluidHeight * j) + i;
+			//check to see if edges of the array
+			if(i == 0 || i == m_fluidWidth-1 || j == 0 || j == m_fluidWidth-1){
 				m_heightMap[index].border = true;;
 			}else{
 				m_heightMap[index].border = false;
@@ -720,50 +530,57 @@ void FluidClass::ResetWater(){
 	int index;
 	float height = 0.0;
 	// Initialize the data in the height map (flat).
-	for(int j=0; j<m_terrainHeight; j++){
-		for(int i=0; i<m_terrainWidth; i++){			
-			index = (m_terrainHeight * j) + i;
+	for(int j=0; j<m_fluidHeight; j++){
+		for(int i=0; i<m_fluidWidth; i++){			
+			index = (m_fluidHeight * j) + i;
 
-			m_heightMap[index].x = ((float)i)/mScale-(float(m_terrainWidth)/2);
+			m_heightMap[index].x = ((float)i)/mScale-(float(m_fluidWidth)/2);
 			m_heightMap[index].y = (float)height/mScale;
-			m_heightMap[index].z = ((float)j)/mScale-(float(m_terrainWidth)/2);
+			m_heightMap[index].z = ((float)j)/mScale-(float(m_fluidWidth)/2);
 			m_heightMap[index].nextY = 0.0f;
 			m_heightMap[index].prevY = 0.0f;
 		}
 	}
 }
+/*
+* Set init water values to a random height and location
+*/
 void FluidClass::InitValues(){
 	int index;
-	for(int j=m_terrainHeight/2-2; j<m_terrainHeight/2+2; j++){
-		for(int i=m_terrainWidth/2-2; i<m_terrainWidth/2+2; i++){			
-			index = (m_terrainHeight * j) + i;
+	for(int j=m_fluidHeight/2-2; j<m_fluidHeight/2+2; j++){
+		for(int i=m_fluidWidth/2-2; i<m_fluidWidth/2+2; i++){			
+			index = (m_fluidHeight * j) + i;
 			if(m_heightMap[index].border == false){
 				m_heightMap[index].y = 2.0f/mScale;
 			}
 		}
 	}
-	for(int j=m_terrainHeight/2-10; j<m_terrainHeight/2-5; j++){
-		for(int i=m_terrainWidth/2-10; i<m_terrainWidth/2-5; i++){			
-			index = (m_terrainHeight * j) + i;
+	for(int j=m_fluidHeight/2-10; j<m_fluidHeight/2-5; j++){
+		for(int i=m_fluidWidth/2-10; i<m_fluidWidth/2-5; i++){			
+			index = (m_fluidHeight * j) + i;
 			if(m_heightMap[index].border == false){
 				m_heightMap[index].y = -5.0f/mScale;
 			}
 		}
 	}
-	for(int j=m_terrainHeight/2+20; j<m_terrainHeight/2+25; j++){
-		for(int i=m_terrainWidth/2+20; i<m_terrainWidth/2+25; i++){			
-			index = (m_terrainHeight * j) + i;
+	for(int j=m_fluidHeight/2+20; j<m_fluidHeight/2+25; j++){
+		for(int i=m_fluidWidth/2+20; i<m_fluidWidth/2+25; i++){			
+			index = (m_fluidHeight * j) + i;
 			if(m_heightMap[index].border == false){
 			m_heightMap[index].y = 1.5f/mScale;
 			}
 		}
 	}
 }
+/*
+* Takes in the Terrain HeightMap via a pointer and works out if the height is above zero
+* set a border in the water array at the same location
+*/
 void FluidClass::SetBorders(TerrainClass::HeightMapType * terrainArray,int size){
 	int index = 0;
 	for(int i = 0; i < size; i++){
 		for(int j = 0; j<size;j++){
-			index = (m_terrainHeight * i) + j;
+			index = (m_fluidHeight * i) + j;
 			if(terrainArray[index].y > 0){
 				m_heightMap[index].border = true;
 			}

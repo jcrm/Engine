@@ -320,7 +320,6 @@ bool MergeTextureShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceCon
 {
 	HRESULT result;
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
-	unsigned int bufferNumber;
 	MergeBufferType *dataPtr;
 
 	result = deviceContext->Map(mMergeBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);

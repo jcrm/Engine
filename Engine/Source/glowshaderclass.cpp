@@ -76,7 +76,6 @@ bool GlowShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* v
 	unsigned int numElements;
 	D3D11_BUFFER_DESC matrixBufferDesc;
     D3D11_SAMPLER_DESC samplerDesc;
-	D3D11_BUFFER_DESC glowBufferDesc;
 
 	// Initialize the pointers this function will use to null.
 	errorMessage = 0;
@@ -307,10 +306,6 @@ void GlowShaderClass::RenderShader(ID3D11DeviceContext* deviceContext, int index
 }
 bool GlowShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext, ID3D11ShaderResourceView* texture)
 {
-	HRESULT result;
-	D3D11_MAPPED_SUBRESOURCE mappedResource;
-	unsigned int bufferNumber;
-
 	// Set shader texture resource in the pixel shader.
 	deviceContext->PSSetShaderResources(0, 1, &texture);
 
