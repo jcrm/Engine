@@ -2,13 +2,13 @@
 // Filename: main.cpp
 ////////////////////////////////////////////////////////////////////////////////
 #include "systemclass.h"
-
+#include <time.h>
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pScmdline, int iCmdshow)
 {
 	SystemClass* System;
 	bool result;
-	
+	srand(time(NULL));
 	
 	// Create the system object.
 	System = new SystemClass;

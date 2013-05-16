@@ -33,10 +33,9 @@ ApplicationClass::ApplicationClass()
 	mGlowShader = 0;
 	mMergerShader = 0;
 	m_MergeTexture = 0;
-	m_Model[0] = 0;
-	m_Model[1] = 0;
-	m_Model[2] = 0;
-	m_Model[3] = 0;
+	for(int i = 0; i < MODEL_NUMBER; i++){
+		m_Model[0] = 0;
+	}
 }
 
 
@@ -53,11 +52,6 @@ ApplicationClass::~ApplicationClass()
 bool ApplicationClass::Initialize(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight)
 {
 	bool result;
-	float cameraX, cameraY, cameraZ;
-	D3DXMATRIX baseViewMatrix;
-	char videoCard[128];
-	int videoMemory;
-
 	int downSampleWidth, downSampleHeight;
 
 	// Set the size to sample down to.
@@ -88,111 +82,9 @@ bool ApplicationClass::Initialize(HINSTANCE hinstance, HWND hwnd, int screenWidt
 		MessageBox(hwnd, L"Could not initialize DirectX 11.", L"Error", MB_OK);
 		return false;
 	}
-
-	// Create the camera object.
-	m_Camera = new CameraClass;
-	if(!m_Camera){
-		return false;
-	}
-
-	// Initialize a base view matrix with the camera for 2D user interface rendering.
-	m_Camera->SetPosition(0.0f, 0.0f, -1.0f);
-	m_Camera->Render();
-	m_Camera->GetViewMatrix(baseViewMatrix);
-
-	// Set the initial position of the camera.
-	cameraX = 0.0f;
-	cameraY = 2.0f;
-	cameraZ = -7.0f;
-
-	m_Camera->SetPosition(cameraX, cameraY, cameraZ);
+	InitCamera();
 	InitObjects(hwnd);
-	// Create the timer object.
-	m_Timer = new TimerClass;
-	if(!m_Timer)
-	{
-		return false;
-	}
-
-	// Initialize the timer object.
-	result = m_Timer->Initialize();
-	if(!result)
-	{
-		MessageBox(hwnd, L"Could not initialize the timer object.", L"Error", MB_OK);
-		return false;
-	}
-
-	// Create the position object.
-	m_Position = new PositionClass;
-	if(!m_Position)
-	{
-		return false;
-	}
-
-	// Set the initial position of the viewer to the same as the initial camera position.
-	m_Position->SetPosition(cameraX, cameraY, cameraZ);
-
-	// Create the fps object.
-	m_Fps = new FpsClass;
-	if(!m_Fps)
-	{
-		return false;
-	}
-
-	// Initialize the fps object.
-	m_Fps->Initialize();
-
-	// Create the cpu object.
-	m_Cpu = new CpuClass;
-	if(!m_Cpu)
-	{
-		return false;
-	}
-
-	// Initialize the cpu object.
-	m_Cpu->Initialize();
-
-	// Create the font shader object.
-	m_FontShader = new FontShaderClass;
-	if(!m_FontShader)
-	{
-		return false;
-	}
-
-	// Initialize the font shader object.
-	result = m_FontShader->Initialize(m_Direct3D->GetDevice(), hwnd);
-	if(!result)
-	{
-		MessageBox(hwnd, L"Could not initialize the font shader object.", L"Error", MB_OK);
-		return false;
-	}
-
-	// Create the text object.
-	m_Text = new TextClass;
-	if(!m_Text)
-	{
-		return false;
-	}
-
-	// Initialize the text object.
-	result = m_Text->Initialize(m_Direct3D->GetDevice(), m_Direct3D->GetDeviceContext(), hwnd, screenWidth, screenHeight, baseViewMatrix);
-	if(!result)
-	{
-		MessageBox(hwnd, L"Could not initialize the text object.", L"Error", MB_OK);
-		return false;
-	}
-
-	// Retrieve the video card information.
-	m_Direct3D->GetVideoCardInfo(videoCard, videoMemory);
-
-	// Set the video card information in the text object.
-	result = m_Text->SetVideoCardInfo(videoCard, videoMemory, m_Direct3D->GetDeviceContext());
-	if(!result)
-	{
-		MessageBox(hwnd, L"Could not set video card info in the text object.", L"Error", MB_OK);
-		return false;
-	}
-	
+	InitText(hwnd, screenWidth, screenHeight);
 	// Create the light object.
 	m_Light = new LightClass;
 	if(!m_Light){
@@ -220,8 +112,7 @@ bool ApplicationClass::Initialize(HINSTANCE hinstance, HWND hwnd, int screenWidt
 
 	// Create the full screen ortho window object.
 	m_FullScreenWindow = new OrthoWindowClass;
-	if(!m_FullScreenWindow)
-	{
+	if(!m_FullScreenWindow){
 		return false;
 	}
 
@@ -234,21 +125,79 @@ bool ApplicationClass::Initialize(HINSTANCE hinstance, HWND hwnd, int screenWidt
 	}
 	m_Terrain->GenerateHeightMap(m_Direct3D->GetDevice());
 	mFluid->SetBorders(m_Terrain->getHeightMap(), m_Terrain->getHeightMapSize());
+	mFluid->InitValues();
+	return true;
+}
+bool ApplicationClass::InitText(HWND hwnd, int screenWidth , int screenHeight){
+	D3DXMATRIX baseViewMatrix;
+	char videoCard[128];
+	int videoMemory;
+	bool result = true;
+	// Create the timer object.
+	m_Timer = new TimerClass;
+	if(!m_Timer){
+		return false;
+	}
+	// Initialize the timer object.
+	result = m_Timer->Initialize();
+	if(!result){
+		MessageBox(hwnd, L"Could not initialize the timer object.", L"Error", MB_OK);
+		return false;
+	}
+	// Create the fps object.
+	m_Fps = new FpsClass;
+	if(!m_Fps){
+		return false;
+	}
+
+	// Initialize the fps object.
+	m_Fps->Initialize();
+
+	// Create the cpu object.
+	m_Cpu = new CpuClass;
+	if(!m_Cpu){
+		return false;
+	}
+	// Initialize the cpu object.
+	m_Cpu->Initialize();
+	// Create the text object.
+	m_Text = new TextClass;
+	if(!m_Text){
+		return false;
+	}
+	m_Camera->GetViewMatrix(baseViewMatrix);
+	// Initialize the text object.
+	result = m_Text->Initialize(m_Direct3D->GetDevice(), m_Direct3D->GetDeviceContext(), hwnd, screenWidth, screenHeight, baseViewMatrix);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the text object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Retrieve the video card information.
+	m_Direct3D->GetVideoCardInfo(videoCard, videoMemory);
+
+	// Set the video card information in the text object.
+	result = m_Text->SetVideoCardInfo(videoCard, videoMemory, m_Direct3D->GetDeviceContext());
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not set video card info in the text object.", L"Error", MB_OK);
+		return false;
+	}
 	return true;
 }
 bool ApplicationClass::InitObjects(HWND hwnd){
 	bool result;
-	for(int i = 0; i < 4; i++){
+	for(int i = 0; i < MODEL_NUMBER; i++){
 		// Create the model object.
-		m_Model[i] = new ModelClass(float(i-2));
+		m_Model[i] = new ModelClass(D3DXVECTOR3(rand()%50,(rand()%5)+10,rand()%50));
 		if(!m_Model){
 			return false;
 		}
 
 		// Initialize the model object.
 		result = m_Model[i]->Initialize(m_Direct3D->GetDevice(), "data/cube.txt", L"data/seafloor.dds");
-		if(!result)
-		{
+		if(!result){
 			MessageBox(hwnd, L"Could not initialize the model object.", L"Error", MB_OK);
 			return false;
 		}
@@ -354,8 +303,46 @@ bool ApplicationClass::InitTextures(HWND hwnd, int screenWidth, int screenHeight
 	}
 	return true;
 }
+bool ApplicationClass::InitCamera(){
+	float cameraX, cameraY, cameraZ;
+	// Create the camera object.
+	m_Camera = new CameraClass;
+	if(!m_Camera){
+		return false;
+	}
+
+	// Initialize a base view matrix with the camera for 2D user interface rendering.
+	m_Camera->SetPosition(0.0f, 0.0f, -1.0f);
+	m_Camera->Render();
+
+	// Set the initial position of the camera.
+	cameraX = 0.0f;
+	cameraY = 2.0f;
+	cameraZ = -7.0f;
+
+	m_Camera->SetPosition(cameraX, cameraY, cameraZ);
+	// Create the position object.
+	m_Position = new PositionClass;
+	if(!m_Position){
+		return false;
+	}
+
+	// Set the initial position of the viewer to the same as the initial camera position.
+	m_Position->SetPosition(cameraX, cameraY, cameraZ);
+}
 bool ApplicationClass::InitShaders(HWND hwnd){
 	bool result;
+	// Create the font shader object.
+	m_FontShader = new FontShaderClass;
+	if(!m_FontShader){
+		return false;
+	}
+	// Initialize the font shader object.
+	result = m_FontShader->Initialize(m_Direct3D->GetDevice(), hwnd);
+	if(!result){
+		MessageBox(hwnd, L"Could not initialize the font shader object.", L"Error", MB_OK);
+		return false;
+	}
 	// Create the terrain shader object.
 	m_TerrainShader = new TerrainShaderClass;
 	if(!m_TerrainShader){
@@ -379,24 +366,19 @@ bool ApplicationClass::InitShaders(HWND hwnd){
 	}
 	// Create the texture shader object.
 	m_TextureToTextureShader = new TextureToTextureShaderClass;
-	if(!m_TextureToTextureShader)
-	{
+	if(!m_TextureToTextureShader){
 		return false;
 	}
-
 	// Initialize the texture shader object.
 	result = m_TextureToTextureShader->Initialize(m_Direct3D->GetDevice(), hwnd);
-	if(!result)
-	{
+	if(!result){
 		MessageBox(hwnd, L"Could not initialize the texture shader object.", L"Error", MB_OK);
 		return false;
 	}
-
 	m_TextureShader = new TextureShaderClass;
 	if(!m_TextureShader){
 		return false;
 	}
-
 	// Initialize the texture shader object.
 	result = m_TextureShader->Initialize(m_Direct3D->GetDevice(), hwnd);
 	if(!result){
@@ -432,41 +414,68 @@ bool ApplicationClass::InitShaders(HWND hwnd){
 	}
 	return true;
 }
-void ApplicationClass::Shutdown()
-{
-	if(m_FullScreenWindow)
-	{
-		m_FullScreenWindow->Shutdown();
-		delete m_FullScreenWindow;
-		m_FullScreenWindow = 0;
-	}
 
-	// Release the small ortho window object.
-	if(m_SmallWindow)
-	{
-		m_SmallWindow->Shutdown();
-		delete m_SmallWindow;
-		m_SmallWindow = 0;
+void ApplicationClass::ShutdownText(){
+	// Release the text object.
+	if(m_Text){
+		m_Text->Shutdown();
+		delete m_Text;
+		m_Text = 0;
 	}
-
+	// Release the cpu object.
+	if(m_Cpu){
+		m_Cpu->Shutdown();
+		delete m_Cpu;
+		m_Cpu = 0;
+	}
+	// Release the fps object.
+	if(m_Fps){
+		delete m_Fps;
+		m_Fps = 0;
+	}
+	// Release the timer object.
+	if(m_Timer){
+		delete m_Timer;
+		m_Timer = 0;
+	}
+}
+void ApplicationClass::ShutdownObjects(){
+	for(int i = 0; i < MODEL_NUMBER; i++){
+		// Release the model object.
+		if(m_Model[i]){
+			m_Model[i]->Shutdown();
+			delete m_Model[i];
+			m_Model[i] = 0;
+		}
+	}
+	// Release the terrain object.
+	if(m_Terrain){
+		m_Terrain->Shutdown();
+		delete m_Terrain;
+		m_Terrain = 0;
+	}
+	if(mFluid){
+		mFluid->Shutdown();
+		delete mFluid;
+		mFluid = 0;
+	}
+}
+void ApplicationClass::ShutdownTextures(){
 	// Release the up sample render to texture object.
-	if(m_UpSampleTexure)
-	{
+	if(m_UpSampleTexure){
 		m_UpSampleTexure->Shutdown();
 		delete m_UpSampleTexure;
 		m_UpSampleTexure = 0;
 	}
 	// Release the down sample render to texture object.
-	if(m_DownSampleTexure)
-	{
+	if(m_DownSampleTexure){
 		m_DownSampleTexure->Shutdown();
 		delete m_DownSampleTexure;
 		m_DownSampleTexure = 0;
 	}
 
 	// Release the render to texture object.
-	if(m_RenderTexture)
-	{
+	if(m_RenderTexture){
 		m_RenderTexture->Shutdown();
 		delete m_RenderTexture;
 		m_RenderTexture = 0;
@@ -476,15 +485,36 @@ void ApplicationClass::Shutdown()
 		delete m_ConvolutionTexture;
 		m_ConvolutionTexture = 0;
 	}
+	if (m_GlowTexture){
+		m_GlowTexture->Shutdown();
+		delete m_GlowTexture;
+		m_GlowTexture = 0;
+	}
+	if (m_MergeTexture){
+		m_MergeTexture->Shutdown();
+		delete m_MergeTexture;
+		m_MergeTexture = 0;
+	}
+}
+void ApplicationClass::ShutdownCamera(){
+	if(m_Position){
+		delete m_Position;
+		m_Position = 0;
+	}
+	// Release the camera object.
+	if(m_Camera){
+		delete m_Camera;
+		m_Camera = 0;
+	}
+}
+void ApplicationClass::ShutdownShaders(){
 	// Release the texture shader object.
-	if(m_TextureShader)
-	{
+	if(m_TextureShader){
 		m_TextureShader->Shutdown();
 		delete m_TextureShader;
 		m_TextureShader = 0;
 	}
-	if(m_TextureToTextureShader)
-	{
+	if(m_TextureToTextureShader){
 		m_TextureToTextureShader->Shutdown();
 		delete m_TextureToTextureShader;
 		m_TextureToTextureShader = 0;
@@ -495,112 +525,70 @@ void ApplicationClass::Shutdown()
 		m_ConvolutionShader = 0;
 	}
 
-	for(int i = 0; i < 4; i++){
-		// Release the model object.
-		if(m_Model[i])
-		{
-			m_Model[i]->Shutdown();
-			delete m_Model[i];
-			m_Model[i] = 0;
-		}
-	}
-
-	// Release the light object.
-	if(m_Light)
-	{
-		delete m_Light;
-		m_Light = 0;
-	}
-
-	// Release the terrain shader object.
-	if(m_TerrainShader)
-	{
-		m_TerrainShader->Shutdown();
-		delete m_TerrainShader;
-		m_TerrainShader = 0;
-	}
-	if(mFluidShader)
-	{
-		mFluidShader->Shutdown();
-		delete mFluidShader;
-		mFluidShader = 0;
-	}
-	// Release the text object.
-	if(m_Text)
-	{
-		m_Text->Shutdown();
-		delete m_Text;
-		m_Text = 0;
-	}
-
 	// Release the font shader object.
-	if(m_FontShader)
-	{
+	if(m_FontShader){
 		m_FontShader->Shutdown();
 		delete m_FontShader;
 		m_FontShader = 0;
 	}
 
-	// Release the cpu object.
-	if(m_Cpu)
-	{
-		m_Cpu->Shutdown();
-		delete m_Cpu;
-		m_Cpu = 0;
+	// Release the terrain shader object.
+	if(m_TerrainShader){
+		m_TerrainShader->Shutdown();
+		delete m_TerrainShader;
+		m_TerrainShader = 0;
+	}
+	if(mFluidShader){
+		mFluidShader->Shutdown();
+		delete mFluidShader;
+		mFluidShader = 0;
 	}
 
-	// Release the fps object.
-	if(m_Fps)
-	{
-		delete m_Fps;
-		m_Fps = 0;
+	if (mMergerShader){
+		mMergerShader->Shutdown();
+		delete mMergerShader;
+		mMergerShader = 0;
+	}
+	if(mGlowShader){
+		mGlowShader->Shutdown();
+		delete mGlowShader;
+		mGlowShader = 0;
+	}
+}
+void ApplicationClass::Shutdown()
+{
+	if(m_FullScreenWindow){
+		m_FullScreenWindow->Shutdown();
+		delete m_FullScreenWindow;
+		m_FullScreenWindow = 0;
 	}
 
-	// Release the position object.
-	if(m_Position)
-	{
-		delete m_Position;
-		m_Position = 0;
+	// Release the small ortho window object.
+	if(m_SmallWindow){
+		m_SmallWindow->Shutdown();
+		delete m_SmallWindow;
+		m_SmallWindow = 0;
 	}
-
-	// Release the timer object.
-	if(m_Timer)
-	{
-		delete m_Timer;
-		m_Timer = 0;
+	// Release the light object.
+	if(m_Light){
+		delete m_Light;
+		m_Light = 0;
 	}
-
-	// Release the terrain object.
-	if(m_Terrain)
-	{
-		m_Terrain->Shutdown();
-		delete m_Terrain;
-		m_Terrain = 0;
-	}
-	if(mFluid)
-	{
-		mFluid->Shutdown();
-		delete mFluid;
-		mFluid = 0;
-	}
-	// Release the camera object.
-	if(m_Camera)
-	{
-		delete m_Camera;
-		m_Camera = 0;
-	}
-
+	ShutdownText();
+	ShutdownTextures();
+	ShutdownShaders();
+	ShutdownObjects();
+	ShutdownCamera();
+	
 	// Release the Direct3D object.
-	if(m_Direct3D)
-	{
+	if(m_Direct3D){
 		m_Direct3D->Shutdown();
 		delete m_Direct3D;
 		m_Direct3D = 0;
 	}
 
 	// Release the input object.
-	if(m_Input)
-	{
+	if(m_Input){
 		m_Input->Shutdown();
 		delete m_Input;
 		m_Input = 0;
@@ -655,19 +643,9 @@ bool ApplicationClass::Frame()
 	}
 	mFluid->GenerateHeightMap(m_Direct3D->GetDevice());
 
-	static float rotation = 0.0f;
-
-
-	// Update the rotation variable each frame.
-	rotation += (float)D3DX_PI * 0.005f;
-	if(rotation > 360.0f)
-	{
-		rotation -= 360.0f;
-	}
 	// Render the graphics scene.
-	result = Render(rotation);
-	if(!result)
-	{
+	result = Render();
+	if(!result){
 		return false;
 	}
 	return result;
@@ -687,9 +665,8 @@ bool ApplicationClass::HandleInput(float frameTime)
 	}
 	keyDown = m_Input->IsRPressed();
 	if(keyDown){
-		for(int i = 0; i <5; i++){
-			mFluid->ResetWater();
-		}
+		mFluid->ResetWater();
+		mFluid->InitValues();
 	}
 	// Set the frame time for calculating the updated position.
 	m_Position->SetFrameTime(frameTime);
@@ -743,11 +720,11 @@ bool ApplicationClass::HandleInput(float frameTime)
 	return true;
 }
 
-bool ApplicationClass::Render(float rotation){
+bool ApplicationClass::Render(){
 	bool result;
 
 	// First render the scene to a render texture.
-	result = RenderSceneToTexture(m_RenderTexture, rotation);
+	result = RenderSceneToTexture(m_RenderTexture);
 	if(!result){
 		return false;
 	}
@@ -771,7 +748,7 @@ bool ApplicationClass::Render(float rotation){
 	return true;
 }
 
-bool ApplicationClass::RenderSceneToTexture(RenderTextureClass* write, float rotation)
+bool ApplicationClass::RenderSceneToTexture(RenderTextureClass* write)
 {
 	D3DXMATRIX worldMatrix, modelWorldMatrix, viewMatrix, projectionMatrix;
 	bool result;
@@ -797,11 +774,11 @@ bool ApplicationClass::RenderSceneToTexture(RenderTextureClass* write, float rot
 		return false;
 	}
 
-	modelWorldMatrix = worldMatrix;
-	// Rotate the world matrix by the rotation value so that the cube will spin.
-	D3DXMatrixRotationY(&modelWorldMatrix, rotation);
 
-	for(int i = 0; i< 4; i++){
+	for(int i = 0; i< MODEL_NUMBER; i++){
+		modelWorldMatrix = worldMatrix;
+		// Rotate the world matrix by the rotation value so that the cube will spin.
+		D3DXMatrixRotationY(&modelWorldMatrix, m_Model[i]->GetRotation());
 		// Put the model vertex and index buffers on the graphics pipeline to prepare them for drawing.
 		m_Model[i]->Render(m_Direct3D->GetDeviceContext());
 

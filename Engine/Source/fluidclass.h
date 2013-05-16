@@ -19,21 +19,15 @@
 class FluidClass
 {
 private:
-	struct VertexType
-	{
+	struct VertexType{
 		D3DXVECTOR3 position;
 	    D3DXVECTOR3 normal;
 	};
-
-
-	struct VectorType 
-	{ 
+	struct VectorType { 
 		float x, y, z;
 	};
-
 public:
-	struct HeightMapType 
-	{ 
+	struct HeightMapType { 
 		float x, y, z;
 		float nx, ny, nz;
 		float prevY, nextY;
@@ -55,22 +49,21 @@ public:
 	void AddWater(int x, int z, float height);
 	void ResetWater();
 	void SetBorders(TerrainClass::HeightMapType * terrain_array,int size);
+	void InitValues();
 private:
 	bool LoadHeightMap(char*);
 	void NormalizeHeightMap();
 	bool CalculateNormals();
 	void ShutdownHeightMap();
-
+	bool InitVertex();
 	bool InitializeBuffers(ID3D11Device*);
 	void ReleaseBuffers();
 	void RenderBuffers(ID3D11DeviceContext*);
+
 	float ValuesAroundPoint(int x, int z);
 	void UpdateWaterValues();
-	inline int createIndex(int size, int i, int j){ return (size * i) + j;}
-	inline signed char scrand(signed char r = 4) {return (-r + 2 * (rand() % r)); }
 	void DiminishWater();
 	bool CheckBorder(int x, int z);
-	bool InitVertex();
 	void ResetBorders();
 private:
 	bool m_terrainGeneratedToggle;

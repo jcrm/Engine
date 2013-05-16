@@ -1,45 +1,20 @@
-﻿Build started 5/16/2013 10:27:47 AM.
+﻿Build started 5/16/2013 1:27:09 PM.
      1>Project "C:\Users\Jake\Documents\Visual Studio 2010\Projects\Engine\Engine\Engine.vcxproj" on node 2 (build target(s)).
      1>InitializeBuildStatus:
          Touching "Debug\Engine.unsuccessfulbuild".
        ClCompile:
-         c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /I"C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include" /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _WINDOWS /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc100.pdb" /Gd /TP /analyze- /errorReport:prompt Source\applicationclass.cpp Source\cameraclass.cpp Source\convolutionshaderclass.cpp Source\cpuclass.cpp Source\d3dclass.cpp Source\fluidclass.cpp Source\fluidshaderclass.cpp Source\fontclass.cpp Source\fontshaderclass.cpp Source\fpsclass.cpp Source\glowshaderclass.cpp Source\inputclass.cpp Source\lightclass.cpp Source\main.cpp Source\mergetextureshaderclass.cpp Source\modelclass.cpp Source\orthowindowclass.cpp Source\positionclass.cpp Source\rendertextureclass.cpp Source\ShaderClass.cpp Source\systemclass.cpp Source\terrainclass.cpp Source\terrainshaderclass.cpp Source\textclass.cpp Source\textureclass.cpp Source\textureshaderclass.cpp Source\texturetotextureshaderclass.cpp Source\timerclass.cpp
-         timerclass.cpp
-         texturetotextureshaderclass.cpp
-         textureshaderclass.cpp
-         textureclass.cpp
-         textclass.cpp
-         terrainshaderclass.cpp
-         terrainclass.cpp
-         systemclass.cpp
-         ShaderClass.cpp
-         rendertextureclass.cpp
-         positionclass.cpp
-         orthowindowclass.cpp
-         modelclass.cpp
-         mergetextureshaderclass.cpp
-     1>c:\users\jake\documents\visual studio 2010\projects\engine\engine\source\mergetextureshaderclass.cpp(323): warning C4101: 'bufferNumber' : unreferenced local variable
-         main.cpp
-         lightclass.cpp
-         inputclass.cpp
-         glowshaderclass.cpp
-     1>c:\users\jake\documents\visual studio 2010\projects\engine\engine\source\glowshaderclass.cpp(79): warning C4101: 'glowBufferDesc' : unreferenced local variable
-     1>c:\users\jake\documents\visual studio 2010\projects\engine\engine\source\glowshaderclass.cpp(312): warning C4101: 'bufferNumber' : unreferenced local variable
-     1>c:\users\jake\documents\visual studio 2010\projects\engine\engine\source\glowshaderclass.cpp(311): warning C4101: 'mappedResource' : unreferenced local variable
-     1>c:\users\jake\documents\visual studio 2010\projects\engine\engine\source\glowshaderclass.cpp(310): warning C4101: 'result' : unreferenced local variable
-         fpsclass.cpp
-         fontshaderclass.cpp
-         Generating Code...
-         Compiling...
-         fontclass.cpp
-         fluidshaderclass.cpp
-         fluidclass.cpp
-         d3dclass.cpp
-         cpuclass.cpp
-         convolutionshaderclass.cpp
-         cameraclass.cpp
+         c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /I"C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include" /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _WINDOWS /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc100.pdb" /Gd /TP /analyze- /errorReport:prompt Source\applicationclass.cpp Source\main.cpp Source\systemclass.cpp
          applicationclass.cpp
+     1>c:\users\jake\documents\visual studio 2010\projects\engine\engine\source\applicationclass.cpp(193): warning C4244: 'argument' : conversion from 'int' to 'FLOAT', possible loss of data
+     1>c:\users\jake\documents\visual studio 2010\projects\engine\engine\source\applicationclass.cpp(193): warning C4244: 'argument' : conversion from 'int' to 'FLOAT', possible loss of data
+     1>c:\users\jake\documents\visual studio 2010\projects\engine\engine\source\applicationclass.cpp(193): warning C4244: 'argument' : conversion from 'int' to 'FLOAT', possible loss of data
          Generating Code...
+     1>c:\users\jake\documents\visual studio 2010\projects\engine\engine\source\applicationclass.cpp(332): warning C4715: 'ApplicationClass::InitCamera' : not all control paths return a value
+         Compiling...
+         systemclass.cpp
+         Generating Code...
+         Skipping... (no relevant changes detected)
+         main.cpp
        ManifestResourceCompile:
          C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\bin\rc.exe /nologo /fo"Debug\Engine.exe.embed.manifest.res" Debug\Engine_manifest.rc 
        Link:
@@ -113,4 +88,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:44.02
+Time Elapsed 00:00:08.30

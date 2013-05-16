@@ -42,6 +42,7 @@ const float SCREEN_NEAR = 0.1f;
 #include "glowshaderclass.h"
 #include "ShaderClass.h"
 
+#define MODEL_NUMBER 10
 
 ////////////////////////////////////////////////////////////////////////////////
 // Class name: ApplicationClass
@@ -60,15 +61,22 @@ public:
 private:
 	bool HandleInput(float);
 	bool RenderGraphics();
-	bool Render(float rotation);
-	bool RenderSceneToTexture(RenderTextureClass* mWrite, float rotation);
+	bool Render();
+	bool RenderSceneToTexture(RenderTextureClass* mWrite);
 	bool RenderTexture(ShaderClass *mShader, RenderTextureClass *mReadTexture, RenderTextureClass *mWriteTexture, OrthoWindowClass *mWindow);
 	bool Render2DTextureScene(RenderTextureClass* mRead);
 	bool RenderMergeTexture(RenderTextureClass *readTexture, RenderTextureClass *readTexture2, RenderTextureClass *writeTexture, OrthoWindowClass *window);
 	bool InitObjects(HWND hwnd);
 	bool InitTextures(HWND hwnd, int screenWidth, int screenHeight);
+	bool InitText(HWND hwnd, int screenWidth , int screenHeight);
 	bool InitShaders(HWND hwnd);
+	bool InitCamera();
 	void SetBorders();
+	void ShutdownObjects();
+	void ShutdownText();
+	void ShutdownTextures();
+	void ShutdownCamera();
+	void ShutdownShaders();
 private:
 	InputClass* m_Input;
 	D3DClass* m_Direct3D;
@@ -83,7 +91,7 @@ private:
 	OrthoWindowClass *m_SmallWindow, *m_FullScreenWindow;
 	
 	TerrainClass* m_Terrain;
-	ModelClass* m_Model[4];
+	ModelClass* m_Model[MODEL_NUMBER];
 	FluidClass* mFluid;
 	
 	TextureShaderClass* m_TextureShader;

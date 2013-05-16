@@ -64,7 +64,7 @@ private:
 	float AvgDiamondVals (int i, int j, int stride, int size, int subSize);
 	float AvgSquareVals (int i, int j, int stride, int size);
 
-	void Faulting();
+	void Faulting(int passes, float displacement);
 	int CheckCrossProduct(float x1, float z1, float x2, float z2);
 	
 	void Smooth(int passes);

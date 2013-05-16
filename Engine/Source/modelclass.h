@@ -40,7 +40,7 @@ private:
 	};
 
 public:
-	ModelClass(float offset);
+	ModelClass(D3DXVECTOR3 offset);
 	ModelClass(const ModelClass&);
 	~ModelClass();
 
@@ -50,7 +50,7 @@ public:
 
 	int GetIndexCount();
 	ID3D11ShaderResourceView* GetTexture();
-
+	float GetRotation();
 private:
 	bool InitializeBuffers(ID3D11Device*);
 	void ShutdownBuffers();
@@ -61,13 +61,15 @@ private:
 
 	bool LoadModel(char*);
 	void ReleaseModel();
-
+	void IncrementRotation();
 private:
 	ID3D11Buffer *m_vertexBuffer, *m_indexBuffer;
 	int m_vertexCount, m_indexCount;
 	TextureClass* m_Texture;
 	ModelType* m_model;
-	float mOffset;
+	D3DXVECTOR3 mOffset;
+	float mRotation;
+	float mRotationSpeed;
 };
 
 #endif

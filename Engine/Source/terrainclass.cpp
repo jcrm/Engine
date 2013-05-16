@@ -112,24 +112,20 @@ bool TerrainClass::GenerateHeightMap(ID3D11Device* device){
 	//the toggle is just a bool that I use to make sure this is only called ONCE when you press a key
 	//until you release the key and start again. We don t want to be generating the terrain 500
 	//times per second. 
-	float maxHeight = 10.0f;
+	float maxHeight = 7.5f;
 	float height = randRange(-maxHeight,maxHeight);
 	if(!m_terrainGeneratedToggle){
 		ShutdownBuffers();
-		//faulting();
 		for(int i = 1; i < 5; i++){
 			MidPointDisplacement(100.0f/i , 0.4f);
 		}
-		for (int i = 0; i <12; i++){
+		for (int i = 0; i <30; i++){
 			height = randRange(0,maxHeight);
-			ParticleDeposition(3000, height);
+			ParticleDeposition(1000, height);
+			ParticleDeposition(50, -height);
 		}
-		for (int i = 0; i <6; i++){
-			height = randRange(-maxHeight,0);
-			ParticleDeposition(1500, height);
-		}
+		Faulting(10, -2.5f);
 		Smooth(5);
-		
 		result = CalculateNormals();
 		if(!result){
 			return false;
@@ -899,11 +895,6 @@ void TerrainClass::MidPointDisplacement (float heightScale, float h)
        such that they join seemlessly. */
 
     length = noOfConnectors / 2;
-	m_heightMap[(0*noOfVectors)+0].y = 0.0f;
-	m_heightMap[(noOfConnectors*noOfVectors)+0].y = 0.0f;
-	m_heightMap[(noOfConnectors*noOfVectors)+noOfConnectors].y = 0.0f;
-	m_heightMap[(0*noOfVectors)+noOfConnectors].y = 0.0f;
-
     /* Now we add ever-increasing detail based on the "diamond" seeded
        values. We loop over stride, which gets cut in half at the
        bottom of the loop. Since it's an int, eventually division by 2
@@ -987,35 +978,47 @@ void TerrainClass::MidPointDisplacement (float heightScale, float h)
     }
 }
 
-void TerrainClass::Faulting(){
-	D3DXVECTOR3 faultLine;
-	//float height = randRange(-5,5); 
-	float height = -2.0f; 
-	int index = 0;
+void TerrainClass::Faulting(int passes, float displacement){
+	while(passes > 0){
+		passes--;
+		int x1Index = 0;
+		int z1Index = 0;
+		int x2Index = 0;
+		int z2Index = 0;
+		float x1, z1, x2, z2 = 0.0f;
 
-	while((height >0.01f) || (height < -0.01f)){
-		faultLine = D3DXVECTOR3(1, 1, 1);
-		for(int j = 0; j < m_terrainWidth; j++){
-			for(int i = 0; i < m_terrainWidth; i++){
-				index = (m_terrainHeight * j) + i;
-				if(CheckCrossProduct(faultLine.x, faultLine.z, m_heightMap[index].x, m_heightMap[index].z)==0){
-					m_heightMap[index].y += height;
-				}else{
-					m_heightMap[index].y -= height;
+		while((x1Index == x2Index) && (z1Index == z2Index)){
+			x1Index = rand()%m_terrainHeight;
+			z1Index = rand()%m_terrainHeight;
+			x2Index = rand()%m_terrainHeight;
+			z2Index = rand()%m_terrainHeight;
+		}
+
+		int index = calculateIndex(m_terrainHeight,x1Index, z1Index);
+		x1 = m_heightMap[index].x;
+		z1 = m_heightMap[index].z;
+
+		index = calculateIndex(m_terrainHeight,x2Index, z2Index);
+		x2 = m_heightMap[index].x;
+		z2 = m_heightMap[index].z;
+
+		D3DXVECTOR2 faultLine = D3DXVECTOR2(x2-x1, z2-z1);
+
+		for(int i = 0; i < m_terrainHeight; i++){
+			for(int j = 0; j < m_terrainWidth; j++){
+				index = calculateIndex(m_terrainHeight,j, i);
+				float px = m_heightMap[index].x;
+				float pz = m_heightMap[index].z;
+				D3DXVECTOR2 posVector = D3DXVECTOR2(px-x1, pz-z1);
+
+				if(((faultLine.x *posVector.y) - (faultLine.y*posVector.x)) > 0){
+					m_heightMap[index].y += displacement;
 				}
 			}
 		}
-		height += float(rand()%10)/10;
+		displacement *= 0.9f;
 	}
 }
-int TerrainClass::CheckCrossProduct(float x1, float z1, float x2, float z2){
-	if((x1*z2)-(z1*z2) < 0){
-		return 0;
-	}else{
-		return 1;
-	}
-}
-
 float TerrainClass::ValuesAroundPoint(int x, int z){
 	float sum = m_heightMap[(m_terrainWidth * (z-1) ) + x].y;
 	sum += m_heightMap[(m_terrainWidth * (z+1) ) + x].y;

@@ -729,25 +729,31 @@ void FluidClass::ResetWater(){
 			m_heightMap[index].prevY = 0.0f;
 		}
 	}
+}
+void FluidClass::InitValues(){
+	int index;
 	for(int j=m_terrainHeight/2-2; j<m_terrainHeight/2+2; j++){
 		for(int i=m_terrainWidth/2-2; i<m_terrainWidth/2+2; i++){			
 			index = (m_terrainHeight * j) + i;
-			m_heightMap[index].y = 2.0f/mScale;
-
+			if(m_heightMap[index].border == false){
+				m_heightMap[index].y = 2.0f/mScale;
+			}
 		}
 	}
 	for(int j=m_terrainHeight/2-10; j<m_terrainHeight/2-5; j++){
 		for(int i=m_terrainWidth/2-10; i<m_terrainWidth/2-5; i++){			
 			index = (m_terrainHeight * j) + i;
-			m_heightMap[index].y = -5.0f/mScale;
-
+			if(m_heightMap[index].border == false){
+				m_heightMap[index].y = -5.0f/mScale;
+			}
 		}
 	}
 	for(int j=m_terrainHeight/2+20; j<m_terrainHeight/2+25; j++){
 		for(int i=m_terrainWidth/2+20; i<m_terrainWidth/2+25; i++){			
 			index = (m_terrainHeight * j) + i;
+			if(m_heightMap[index].border == false){
 			m_heightMap[index].y = 1.5f/mScale;
-
+			}
 		}
 	}
 }
