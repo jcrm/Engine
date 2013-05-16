@@ -348,8 +348,8 @@ void ConvolutionShaderClass::OutputShaderErrorMessage(ID3D10Blob* errorMessage, 
 
 	return;
 }
-bool ConvolutionShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext, 
-	D3DXMATRIX projectionMatrix, ID3D11ShaderResourceView* texture, float screenHeight, float screenWidth)
+bool ConvolutionShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext, D3DXMATRIX projectionMatrix, 
+	ID3D11ShaderResourceView* texture, float screenHeight, float screenWidth)
 {
 	HRESULT result;
 	D3D11_MAPPED_SUBRESOURCE mappedResource;

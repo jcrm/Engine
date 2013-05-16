@@ -52,6 +52,12 @@ public:
 	bool IsPgDownPressed();
 	bool IsHPressed();
 	bool IsRPressed();
+	bool IsWPressed();
+	bool IsSPressed();
+	bool IsDPressed();
+	bool IsEPressed();
+	bool IsQPressed();
+	bool IsXPressed();
 
 private:
 	bool ReadKeyboard();

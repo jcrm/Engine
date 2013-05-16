@@ -46,7 +46,7 @@ public:
 	void Water();
 
 	inline int  GetIndexCount() {return m_indexCount;}
-	void AddWater(int x, int z, float height);
+	void AddWater(int x, int z);
 	void ResetWater();
 	void SetBorders(TerrainClass::HeightMapType * terrain_array,int size);
 	void InitValues();

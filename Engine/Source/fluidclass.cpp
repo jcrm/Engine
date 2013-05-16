@@ -685,8 +685,10 @@ void FluidClass::DiminishWater(){
 	}
 	UpdateWaterValues();
 }
-void FluidClass::AddWater(int x, int z, float height){
-	m_heightMap[(m_terrainWidth * x) + z].y+=(height/mScale);
+void FluidClass::AddWater(int x, int z){
+	if(m_heightMap[(m_terrainWidth * x) + z].border == false){
+		m_heightMap[(m_terrainWidth * x) + z].y+=(float(rand()%20)/10/mScale);
+	}
 }
 bool FluidClass::CheckBorder(int x, int z){
 	int numOfCircle = 3;

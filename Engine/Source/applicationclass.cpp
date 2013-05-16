@@ -27,8 +27,8 @@ ApplicationClass::ApplicationClass(const ApplicationClass& other): m_Input(0), m
 		m_Model[0] = 0;
 	}
 }
-ApplicationClass::~ApplicationClass(){}
-
+ApplicationClass::~ApplicationClass(){
+}
 bool ApplicationClass::Initialize(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight){
 	bool result;
 	int downSampleWidth, downSampleHeight;
@@ -96,6 +96,422 @@ bool ApplicationClass::Initialize(HINSTANCE hinstance, HWND hwnd, int screenWidt
 	mFluid->SetBorders(m_Terrain->getHeightMap(), m_Terrain->getHeightMapSize());
 	//set the init water values based upon borders
 	mFluid->InitValues();
+	return true;
+}
+void ApplicationClass::Shutdown(){
+	if(m_FullScreenWindow){
+		m_FullScreenWindow->Shutdown();
+		delete m_FullScreenWindow;
+		m_FullScreenWindow = 0;
+	}
+	// Release the light object.
+	if(m_Light){
+		delete m_Light;
+		m_Light = 0;
+	}
+	//Shutdown functions
+	ShutdownText();
+	ShutdownTextures();
+	ShutdownShaders();
+	ShutdownObjects();
+	ShutdownCamera();
+	// Release the Direct3D object.
+	if(m_Direct3D){
+		m_Direct3D->Shutdown();
+		delete m_Direct3D;
+		m_Direct3D = 0;
+	}
+	// Release the input object.
+	if(m_Input){
+		m_Input->Shutdown();
+		delete m_Input;
+		m_Input = 0;
+	}
+	return;
+}
+bool ApplicationClass::Frame(){
+	bool result;
+	static int waterCounter = 0;
+	static const int maxWaterCounter = 15;
+	// Read the user input.
+	result = m_Input->Frame();
+	if(!result){
+		return false;
+	}
+	//every 15 frames add a more drops of water
+	if(waterCounter++ > maxWaterCounter){
+		waterCounter = 0;
+		for(int i = 0; i <5; i++){
+			mFluid->AddWater(rand()%129,rand()%129);
+		}
+	}
+	// Check if the user pressed escape and wants to exit the application.
+	if(m_Input->IsEscapePressed() == true){
+		return false;
+	}
+
+	// Update the system stats.
+	m_Timer->Frame();
+	m_Fps->Frame();
+	m_Cpu->Frame();
+
+	// Update the FPS value in the text object.
+	result = m_Text->SetFps(m_Fps->GetFps(), m_Direct3D->GetDeviceContext());
+	if(!result){
+		return false;
+	}
+	
+	// Update the CPU usage value in the text object.
+	result = m_Text->SetCpu(m_Cpu->GetCpuPercentage(), m_Direct3D->GetDeviceContext());
+	if(!result){
+		return false;
+	}
+
+	// Do the frame input processing.
+	result = HandleInput(m_Timer->GetTime());
+	if(!result){
+		return false;
+	}
+
+	mFluid->GenerateHeightMap(m_Direct3D->GetDevice());
+	// Render the graphics scene.
+	result = Render();
+	if(!result){
+		return false;
+	}
+	return result;
+}
+bool ApplicationClass::HandleInput(float frameTime){
+	bool keyDown, result, blur;
+	float posX, posY, posZ, rotX, rotY, rotZ;
+	blur = false;
+
+	keyDown = m_Input->IsHPressed();
+	if(keyDown){
+		for(int i = 0; i <5; i++){
+			mFluid->AddWater(rand()%129,rand()%129);
+		}
+	}
+	keyDown = m_Input->IsRPressed();
+	if(keyDown){
+		mFluid->ResetWater();
+		mFluid->InitValues();
+	}
+	// Set the frame time for calculating the updated position.
+	m_Position->SetFrameTime(frameTime);
+	//if left or a was pressed turn left
+	keyDown = (m_Input->IsLeftPressed() || m_Input->IsAPressed());
+	m_Position->TurnLeft(keyDown);
+	//if right or d was pressed turn right
+	keyDown = (m_Input->IsRightPressed() || m_Input->IsDPressed());
+	m_Position->TurnRight(keyDown);
+	//if up or w was pressed turn up
+	keyDown = (m_Input->IsUpPressed() || m_Input->IsWPressed());
+	m_Position->MoveForward(keyDown);
+	//if down or s was pressed turn down
+	keyDown = (m_Input->IsDownPressed() || m_Input->IsSPressed());
+	m_Position->MoveBackward(keyDown);
+	//if q was pressed move up
+	keyDown = m_Input->IsQPressed();
+	if(keyDown){
+		//set blur to true if moving up
+		blur = true;
+	}
+	m_Position->MoveUpward(keyDown);
+	//if e was pressed move down
+	keyDown = m_Input->IsEPressed();
+	if(keyDown){
+		//set blur to true if moving down
+		blur = true;
+	}
+	m_Position->MoveDownward(keyDown);
+	//if page up or z was pressed look up
+	keyDown = (m_Input->IsPgUpPressed() || m_Input->IsZPressed());
+	m_Position->LookUpward(keyDown);
+	//if page down or x was pressed look down
+	keyDown = (m_Input->IsPgDownPressed() || m_Input->IsXPressed());
+	m_Position->LookDownward(keyDown);
+	
+	// Get the view point position/rotation.
+	m_Position->GetPosition(posX, posY, posZ);
+	m_Position->GetRotation(rotX, rotY, rotZ);
+
+	// Set the position of the camera.
+	m_Camera->SetPosition(posX, posY, posZ);
+	m_Camera->SetRotation(rotX, rotY, rotZ);
+
+	// Update the position values in the text object.
+	result = m_Text->SetCameraPosition(posX, posY, posZ, m_Direct3D->GetDeviceContext());
+	if(!result){
+		return false;
+	}
+	// Update the rotation values in the text object.
+	result = m_Text->SetCameraRotation(rotX, rotY, rotZ, m_Direct3D->GetDeviceContext());
+	if(!result){
+		return false;
+	}
+	//set class blur to be true if moved up or down
+	mBlur = blur;
+	return true;
+}
+bool ApplicationClass::Render(){
+	bool result;
+
+	// First render the scene to a render texture.
+	result = RenderSceneToTexture(m_RenderFullSizeTexture);
+	if(!result){
+		return false;
+	}
+	//next work out which areas need to have glow added
+	result = RenderTexture(mGlowShader, m_RenderFullSizeTexture, m_FullSizeTexure, m_FullScreenWindow);
+	if(!result){
+		return false;
+	}
+	//now downsample the texture
+	result = RenderTexture(m_TextureToTextureShader, m_FullSizeTexure, m_DownSampleHalfSizeTexure, m_FullScreenWindow);
+	if(!result){
+		return false;
+	}
+	//next perform three blurs each time ping ponging the textures so the latest data can be altered
+	result = RenderTexture(m_ConvolutionShader, m_DownSampleHalfSizeTexure, m_HalfSizeTexture, m_FullScreenWindow);
+	if(!result){
+		return false;
+	}
+	//blur number 2
+	result = RenderTexture(m_ConvolutionShader, m_HalfSizeTexture, m_DownSampleHalfSizeTexure, m_FullScreenWindow);
+	if(!result){
+		return false;
+	}
+	//blur number 3
+	result = RenderTexture(m_ConvolutionShader, m_DownSampleHalfSizeTexure, m_HalfSizeTexture, m_FullScreenWindow);
+	if(!result){
+		return false;
+	}
+	//next upsample the texture
+	result = RenderTexture(m_TextureToTextureShader, m_HalfSizeTexture, m_FullSizeTexure, m_FullScreenWindow);
+	if(!result){
+		return false;
+	}//now merge the blurred glow texture with the original texture
+	result= RenderMergeTexture(m_RenderFullSizeTexture,m_FullSizeTexure,m_MergeFullSizeTexture,m_FullScreenWindow);
+	if(!result){
+		return false;
+	}
+	//if the user is moving up or down also blur vertically before rendering
+	if(mBlur){
+		//vertical blur
+		result = RenderTexture(mVerticalBlurShader, m_MergeFullSizeTexture, m_RenderFullSizeTexture, m_FullScreenWindow);
+		if(!result){
+			return false;
+		}
+		//render the texture to the screen
+		result = Render2DTextureScene(m_RenderFullSizeTexture);
+		if(!result){
+			return false;
+		}
+	}else{
+		//render the texture to the scene
+		result = Render2DTextureScene(m_MergeFullSizeTexture);
+		if(!result){
+			return false;
+		}
+	}
+	return true;
+}
+/*
+*	Renders the objects on screen to a texture ready for post-processing.
+*/
+bool ApplicationClass::RenderSceneToTexture(RenderTextureClass* write){
+	D3DXMATRIX worldMatrix, modelWorldMatrix, viewMatrix, projectionMatrix;
+	bool result;
+		
+	// Set the render target to be the render to texture.
+	write->SetRenderTarget(m_Direct3D->GetDeviceContext());
+	// Clear the render to texture.
+	write->ClearRenderTarget(m_Direct3D->GetDeviceContext(), 0.0f, 0.0f, 0.0f, 1.0f);
+	// Generate the view matrix based on the camera's position.
+	m_Camera->Render();
+	// Get the world, view, and projection matrices from the camera and d3d objects.
+	m_Direct3D->GetWorldMatrix(worldMatrix);
+	m_Camera->GetViewMatrix(viewMatrix);
+	m_Direct3D->GetProjectionMatrix(projectionMatrix);	
+
+	// Render the terrain buffers.
+	m_Terrain->Render(m_Direct3D->GetDeviceContext());
+	// Render the terrain using the terrain shader.
+	result = m_TerrainShader->Render(m_Direct3D->GetDeviceContext(), m_Terrain->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, 
+		m_Light->GetAmbientColor(), m_Light->GetDiffuseColor(), m_Light->GetDirection(), m_Terrain->GetTexture());
+	if(!result){
+		return false;
+	}
+
+	//render the models in 3d world space
+	for(int i = 0; i< MODEL_NUMBER; i++){
+		modelWorldMatrix = worldMatrix;
+		// Rotate the world matrix by the rotation value so that the cube will spin.
+		D3DXMatrixRotationY(&modelWorldMatrix, m_Model[i]->GetRotation());
+		D3DXMATRIX translation = m_Model[i]->GetTranslation();
+		D3DXMatrixMultiply(&modelWorldMatrix,&modelWorldMatrix,&translation);
+		// Put the model vertex and index buffers on the graphics pipeline to prepare them for drawing.
+		m_Model[i]->Render(m_Direct3D->GetDeviceContext());
+
+		// Render the model using the texture shader.
+		result = m_TextureShader->Render(m_Direct3D->GetDeviceContext(), m_Model[i]->GetIndexCount(), modelWorldMatrix, viewMatrix, projectionMatrix, 
+			m_Model[i]->GetTexture());
+		if(!result){
+			return false;
+		}
+	}
+	// Turn on the alpha blending before rendering the text.
+	m_Direct3D->TurnOnAlphaBlending();
+
+	mFluid->Render(m_Direct3D->GetDeviceContext());
+	result = mFluidShader->Render(m_Direct3D->GetDeviceContext(), mFluid->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, 
+		m_Light->GetAmbientColor(), m_Light->GetDiffuseColor(), m_Light->GetDirection());
+	if(!result){
+		return false;
+	}
+
+	// Turn off alpha blending after rendering the text.
+	m_Direct3D->TurnOffAlphaBlending();
+	// Reset the render target back to the original back buffer and not the render to texture anymore.
+	m_Direct3D->SetBackBufferRenderTarget();
+
+	// Reset the viewport back to the original.
+	m_Direct3D->ResetViewport();
+
+	return true;
+}
+/*
+*	Takes a texture and performs shader actions on it.
+*/
+bool ApplicationClass::RenderTexture(ShaderClass *shader, RenderTextureClass *readTexture, RenderTextureClass *writeTexture, OrthoWindowClass *window){
+	D3DXMATRIX orthoMatrix;
+	float screenSizeX, screenSizeY;
+	bool result;
+
+	screenSizeY = (float)writeTexture->GetTextureHeight();
+	screenSizeX = (float)writeTexture->GetTextureWidth();
+
+	// Set the render target to be the render to texture.
+	writeTexture->SetRenderTarget(m_Direct3D->GetDeviceContext());
+
+	// Clear the render to texture.
+	writeTexture->ClearRenderTarget(m_Direct3D->GetDeviceContext(), 0.0f, 0.0f, 0.0f, 1.0f);
+
+	// Generate the view matrix based on the camera's position.
+	m_Camera->Render();
+	
+	// Get the ortho matrix from the render to texture since texture has different dimensions being that it is smaller.
+	writeTexture->GetOrthoMatrix(orthoMatrix);
+
+	// Turn off the Z buffer to begin all 2D rendering.
+	m_Direct3D->TurnZBufferOff();
+
+	// Put the small ortho window vertex and index buffers on the graphics pipeline to prepare them for drawing.
+	window->Render(m_Direct3D->GetDeviceContext());
+
+	// Render the small ortho window using the texture shader and the render to texture of the scene as the texture resource.
+	result = shader->Render(m_Direct3D->GetDeviceContext(), window->GetIndexCount(), orthoMatrix, 
+		readTexture->GetShaderResourceView(),screenSizeY,screenSizeX);
+	if(!result){
+		return false;
+	}
+
+	// Turn the Z buffer back on now that all 2D rendering has completed.
+	m_Direct3D->TurnZBufferOn();
+
+	// Reset the render target back to the original back buffer and not the render to texture anymore.
+	m_Direct3D->SetBackBufferRenderTarget();
+
+	// Reset the viewport back to the original.
+	m_Direct3D->ResetViewport();
+	return true;
+}
+/*
+*	Takes two textures and combines them to make a third texture;
+*/
+bool ApplicationClass::RenderMergeTexture(RenderTextureClass *readTexture, RenderTextureClass *readTexture2, RenderTextureClass *writeTexture, OrthoWindowClass *window){
+	bool result;
+
+	// Set the render target to be the render to texture.
+	writeTexture->SetRenderTarget(m_Direct3D->GetDeviceContext());
+
+	// Clear the render to texture.
+	writeTexture->ClearRenderTarget(m_Direct3D->GetDeviceContext(), 0.0f, 0.0f, 0.0f, 1.0f);
+
+	// Generate the view matrix based on the camera's position.
+	m_Camera->Render();
+
+	// Turn off the Z buffer to begin all 2D rendering.
+	m_Direct3D->TurnZBufferOff();
+
+	// Put the small ortho window vertex and index buffers on the graphics pipeline to prepare them for drawing.
+	window->Render(m_Direct3D->GetDeviceContext());
+
+	// Render the small ortho window using the texture shader and the render to texture of the scene as the texture resource.
+	result = mMergerShader->Render(m_Direct3D->GetDeviceContext(), window->GetIndexCount(), readTexture->GetShaderResourceView(), 
+		readTexture2->GetShaderResourceView());
+	if(!result){
+		return false;
+	}
+
+	// Turn the Z buffer back on now that all 2D rendering has completed.
+	m_Direct3D->TurnZBufferOn();
+
+	// Reset the render target back to the original back buffer and not the render to texture anymore.
+	m_Direct3D->SetBackBufferRenderTarget();
+
+	// Reset the viewport back to the original.
+	m_Direct3D->ResetViewport();
+	return true;
+}
+/*
+* Renders a texture to the screen.
+*/
+bool ApplicationClass::Render2DTextureScene(RenderTextureClass* mRead){
+	D3DXMATRIX worldMatrix, viewMatrix, orthoMatrix, projectionMatrix;
+	bool result;
+
+	// Clear the buffers to begin the scene.
+	m_Direct3D->BeginScene(0.0f, 0.0f, 0.0f, 1.0f);
+
+	// Generate the view matrix based on the camera's position.
+	m_Camera->Render();
+
+	// Get the world, view, and ortho matrices from the camera and d3d objects.
+	m_Camera->GetViewMatrix(viewMatrix);
+	m_Direct3D->GetWorldMatrix(worldMatrix);
+	m_Direct3D->GetOrthoMatrix(orthoMatrix);
+	// Turn off the Z buffer to begin all 2D rendering.
+	m_Direct3D->TurnZBufferOff();
+
+	// Put the full screen ortho window vertex and index buffers on the graphics pipeline to prepare them for drawing.
+	m_FullScreenWindow->Render(m_Direct3D->GetDeviceContext());
+
+	// Render the full screen ortho window using the texture shader and the full screen sized blurred render to texture resource.
+	result = m_TextureToTextureShader->Render(m_Direct3D->GetDeviceContext(), m_FullScreenWindow->GetIndexCount(), orthoMatrix, mRead->GetShaderResourceView());
+	if(!result){
+		return false;
+	}
+	
+	// Turn on the alpha blending before rendering the text.
+	m_Direct3D->TurnOnAlphaBlending();
+
+	// Render the text user interface elements.
+	result = m_Text->Render(m_Direct3D->GetDeviceContext(), m_FontShader, worldMatrix, orthoMatrix);
+	if(!result){
+		return false;
+	}
+
+	// Turn off alpha blending after rendering the text.
+	m_Direct3D->TurnOffAlphaBlending();
+	
+	// Turn the Z buffer back on now that all 2D rendering has completed.
+	m_Direct3D->TurnZBufferOn();
+
+	// Present the rendered scene to the screen.
+	m_Direct3D->EndScene();
+
 	return true;
 }
 bool ApplicationClass::InitText(HWND hwnd, int screenWidth , int screenHeight){
@@ -297,27 +713,29 @@ bool ApplicationClass::InitShaders(HWND hwnd){
 		MessageBox(hwnd, L"Could not initialize the terrain shader object.", L"Error", MB_OK);
 		return false;
 	}
+	//create the shader for the fluid
 	mFluidShader = new FluidShaderClass;
 	if(!mFluidShader){
 		return false;
 	}
-	// Initialize the terrain shader object.
+	// Initialize the fluid shader object.
 	result = mFluidShader->Initialize(m_Direct3D->GetDevice(), hwnd);
 	if(!result){
 		MessageBox(hwnd, L"Could not initialize the fluid shader object.", L"Error", MB_OK);
 		return false;
 	}
-	// Create the texture shader object.
+	// Create the texture to texture shader object.
 	m_TextureToTextureShader = new TextureToTextureShaderClass;
 	if(!m_TextureToTextureShader){
 		return false;
 	}
-	// Initialize the texture shader object.
+	// Initialize the texture to texture shader object.
 	result = m_TextureToTextureShader->Initialize(m_Direct3D->GetDevice(), hwnd);
 	if(!result){
 		MessageBox(hwnd, L"Could not initialize the texture shader object.", L"Error", MB_OK);
 		return false;
 	}
+	//create the texture shader object
 	m_TextureShader = new TextureShaderClass;
 	if(!m_TextureShader){
 		return false;
@@ -328,6 +746,7 @@ bool ApplicationClass::InitShaders(HWND hwnd){
 		MessageBox(hwnd, L"Could not initialize the texture shader object.", L"Error", MB_OK);
 		return false;
 	}
+	//create the convolution shader object
 	m_ConvolutionShader = new ConvolutionShaderClass;
 	if (!m_ConvolutionShader){
 		return false;
@@ -337,6 +756,7 @@ bool ApplicationClass::InitShaders(HWND hwnd){
 		MessageBox(hwnd, L"Could not initialize the convolution shader object.", L"Error", MB_OK);
 		return false;
 	}
+	//create the merge shader object
 	mMergerShader = new MergeTextureShaderClass;
 	if (!mMergerShader){
 		return false;
@@ -346,6 +766,7 @@ bool ApplicationClass::InitShaders(HWND hwnd){
 		MessageBox(hwnd, L"Could not initialize the convolution shader object.", L"Error", MB_OK);
 		return false;
 	}
+	//create the glow shader object
 	mGlowShader = new GlowShaderClass;
 	if (!mGlowShader){
 		return false;
@@ -355,6 +776,7 @@ bool ApplicationClass::InitShaders(HWND hwnd){
 		MessageBox(hwnd, L"Could not initialize the convolution shader object.", L"Error", MB_OK);
 		return false;
 	}
+	//create the vertical blur shader
 	mVerticalBlurShader = new VerticalBlurShaderClass;
 	if (!mVerticalBlurShader){
 		return false;
@@ -366,7 +788,6 @@ bool ApplicationClass::InitShaders(HWND hwnd){
 	}
 	return true;
 }
-
 void ApplicationClass::ShutdownText(){
 	// Release the text object.
 	if(m_Text){
@@ -392,8 +813,8 @@ void ApplicationClass::ShutdownText(){
 	}
 }
 void ApplicationClass::ShutdownObjects(){
+	// Release each model object.
 	for(int i = 0; i < MODEL_NUMBER; i++){
-		// Release the model object.
 		if(m_Model[i]){
 			m_Model[i]->Shutdown();
 			delete m_Model[i];
@@ -406,6 +827,7 @@ void ApplicationClass::ShutdownObjects(){
 		delete m_Terrain;
 		m_Terrain = 0;
 	}
+	//release fluid object
 	if(mFluid){
 		mFluid->Shutdown();
 		delete mFluid;
@@ -425,18 +847,19 @@ void ApplicationClass::ShutdownTextures(){
 		delete m_DownSampleHalfSizeTexure;
 		m_DownSampleHalfSizeTexure = 0;
 	}
-
 	// Release the render to texture object.
 	if(m_RenderFullSizeTexture){
 		m_RenderFullSizeTexture->Shutdown();
 		delete m_RenderFullSizeTexture;
 		m_RenderFullSizeTexture = 0;
 	}
+	//release half size texture
 	if (m_HalfSizeTexture){
 		m_HalfSizeTexture->Shutdown();
 		delete m_HalfSizeTexture;
 		m_HalfSizeTexture = 0;
 	}
+	//release merge full size texture
 	if (m_MergeFullSizeTexture){
 		m_MergeFullSizeTexture->Shutdown();
 		delete m_MergeFullSizeTexture;
@@ -444,6 +867,7 @@ void ApplicationClass::ShutdownTextures(){
 	}
 }
 void ApplicationClass::ShutdownCamera(){
+	//relase position object
 	if(m_Position){
 		delete m_Position;
 		m_Position = 0;
@@ -456,23 +880,23 @@ void ApplicationClass::ShutdownCamera(){
 }
 void ApplicationClass::ShutdownShaders(){
 	// Release the texture shader object.
-
 	if(m_TextureShader){
 		m_TextureShader->Shutdown();
 		delete m_TextureShader;
 		m_TextureShader = 0;
 	}
+	//release texture to texture shader
 	if(m_TextureToTextureShader){
 		m_TextureToTextureShader->Shutdown();
 		delete m_TextureToTextureShader;
 		m_TextureToTextureShader = 0;
 	}
+	//release convolution shader
 	if (m_ConvolutionShader){
 		m_ConvolutionShader->Shutdown();
 		delete m_ConvolutionShader;
 		m_ConvolutionShader = 0;
 	}
-
 	// Release the font shader object.
 	if(m_FontShader){
 		m_FontShader->Shutdown();
@@ -486,432 +910,28 @@ void ApplicationClass::ShutdownShaders(){
 		delete m_TerrainShader;
 		m_TerrainShader = 0;
 	}
+	//Release Fluid Shader
 	if(mFluidShader){
 		mFluidShader->Shutdown();
 		delete mFluidShader;
 		mFluidShader = 0;
 	}
-
+	//Release merge shader
 	if (mMergerShader){
 		mMergerShader->Shutdown();
 		delete mMergerShader;
 		mMergerShader = 0;
 	}
+	//release glow shader
 	if(mGlowShader){
 		mGlowShader->Shutdown();
 		delete mGlowShader;
 		mGlowShader = 0;
 	}
+	//release vertical blur shader
 	if(mVerticalBlurShader){
 		mVerticalBlurShader->Shutdown();
 		delete mVerticalBlurShader;
 		mVerticalBlurShader = 0;
 	}
-}
-void ApplicationClass::Shutdown()
-{
-	if(m_FullScreenWindow){
-		m_FullScreenWindow->Shutdown();
-		delete m_FullScreenWindow;
-		m_FullScreenWindow = 0;
-	}
-	// Release the light object.
-	if(m_Light){
-		delete m_Light;
-		m_Light = 0;
-	}
-	ShutdownText();
-	ShutdownTextures();
-	ShutdownShaders();
-	ShutdownObjects();
-	ShutdownCamera();
-	
-	// Release the Direct3D object.
-	if(m_Direct3D){
-		m_Direct3D->Shutdown();
-		delete m_Direct3D;
-		m_Direct3D = 0;
-	}
-
-	// Release the input object.
-	if(m_Input){
-		m_Input->Shutdown();
-		delete m_Input;
-		m_Input = 0;
-	}
-
-	return;
-}
-
-
-bool ApplicationClass::Frame()
-{
-	bool result;
-	static int waterCounter = 0;
-	static int maxWaterCounter = 10;
-	// Read the user input.
-	result = m_Input->Frame();
-	if(!result){
-		return false;
-	}
-	if(waterCounter++ > maxWaterCounter){
-		waterCounter = 0;
-		for(int i = 0; i <5; i++){
-			mFluid->AddWater(rand()%120+1,rand()%120+1, float(rand()%20)/10);
-		}
-	}
-	// Check if the user pressed escape and wants to exit the application.
-	if(m_Input->IsEscapePressed() == true){
-		return false;
-	}
-
-	// Update the system stats.
-	m_Timer->Frame();
-	m_Fps->Frame();
-	m_Cpu->Frame();
-
-	// Update the FPS value in the text object.
-	result = m_Text->SetFps(m_Fps->GetFps(), m_Direct3D->GetDeviceContext());
-	if(!result){
-		return false;
-	}
-	
-	// Update the CPU usage value in the text object.
-	result = m_Text->SetCpu(m_Cpu->GetCpuPercentage(), m_Direct3D->GetDeviceContext());
-	if(!result){
-		return false;
-	}
-
-	// Do the frame input processing.
-	result = HandleInput(m_Timer->GetTime());
-	if(!result){
-		return false;
-	}
-
-	mFluid->GenerateHeightMap(m_Direct3D->GetDevice());
-	// Render the graphics scene.
-	result = Render();
-	if(!result){
-		return false;
-	}
-	return result;
-}
-
-
-bool ApplicationClass::HandleInput(float frameTime){
-	bool keyDown, result, blur;
-	float posX, posY, posZ, rotX, rotY, rotZ;
-	blur = false;
-
-	keyDown = m_Input->IsHPressed();
-	if(keyDown){
-		for(int i = 0; i <5; i++){
-			mFluid->AddWater(rand()%120+1,rand()%120+1, float(rand()%20)/10);
-		}
-	}
-	keyDown = m_Input->IsRPressed();
-	if(keyDown){
-		mFluid->ResetWater();
-		mFluid->InitValues();
-	}
-	// Set the frame time for calculating the updated position.
-	m_Position->SetFrameTime(frameTime);
-
-	keyDown = m_Input->IsLeftPressed();
-	m_Position->TurnLeft(keyDown);
-
-	keyDown = m_Input->IsRightPressed();
-	m_Position->TurnRight(keyDown);
-
-	keyDown = m_Input->IsUpPressed();
-	m_Position->MoveForward(keyDown);
-
-	keyDown = m_Input->IsDownPressed();
-	m_Position->MoveBackward(keyDown);
-
-	keyDown = m_Input->IsAPressed();
-	if(keyDown){
-		blur = true;
-	}
-	m_Position->MoveUpward(keyDown);
-
-	keyDown = m_Input->IsZPressed();
-	if(keyDown){
-		blur = true;
-	}
-	m_Position->MoveDownward(keyDown);
-
-	keyDown = m_Input->IsPgUpPressed();
-	m_Position->LookUpward(keyDown);
-
-	keyDown = m_Input->IsPgDownPressed();
-	m_Position->LookDownward(keyDown);
-	
-	// Get the view point position/rotation.
-	m_Position->GetPosition(posX, posY, posZ);
-	m_Position->GetRotation(rotX, rotY, rotZ);
-
-	// Set the position of the camera.
-	m_Camera->SetPosition(posX, posY, posZ);
-	m_Camera->SetRotation(rotX, rotY, rotZ);
-
-	// Update the position values in the text object.
-	result = m_Text->SetCameraPosition(posX, posY, posZ, m_Direct3D->GetDeviceContext());
-	if(!result){
-		return false;
-	}
-	// Update the rotation values in the text object.
-	result = m_Text->SetCameraRotation(rotX, rotY, rotZ, m_Direct3D->GetDeviceContext());
-	if(!result){
-		return false;
-	}
-	mBlur = blur;
-	return true;
-}
-
-bool ApplicationClass::Render(){
-	bool result;
-
-	// First render the scene to a render texture.
-	result = RenderSceneToTexture(m_RenderFullSizeTexture);
-	if(!result){
-		return false;
-	}
-	result = RenderTexture(mGlowShader, m_RenderFullSizeTexture, m_FullSizeTexure, m_FullScreenWindow);
-	if(!result){
-		return false;
-	}
-	result = RenderTexture(m_TextureToTextureShader, m_FullSizeTexure, m_DownSampleHalfSizeTexure, m_FullScreenWindow);
-	if(!result){
-		return false;
-	}
-	result = RenderTexture(m_ConvolutionShader, m_DownSampleHalfSizeTexure, m_HalfSizeTexture, m_FullScreenWindow);
-	if(!result){
-		return false;
-	}
-	result = RenderTexture(m_ConvolutionShader, m_HalfSizeTexture, m_DownSampleHalfSizeTexure, m_FullScreenWindow);
-	if(!result){
-		return false;
-	}
-	result = RenderTexture(m_ConvolutionShader, m_DownSampleHalfSizeTexure, m_HalfSizeTexture, m_FullScreenWindow);
-	if(!result){
-		return false;
-	}
-	result = RenderTexture(m_TextureToTextureShader, m_HalfSizeTexture, m_FullSizeTexure, m_FullScreenWindow);
-	if(!result){
-		return false;
-	}
-	result= RenderMergeTexture(m_RenderFullSizeTexture,m_FullSizeTexure,m_MergeFullSizeTexture,m_FullScreenWindow);
-	if(!result){
-		return false;
-	}
-	if(mBlur){
-		result = RenderTexture(mVerticalBlurShader, m_MergeFullSizeTexture, m_RenderFullSizeTexture, m_FullScreenWindow);
-		if(!result){
-			return false;
-		}
-		result = Render2DTextureScene(m_RenderFullSizeTexture);
-		if(!result){
-			return false;
-		}
-	}else{
-		result = Render2DTextureScene(m_MergeFullSizeTexture);
-		if(!result){
-			return false;
-		}
-	}
-	return true;
-}
-
-bool ApplicationClass::RenderSceneToTexture(RenderTextureClass* write)
-{
-	D3DXMATRIX worldMatrix, modelWorldMatrix, viewMatrix, projectionMatrix;
-	bool result;
-
-	
-	// Set the render target to be the render to texture.
-	write->SetRenderTarget(m_Direct3D->GetDeviceContext());
-	// Clear the render to texture.
-	write->ClearRenderTarget(m_Direct3D->GetDeviceContext(), 0.0f, 0.0f, 0.0f, 1.0f);
-	// Generate the view matrix based on the camera's position.
-	m_Camera->Render();
-	// Get the world, view, and projection matrices from the camera and d3d objects.
-	m_Direct3D->GetWorldMatrix(worldMatrix);
-	m_Camera->GetViewMatrix(viewMatrix);
-	m_Direct3D->GetProjectionMatrix(projectionMatrix);	
-
-	// Render the terrain buffers.
-	m_Terrain->Render(m_Direct3D->GetDeviceContext());
-	// Render the terrain using the terrain shader.
-	result = m_TerrainShader->Render(m_Direct3D->GetDeviceContext(), m_Terrain->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, 
-		m_Light->GetAmbientColor(), m_Light->GetDiffuseColor(), m_Light->GetDirection(), m_Terrain->GetTexture());
-	if(!result){
-		return false;
-	}
-
-
-	for(int i = 0; i< MODEL_NUMBER; i++){
-		modelWorldMatrix = worldMatrix;
-		// Rotate the world matrix by the rotation value so that the cube will spin.
-		D3DXMatrixRotationY(&modelWorldMatrix, m_Model[i]->GetRotation());
-		D3DXMATRIX translation = m_Model[i]->GetTranslation();
-		D3DXMatrixMultiply(&modelWorldMatrix,&modelWorldMatrix,&translation);
-		// Put the model vertex and index buffers on the graphics pipeline to prepare them for drawing.
-		m_Model[i]->Render(m_Direct3D->GetDeviceContext());
-
-		// Render the model using the texture shader.
-		result = m_TextureShader->Render(m_Direct3D->GetDeviceContext(), m_Model[i]->GetIndexCount(), modelWorldMatrix, viewMatrix, projectionMatrix, 
-			m_Model[i]->GetTexture());
-		if(!result){
-			return false;
-		}
-	}
-	// Turn on the alpha blending before rendering the text.
-	m_Direct3D->TurnOnAlphaBlending();
-
-	mFluid->Render(m_Direct3D->GetDeviceContext());
-	result = mFluidShader->Render(m_Direct3D->GetDeviceContext(), mFluid->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, 
-		m_Light->GetAmbientColor(), m_Light->GetDiffuseColor(), m_Light->GetDirection());
-	if(!result){
-		return false;
-	}
-
-	// Turn off alpha blending after rendering the text.
-	m_Direct3D->TurnOffAlphaBlending();
-	// Reset the render target back to the original back buffer and not the render to texture anymore.
-	m_Direct3D->SetBackBufferRenderTarget();
-
-	// Reset the viewport back to the original.
-	m_Direct3D->ResetViewport();
-
-	return true;
-}
-bool ApplicationClass::RenderTexture(ShaderClass *shader, RenderTextureClass *readTexture, RenderTextureClass *writeTexture, OrthoWindowClass *window)
-{
-	D3DXMATRIX worldMatrix, viewMatrix, orthoMatrix;
-	float screenSizeX, screenSizeY;
-	bool result;
-
-	screenSizeY = (float)writeTexture->GetTextureHeight();
-	screenSizeX = (float)writeTexture->GetTextureWidth();
-
-	// Set the render target to be the render to texture.
-	writeTexture->SetRenderTarget(m_Direct3D->GetDeviceContext());
-
-	// Clear the render to texture.
-	writeTexture->ClearRenderTarget(m_Direct3D->GetDeviceContext(), 0.0f, 0.0f, 0.0f, 1.0f);
-
-	// Generate the view matrix based on the camera's position.
-	m_Camera->Render();
-
-	// Get the world and view matrices from the camera and d3d objects.
-	m_Camera->GetViewMatrix(viewMatrix);
-	m_Direct3D->GetWorldMatrix(worldMatrix);
-	
-	// Get the ortho matrix from the render to texture since texture has different dimensions being that it is smaller.
-	writeTexture->GetOrthoMatrix(orthoMatrix);
-
-	// Turn off the Z buffer to begin all 2D rendering.
-	m_Direct3D->TurnZBufferOff();
-
-	// Put the small ortho window vertex and index buffers on the graphics pipeline to prepare them for drawing.
-	window->Render(m_Direct3D->GetDeviceContext());
-
-	// Render the small ortho window using the texture shader and the render to texture of the scene as the texture resource.
-	result = shader->Render(m_Direct3D->GetDeviceContext(), window->GetIndexCount(), orthoMatrix, 
-		readTexture->GetShaderResourceView(),screenSizeY,screenSizeX);
-	if(!result){
-		return false;
-	}
-
-	// Turn the Z buffer back on now that all 2D rendering has completed.
-	m_Direct3D->TurnZBufferOn();
-
-	// Reset the render target back to the original back buffer and not the render to texture anymore.
-	m_Direct3D->SetBackBufferRenderTarget();
-
-	// Reset the viewport back to the original.
-	m_Direct3D->ResetViewport();
-	return true;
-}
-bool ApplicationClass::RenderMergeTexture(RenderTextureClass *readTexture, RenderTextureClass *readTexture2, RenderTextureClass *writeTexture, OrthoWindowClass *window){
-	bool result;
-
-	// Set the render target to be the render to texture.
-	writeTexture->SetRenderTarget(m_Direct3D->GetDeviceContext());
-
-	// Clear the render to texture.
-	writeTexture->ClearRenderTarget(m_Direct3D->GetDeviceContext(), 0.0f, 0.0f, 0.0f, 1.0f);
-
-	// Generate the view matrix based on the camera's position.
-	m_Camera->Render();
-
-	// Turn off the Z buffer to begin all 2D rendering.
-	m_Direct3D->TurnZBufferOff();
-
-	// Put the small ortho window vertex and index buffers on the graphics pipeline to prepare them for drawing.
-	window->Render(m_Direct3D->GetDeviceContext());
-
-	// Render the small ortho window using the texture shader and the render to texture of the scene as the texture resource.
-	result = mMergerShader->Render(m_Direct3D->GetDeviceContext(), window->GetIndexCount(), readTexture->GetShaderResourceView(), 
-		readTexture2->GetShaderResourceView());
-	if(!result){
-		return false;
-	}
-
-	// Turn the Z buffer back on now that all 2D rendering has completed.
-	m_Direct3D->TurnZBufferOn();
-
-	// Reset the render target back to the original back buffer and not the render to texture anymore.
-	m_Direct3D->SetBackBufferRenderTarget();
-
-	// Reset the viewport back to the original.
-	m_Direct3D->ResetViewport();
-	return true;
-}
-bool ApplicationClass::Render2DTextureScene(RenderTextureClass* mRead){
-	D3DXMATRIX worldMatrix, viewMatrix, orthoMatrix, projectionMatrix;
-	bool result;
-
-	// Clear the buffers to begin the scene.
-	m_Direct3D->BeginScene(0.0f, 0.0f, 0.0f, 1.0f);
-
-	// Generate the view matrix based on the camera's position.
-	m_Camera->Render();
-
-	// Get the world, view, and ortho matrices from the camera and d3d objects.
-	m_Camera->GetViewMatrix(viewMatrix);
-	m_Direct3D->GetWorldMatrix(worldMatrix);
-	m_Direct3D->GetOrthoMatrix(orthoMatrix);
-	// Turn off the Z buffer to begin all 2D rendering.
-	m_Direct3D->TurnZBufferOff();
-
-	// Put the full screen ortho window vertex and index buffers on the graphics pipeline to prepare them for drawing.
-	m_FullScreenWindow->Render(m_Direct3D->GetDeviceContext());
-
-	// Render the full screen ortho window using the texture shader and the full screen sized blurred render to texture resource.
-	result = m_TextureToTextureShader->Render(m_Direct3D->GetDeviceContext(), m_FullScreenWindow->GetIndexCount(), orthoMatrix, mRead->GetShaderResourceView());
-	if(!result){
-		return false;
-	}
-	
-	// Turn on the alpha blending before rendering the text.
-	m_Direct3D->TurnOnAlphaBlending();
-
-	// Render the text user interface elements.
-	result = m_Text->Render(m_Direct3D->GetDeviceContext(), m_FontShader, worldMatrix, orthoMatrix);
-	if(!result){
-		return false;
-	}
-
-	// Turn off alpha blending after rendering the text.
-	m_Direct3D->TurnOffAlphaBlending();
-	
-	// Turn the Z buffer back on now that all 2D rendering has completed.
-	m_Direct3D->TurnZBufferOn();
-
-	// Present the rendered scene to the screen.
-	m_Direct3D->EndScene();
-
-	return true;
 }
