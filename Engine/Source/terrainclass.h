@@ -62,16 +62,23 @@ private:
 	void ShutdownBuffers();
 	void RenderBuffers(ID3D11DeviceContext*);
 	void MPD();
-	int terrainIterateParticleDeposition(int numIt, bool up);
+	int terrainIterateParticleDeposition(int numIt, float height);
 	void depositPlus(int x, int z);
-	void smooth();
-	void smooth(float k);
+	void smooth(int passes);
 	void depositMinus( int x, int z);
 	void GenerateSinCos(int index);
 	inline int createIndex(int size, int i, int j){ return (size * i) + j;}
 	inline signed char scrand(signed char r = 4) {return (-r + 2 * (rand() % r)); }
 	signed char** mdp(signed char** base, unsigned base_n, signed char r);
 	float ValuesAroundPoint(int x, int z);
+	float avgDiamondVals (int i, int j, int stride, int size, int subSize);
+	float avgSquareVals (int i, int j, int stride, int size);
+	void fill2DFractArray (float heightScale, float h);
+	float randRange(float Min, float Max);
+	void deposit( int x, int z, float value);
+	int checkCrossProduct(float x1, float z1, float x2, float z2);
+	void faulting();
+	int calculateIndex(int x, int z);
 private:
 	bool m_terrainGeneratedToggle;
 	int m_terrainWidth, m_terrainHeight;
