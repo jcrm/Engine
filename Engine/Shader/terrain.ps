@@ -39,6 +39,7 @@ float4 TerrainPixelShader(PixelInputType input) : SV_TARGET
 	float lightIntensity;
 	float4 color;
 
+	//get the texture color
 	textureColor = shaderTexture.Sample(SampleType, input.tex);
 	// Set the default output color to the ambient light value for all pixels.
     color = ambientColor;
@@ -55,6 +56,7 @@ float4 TerrainPixelShader(PixelInputType input) : SV_TARGET
     }
     // Saturate the final light color.
     color = saturate(color);
+	//multiple the colour by the texture colour to get the final colour.
 	color *= textureColor;
     return color;
 }

@@ -58,17 +58,17 @@ PixelInputType ConvolutionVertexShader(VertexInputType input)
 	// Store the texture coordinates for the pixel shader.
 	output.tex = input.tex;
     
-	// Determine the floating point size of a texel for a screen with this specific width.
+	// Determine the floating point size of a texel for a screen with this specific width and height.
 	texelSizeW = 1.0f / screenWidth;
 	texelSizeH = 1.0f / screenHeight;
 
-	// Create UV coordinates for the pixel and its four horizontal neighbors on either side.
+	// Create UV coordinates for the pixel and its surrounding points.
 	output.texCoord1 = input.tex + float2(texelSizeW * -1.0f, texelSizeH * -1.0f);
 	output.texCoord2 = input.tex + float2(texelSizeW *  0.0f, texelSizeH * -1.0f);
 	output.texCoord3 = input.tex + float2(texelSizeW *  1.0f, texelSizeH * -1.0f);
-	output.texCoord4 = input.tex + float2(texelSizeW * -1.0f, 0.0f);
-	output.texCoord5 = input.tex + float2(texelSizeW *  0.0f, 0.0f);
-	output.texCoord6 = input.tex + float2(texelSizeW *  1.0f, 0.0f);
+	output.texCoord4 = input.tex + float2(texelSizeW * -1.0f, texelSizeH *  0.0f);
+	output.texCoord5 = input.tex + float2(texelSizeW *  0.0f, texelSizeH *  0.0f);
+	output.texCoord6 = input.tex + float2(texelSizeW *  1.0f, texelSizeH *  0.0f);
 	output.texCoord7 = input.tex + float2(texelSizeW * -1.0f, texelSizeH *  1.0f);
 	output.texCoord8 = input.tex + float2(texelSizeW *  0.0f, texelSizeH *  1.0f);
 	output.texCoord9 = input.tex + float2(texelSizeW *  1.0f, texelSizeH *  1.0f);

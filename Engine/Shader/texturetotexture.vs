@@ -41,9 +41,7 @@ PixelInputType TextureVertexShader(VertexInputType input)
 	// Calculate the position of the vertex against the world, view, and projection matrices.
 	output.position = input.position;
 	output.position.z = 0;
-	//output.position = mul(input.position, projectionMatrix);
 	
-    
 	// Store the texture coordinates for the pixel shader.
 	output.tex = input.tex;
     

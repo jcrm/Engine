@@ -54,7 +54,7 @@ float4 ConvolutionPixelShader(PixelInputType input) : SV_TARGET
 	// Initialize the color to black.
 	color = float4(0.0f, 0.0f, 0.0f, 0.0f);
 
-	// Add the nine horizontal pixels to the color by the specific weight of each.
+	// Add the nine pixels to the color by the specific weight of each.
 	color += shaderTexture.Sample(SampleType, input.texCoord1) * weight0;
 	color += shaderTexture.Sample(SampleType, input.texCoord2) * weight1;
 	color += shaderTexture.Sample(SampleType, input.texCoord3) * weight2;

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////
-// Filename: merge.vs
+// Filename: glow.vs
 ////////////////////////////////////////////////////////////////////////////////
 
 //////////////
@@ -25,8 +25,6 @@ PixelInputType GlowVertexShader(VertexInputType input)
 {
     PixelInputType output;
     
-
-	// Change the position vector to be 4 units for proper matrix calculations.
     input.position.w = 1.0f;
 
     output.position = input.position;

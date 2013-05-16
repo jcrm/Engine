@@ -34,6 +34,8 @@ float4 GlowPixelShader(PixelInputType input) : SV_TARGET
 {
 	float4 color = float4(0.0f, 0.0f, 0.0f, 0.0f);
     color = texture1.Sample(SampleType, input.tex);
+	//works out if the pixel is a shade of blue based upon the rgb values of the pixel
+	//if not blue render the colour black instead
 	if(color.b >= 0.2f){
 		if(color.r > 0.6f || color.g > 0.6f){
 			color = float4(0.0f, 0.0f, 0.0f, 1.0f);

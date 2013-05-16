@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////
-// Filename: terrain.vs
+// Filename: fluid.vs
 ////////////////////////////////////////////////////////////////////////////////
 
 
@@ -44,6 +44,7 @@ PixelInputType TerrainVertexShader(VertexInputType input)
 
 	// Calculate the position of the vertex against the world, view, and projection matrices.
     output.position = mul(input.position, worldMatrix);
+	//take the position of the vertex before doing vie and projection matrix calculations
 	float height = output.position.y;
     output.position = mul(output.position, viewMatrix);
     output.position = mul(output.position, projectionMatrix);
@@ -53,11 +54,7 @@ PixelInputType TerrainVertexShader(VertexInputType input)
 	
     // Normalize the normal vector.
     output.normal = normalize(output.normal);
-	if(height<=-1){
-		output.hColor = lerp(float4(0.0,0.0,0.0,1.0),float4(0.0,0.0,0.0,0.0),height/2);
-	}else{
-		output.hColor = lerp(float4(0.32,0.2,0.09,1.0),float4(1.0,1.0,1.0,0.0),height/20);
-	}
+	//set the blue to be between two versions of blue
 	output.hColor = lerp(float4(0.0,0.0,0.1,1.0),float4(0.0,0.0,1.0,0.0),height/30);
     return output;
 }

@@ -35,6 +35,7 @@ float4 MergePixelShader(PixelInputType input) : SV_TARGET
 {
 	float4 color = texture1.Sample(SampleType, input.tex);
 	float4 secondTexture = texture2.Sample(SampleType, input.tex);
+	//add on a ration of the second texture to the first
 	color = color + (secondTexture*mergeRatio);		
 	color.a = 1.0f;
     return color;
